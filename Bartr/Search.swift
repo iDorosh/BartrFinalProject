@@ -11,6 +11,7 @@ import MapKit
 import Firebase
 
 class Search: UIViewController, CLLocationManagerDelegate, UITableViewDataSource {
+    @IBAction func backToSearch(segue: UIStoryboardSegue){}
     
     //Data
     var posts = [Post]()
@@ -26,8 +27,6 @@ class Search: UIViewController, CLLocationManagerDelegate, UITableViewDataSource
 
     //Outlets
     @IBOutlet weak var tabletView: UITableView!
-    
-    @IBOutlet weak var NothingYet: UILabel!
     
     @IBOutlet weak var viewType: UIButton!
     
@@ -84,6 +83,7 @@ class Search: UIViewController, CLLocationManagerDelegate, UITableViewDataSource
     override func viewDidLoad() {
         super.viewDidLoad()
         UIApplication.sharedApplication().statusBarStyle = .Default
+        self.navigationController?.setNavigationBarHidden(true, animated: true)
         //Update firebase data and Table View
         updatePosts(false)
         //Setup Map View
@@ -101,11 +101,6 @@ class Search: UIViewController, CLLocationManagerDelegate, UITableViewDataSource
     
     //Set Up Table View
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if (posts.count == 0){
-            NothingYet.hidden = false
-        } else {
-            NothingYet.hidden = true
-        }
         return filteredPosts.count
     }
     
@@ -119,6 +114,7 @@ class Search: UIViewController, CLLocationManagerDelegate, UITableViewDataSource
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath){
         selectedPost = indexPath.row
         performSegueWithIdentifier("detailSegue", sender: self)
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
     }
     
     //Update Firebase data and Table View
@@ -138,12 +134,24 @@ class Search: UIViewController, CLLocationManagerDelegate, UITableViewDataSource
             }
             
             //Get current users posts
-            for i in self.posts
-            {
-                if i.postType.containsString(self.filterType){
-                    self.filteredPosts.append(i)
+            if !filtered{
+                for i in self.posts
+                {
+                    if !i.postComplete && !i.postFL{
+                        self.filteredPosts = self.posts
+                    }
+                }
+                
+                
+            } else {
+                for i in self.posts
+                {
+                    if (i.postType.containsString(self.filterType) && !i.postComplete && !i.postFL){
+                        self.filteredPosts.append(i)
+                    }
                 }
             }
+            
 
             
             self.tabletView.reloadData()

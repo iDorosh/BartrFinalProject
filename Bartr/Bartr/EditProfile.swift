@@ -10,6 +10,7 @@ import UIKit
 import Firebase
 
 class EditProfile: UIViewController {
+    @IBAction func backToEditProfile(segue: UIStoryboardSegue){}
     
     //Variables
     var currentUser : String = String()

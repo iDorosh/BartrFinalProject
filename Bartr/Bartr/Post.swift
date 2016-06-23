@@ -24,6 +24,8 @@ class Post {
     private var _postUserImg: String!
     private var _postDate: String!
     private var _postPrice: String!
+    private var _postComplete: Bool!
+    private var _postFL: Bool!
     
     //Information Getters
     var postKey: String {
@@ -70,6 +72,14 @@ class Post {
         return _postPrice
     }
     
+    var postComplete : Bool {
+        return _postComplete
+    }
+    
+    var postFL :  Bool {
+        return _postFL
+    }
+    
     // Initialize the new post
     init(key: String, dictionary: Dictionary<String, AnyObject>) {
         self._postKey = key
@@ -110,6 +120,14 @@ class Post {
         
         if let postP = dictionary["postPrice"] as? String {
             self._postPrice = postP
+        }
+        
+        if let postC = dictionary["postComplete"] as? Bool {
+            self._postComplete = postC
+        }
+        
+        if let postFL = dictionary["postFeedbackLeft"] as? Bool {
+            self._postFL = postFL
         }
         
         if let user = dictionary["author"] as? String {

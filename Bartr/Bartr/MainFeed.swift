@@ -18,6 +18,7 @@ class MainFeed: UIViewController, UITableViewDataSource {
     
     //All posts class
     var posts = [Post]()
+    var hideCompleteSales = [Post]()
     
     //Selected post index
     var selectedPost: Int = Int()
@@ -56,11 +57,11 @@ class MainFeed: UIViewController, UITableViewDataSource {
     //Tableview Setup
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return posts.count
+        return hideCompleteSales.count
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell{
-        let post = posts[indexPath.row]
+        let post = hideCompleteSales[indexPath.row]
         
         let cell : CustomTableCell = tableView.dequeueReusableCellWithIdentifier("MyCell")! as! CustomTableCell
         
@@ -71,6 +72,7 @@ class MainFeed: UIViewController, UITableViewDataSource {
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath){
         selectedPost = indexPath.row
         performSegueWithIdentifier("detailSegue", sender: self)
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
     }
     
     
@@ -133,6 +135,7 @@ class MainFeed: UIViewController, UITableViewDataSource {
     func updatePosts(){
         DataService.dataService.POST_REF.observeEventType(.Value, withBlock: { snapshot in
             self.posts = []
+            self.hideCompleteSales = []
             
             if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
                 
@@ -144,6 +147,16 @@ class MainFeed: UIViewController, UITableViewDataSource {
                     }
                 }
             }
+            
+            
+                for i in self.posts
+                {
+                    if !i.postComplete && !i.postFL{
+                        self.hideCompleteSales.append(i)
+                    }
+                }
+            
+            
             
             self.tableView.reloadData()
             self.refreshControl.endRefreshing()

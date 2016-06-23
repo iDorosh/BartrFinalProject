@@ -25,6 +25,8 @@ class CustomTableCell: UITableViewCell {
     @IBOutlet weak var profileImg: UIImageView!
     @IBOutlet weak var timeStamp: UILabel!
     @IBOutlet weak var price: UILabel!
+    @IBOutlet weak var bartrCompleteImg: UIImageView!
+    
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -49,6 +51,12 @@ class CustomTableCell: UITableViewCell {
         
         //Images for user profile and listing image
         decodeImages()
+        
+        if post.postComplete{
+            bartrCompleteImg.hidden = false
+        } else {
+            bartrCompleteImg.hidden = true
+        }
     }
     
     //Decodes images from a Base64String stored in Firebase
@@ -65,5 +73,7 @@ class CustomTableCell: UITableViewCell {
         
         profileImg.image = decodedimage2! as UIImage
     }
+    
+    
 
 }

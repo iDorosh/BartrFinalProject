@@ -22,6 +22,17 @@ class Details: UIViewController, UITextViewDelegate {
     var typesString : String = String()
     var pickedPrice : String = String()
     
+    var previousScreen : String = String()
+    var editTitle : String = String()
+    var editPrice : String = String()
+    var editLocation : String = String()
+    var editPhoto : UIImage = UIImage()
+    var editType : String = String()
+    var editProfileImg : String = String()
+    var editUser : String = String()
+    var editDetails : String = String()
+    var editKey : String = String()
+    
     
     //Outlets
     @IBOutlet weak var Image1: UIImageView!
@@ -65,6 +76,27 @@ class Details: UIViewController, UITextViewDelegate {
         applyBlurrEffect()
         addTapRecognizer()
         pickedDescription.delegate = self
+        if previousScreen == "EditView"{
+            if ((editType.containsString("Sale"))){
+                Image1.image = Checked
+                type.append("Sale")
+            }
+            if ((editType.containsString("Trade"))){
+                Image2.image = Checked
+                type.append("Trade")
+            }
+            if ((editType.containsString("Looking"))){
+                Image3.image = Checked
+                type.append("Looking")
+            }
+            if ((editType.containsString("Free"))){
+                Image4.image = Checked
+                type.append("Free")
+            }
+            print(editDetails)
+            pickedDescription.text = editDetails
+
+        }
     }
 
     override func didReceiveMemoryWarning() {
@@ -157,6 +189,10 @@ class Details: UIViewController, UITextViewDelegate {
             summary.pickedTypes = typesString
             summary.pickedDescription = pickedDescription.text
             summary.pickedPrice = pickedPrice
+            summary.editKey = editKey
+            if (previousScreen == "EditView"){
+                summary.previousVC = "EditView"
+            }
         }
     }
 }

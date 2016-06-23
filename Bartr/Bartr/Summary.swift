@@ -26,6 +26,7 @@ class Summary: UIViewController {
     var month : Int = Int()
     var day : Int = Int()
     var year : Int = Int()
+    var editKey : String = String()
     
     //Outlets
     @IBOutlet weak var currentUser: UILabel!
@@ -38,9 +39,20 @@ class Summary: UIViewController {
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var ScrollView: UIScrollView!
     @IBOutlet weak var previewPrice: UILabel!
+    @IBOutlet weak var postLabel: UIButton!
+    
+    @IBOutlet weak var blurView: UIView!
+    
+    @IBOutlet weak var shareToSocialMedia: UIView!
+    
+    
     
     
     //Actions
+    @IBAction func cancelButtonClicked(sender: UIButton) {
+        self.performSegueWithIdentifier("MainFeedUnwind", sender: self)
+    }
+    
     @IBAction func postListing(sender: UIButton) {
         addPostClicked()
     }
@@ -70,6 +82,9 @@ class Summary: UIViewController {
         previewDescription.text = pickedDescription
         previewType.text = "    \(pickedTypes)"
         previewPrice.text = pickedPrice
+        if previousVC == "EditView"{
+            postLabel.setTitle("Update Listing", forState: .Normal)
+        }
     }
     
     //Get listing location on map preview
@@ -97,6 +112,11 @@ class Summary: UIViewController {
         getCurrentUser()
         loadLabels()
         loadLocation()
+        
+        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.Light)
+        let blurEffectView = UIVisualEffectView(effect: blurEffect)
+        blurEffectView.frame = self.view.bounds
+        self.blurView.addSubview(blurEffectView)
     }
 
     override func didReceiveMemoryWarning() {
@@ -107,8 +127,34 @@ class Summary: UIViewController {
     
     //Add post button clicked
     func addPostClicked() {
-        encodePhoto(pickedImage)
-        uploadToFirebase()
+        if previousVC == "EditView"{
+            encodePhoto(pickedImage)
+            let postText = pickedDescription
+            let postTitle = pickedTitle
+            let postType = pickedTypes
+            getCurrentDate()
+            DataService.dataService.CURRENT_USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
+                self.currentProfileImg = snapshot.value.objectForKey("profileImage") as! String
+                self.getCurrentUser()
+            
+            let selectedPostRef = DataService.dataService.POST_REF.childByAppendingPath(self.editKey)
+            selectedPostRef.updateChildValues([
+                "postText": postText,
+                "postTitle": postTitle,
+                "postType": postType,
+                "author": self.currentUser.text!,
+                "postImage": self.base64String,
+                "postLocation": self.pickedLocation,
+                "userProfileImg": self.currentProfileImg,
+                "postPrice": self.pickedPrice
+                ])
+                self.performSegueWithIdentifier("GoBackToProfileSegue", sender: self)
+            })
+        } else {
+            encodePhoto(pickedImage)
+            uploadToFirebase()
+        }
+        
     }
     
     //Encode listing image to send as a string to Firebase
@@ -141,7 +187,7 @@ class Summary: UIViewController {
     }
     
     func removeListing(){
-        performSegueWithIdentifier("MainSegue", sender: self)
+        performSegueWithIdentifier("MainFeedUnwind", sender: self)
     }
     
 
@@ -169,11 +215,14 @@ class Summary: UIViewController {
                     "postLocation": self.pickedLocation,
                     "userProfileImg": self.currentProfileImg,
                     "postDate": "\(self.month)/\(self.day)/\(self.year)",
-                    "postPrice": self.pickedPrice
+                    "postPrice": self.pickedPrice,
+                    "postFeedbackLeft" : false,
+                    "postComplete" : false
                 ]
         
                 DataService.dataService.createNewPost(newpost)
-                self.performSegueWithIdentifier("MainFeedUnwind", sender: self)
+                self.blurView.hidden = false
+                self.shareToSocialMedia.hidden = false
             }
         })
     }

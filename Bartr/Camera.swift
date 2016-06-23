@@ -25,6 +25,18 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     let locationManager = CLLocationManager()
     var currentUsername = ""
     
+    var previousScreen : String?
+    var editedTitle : String?
+    var editedPrice : String?
+    var editedLocation : String?
+    var editedPhoto : UIImage?
+    var editedType : String = String()
+    var editedProfileImg : String?
+    var editedUser : String?
+    var editedDetails : String?
+    var editKey : String = String()
+    
+    
     //----Outlets----//
     
     //Title text field
@@ -41,6 +53,9 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     @IBOutlet weak var scrollView: UIScrollView!
     //Price Field
     @IBOutlet weak var priceField: UITextField!
+    //Title
+    @IBOutlet weak var screenTitle: UILabel!
+    
     
     //----Actions----//
     
@@ -75,6 +90,11 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
         showAlertView("Discard Listing", text: "Listing will be discarded", confirmButton: "Discard", cancelButton: "Cancel")
     }
     
+    @IBAction func nextClicked(sender: UIButton) {
+        performSegueWithIdentifier("NextInfoSegue", sender: self)
+    }
+    
+    
     
     //Load UI
     override func viewWillAppear(animated: Bool) {
@@ -82,13 +102,16 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     }
     
     override func viewDidLoad() {
+        self.navigationController?.setNavigationBarHidden(true, animated: true)
         super.viewDidLoad()
         setUpTextFields()
         addBlurrEffect()
         addTapRecognizer()
         getCurrentUser()
-        setLocationManager()
-        openCamera()
+        if previousScreen != "EditView"{
+            setLocationManager()
+        }
+       openCamera()
     }
     
     
@@ -108,10 +131,20 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
         cityField.delegate = self
         priceField.delegate = self
         
-        titleField.text = ""
-        cityField.text = ""
-        priceField.text = ""
-        previewImage.image = UIImage(named: "placeholderImg")
+        if previousScreen == "EditView"{
+            titleField.text = editedTitle
+            priceField.text = editedPrice
+            cityField.text = editedLocation
+            screenTitle.text = "Edit About"
+            previewImage.image = editedPhoto
+        } else {
+            screenTitle.text = "About"
+            titleField.text = ""
+            cityField.text = ""
+            priceField.text = ""
+            previewImage.image = UIImage(named: "placeholderImg")
+        }
+        
     }
     
     //Next text field
@@ -258,13 +291,36 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
         cityField.text = ""
         priceField.text = ""
         previewImage.image = UIImage(named: "placeholderImg")
-        performSegueWithIdentifier("MainSegue", sender: self)
+        if previousScreen == "EditView"{
+            performSegueWithIdentifier("BackToProfileSegue", sender: self)
+        } else {
+            performSegueWithIdentifier("MainSegue", sender: self)
+        }
+        
     }
     
     //Sends data to next view controller
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         UIApplication.sharedApplication().statusBarHidden = false
-        if (segue.identifier == "detailsSegue"){
+        
+        if (segue.identifier == "NextInfoSegue"){
+            if(previousScreen == "EditView"){
+                print(editedType)
+                let details : Details = segue.destinationViewController as! Details
+                details.editType = editedType
+                details.previousScreen = "EditView"
+                details.pickedImage = previewImage.image!
+                details.pickedTitle = titleField.text!
+                details.pickedLocation = cityField.text!
+                details.editProfileImg = editedProfileImg!
+                details.editPhoto = previewImage.image!
+                details.editUser = editedUser!
+                details.editDetails = editedDetails!
+                details.editKey = editKey
+                details.pickedPrice = priceField.text!
+    
+                
+            } else {
                 let details : Details = segue.destinationViewController as! Details
                 details.pickedImage = previewImage.image!
                 details.pickedTitle = titleField.text!
@@ -277,7 +333,9 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
                     } else {
                         details.pickedPrice = priceField.text!
                     }
+                }
             }
+            
         }
     }
 }

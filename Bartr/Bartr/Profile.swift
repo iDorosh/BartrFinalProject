@@ -20,6 +20,8 @@ class Profile: UIViewController, UITableViewDataSource {
     var userPosts = [Post]()
     var selectedPost : Int = Int()
     
+  
+    
     //Variables
     var currentUser : String = String()
     
@@ -42,9 +44,15 @@ class Profile: UIViewController, UITableViewDataSource {
     
     @IBOutlet weak var userInfoView: UIView!
     
+    
+    @IBAction func showRatings(sender: UIButton) {
+        performSegueWithIdentifier("ShowRecentUserFeedback", sender: self)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         UIApplication.sharedApplication().statusBarStyle = .Default
+        self.navigationController?.setNavigationBarHidden(true, animated: true)
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -69,9 +77,13 @@ class Profile: UIViewController, UITableViewDataSource {
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath){
-        selectedPost = indexPath.row
-        print(indexPath.row)
-        performSegueWithIdentifier("detailSegue", sender: self)
+        if userPosts[indexPath.row].postComplete {
+            showAlertView("Rate User", text: "Please select and rate a user", confirmButton: "Rate", cancelButton: "Later", callBack: "Rate")
+        } else {
+            selectedPost = indexPath.row
+            performSegueWithIdentifier("detailSegue2", sender: self)
+            tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        }
     }
 
     //Functions
@@ -125,8 +137,25 @@ class Profile: UIViewController, UITableViewDataSource {
         })
     }
     
+    //Alert to delete, mark as completed or rate
+    func showAlertView(title: String?, text: String?, confirmButton: String?, cancelButton: String?, callBack: String){
+        let alertview = JSSAlertView().show(
+            self,
+            title: title!,
+            text: text!,
+            buttonText: confirmButton!,
+            cancelButtonText: cancelButton!
+        )
+        alertview.addAction(rateUser)
+    }
+    
+    func rateUser(){
+        performSegueWithIdentifier("LeaveFeedbackFromProfile", sender: self)
+    }
+    
+    
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if (segue.identifier == "detailSegue"){
+        if (segue.identifier == "detailSegue2"){
             let details : PostDetails = segue.destinationViewController as! PostDetails
             details.selectedTitle = userPosts[selectedPost].postTitle
             details.selectedProfileImg = userPosts[selectedPost].postUserImage
@@ -137,7 +166,22 @@ class Profile: UIViewController, UITableViewDataSource {
             details.selectedType = userPosts[selectedPost].postType
             details.key = userPosts[selectedPost].postKey
             details.selectedPrice = userPosts[selectedPost].postPrice
+            print(" Hello \(selectedPost)")
             details.previousVC = "Profile"
+        }
+        
+        if segue.identifier == "LeaveFeedbackFromProfile"{
+            let feedback : Feedback = segue.destinationViewController as! Feedback
+            feedback.postKey = userPosts[selectedPost].postKey
+            feedback.previousSegue = "Profile"
+        }
+        
+        
+        
+        if segue.identifier == "ShowRecentUserFeedback"{
+            let userFeedback : RecentFeedback = segue.destinationViewController as! RecentFeedback
+            userFeedback.previousSegue = "Profile"
+            userFeedback.username = currentUser
         }
     }
 }

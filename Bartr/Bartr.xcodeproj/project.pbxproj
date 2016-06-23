@@ -13,6 +13,29 @@
 		DD22EB2A1D1477B100AB4017 /* PostDetails.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD22EB281D146FDC00AB4017 /* PostDetails.swift */; };
 		DD22EB2C1D14BD3D00AB4017 /* MessageThread.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22EB2B1D14BD3D00AB4017 /* MessageThread.swift */; };
 		DD303AAF1D0CC82600E50D4B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DD303AAE1D0CC82600E50D4B /* GoogleService-Info.plist */; };
+		DD3315E21D1B4BF800048548 /* BlockedUsers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3315E11D1B4BF800048548 /* BlockedUsers.swift */; };
+		DD3315E41D1B4C4A00048548 /* BlockedUsersTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3315E31D1B4C4A00048548 /* BlockedUsersTableCell.swift */; };
+		DD3315E61D1B4F0A00048548 /* UsersProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3315E51D1B4F0A00048548 /* UsersProfile.swift */; };
+		DD3315E71D1B596200048548 /* UsersProfile.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD3315E51D1B4F0A00048548 /* UsersProfile.swift */; };
+		DD3E32351D1C656300F66E0F /* Feedback.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3E32341D1C656300F66E0F /* Feedback.swift */; };
+		DD3E32371D1C662B00F66E0F /* FeedbackTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3E32361D1C662B00F66E0F /* FeedbackTableCell.swift */; };
+		DD3E323C1D1C76BB00F66E0F /* Feedback.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD3E32341D1C656300F66E0F /* Feedback.swift */; };
+		DD3E323D1D1C775C00F66E0F /* BlockedUsers.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD3315E11D1B4BF800048548 /* BlockedUsers.swift */; };
+		DD3E323E1D1C775C00F66E0F /* BlockedUsersTableCell.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD3315E31D1B4C4A00048548 /* BlockedUsersTableCell.swift */; };
+		DD3E323F1D1C775C00F66E0F /* FeedbackTableCell.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD3E32361D1C662B00F66E0F /* FeedbackTableCell.swift */; };
+		DD3E32431D1C9DA000F66E0F /* UsersRecentFeedBackCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3E32421D1C9DA000F66E0F /* UsersRecentFeedBackCell.swift */; };
+		DD3E32451D1C9DC100F66E0F /* RecentFeedback.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3E32441D1C9DC100F66E0F /* RecentFeedback.swift */; };
+		DD3E32461D1C9EF700F66E0F /* RecentFeedback.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD3E32441D1C9DC100F66E0F /* RecentFeedback.swift */; };
+		DD3E32471D1C9EF700F66E0F /* UsersRecentFeedBackCell.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD3E32421D1C9DA000F66E0F /* UsersRecentFeedBackCell.swift */; };
+		DD429F621D1AFBAC003B534D /* Camera.swift in Resources */ = {isa = PBXBuildFile; fileRef = DDF679E31D0D21870006DF37 /* Camera.swift */; };
+		DD429F631D1AFC23003B534D /* Search.swift in Resources */ = {isa = PBXBuildFile; fileRef = DDF679E11D0D216D0006DF37 /* Search.swift */; };
+		DD429F641D1AFC23003B534D /* Details.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD4F0AAF1D1108250040AC23 /* Details.swift */; };
+		DD429F651D1AFC23003B534D /* Summary.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD4F0AB11D1108710040AC23 /* Summary.swift */; };
+		DD429F661D1AFC23003B534D /* Chat.swift in Resources */ = {isa = PBXBuildFile; fileRef = DDF679D91D0D1B610006DF37 /* Chat.swift */; };
+		DD429F671D1AFC23003B534D /* MessageThread.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD22EB2B1D14BD3D00AB4017 /* MessageThread.swift */; };
+		DD429F681D1AFC23003B534D /* Profile.swift in Resources */ = {isa = PBXBuildFile; fileRef = DDF679E51D0D21A70006DF37 /* Profile.swift */; };
+		DD429F691D1AFC23003B534D /* EditProfile.swift in Resources */ = {isa = PBXBuildFile; fileRef = DDBB74CA1D174D96001341E7 /* EditProfile.swift */; };
+		DD429F6A1D1AFC23003B534D /* CustomChatTableCell.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD1DF8851D0F8D8E00511810 /* CustomChatTableCell.swift */; };
 		DD4F0AB01D1108250040AC23 /* Details.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4F0AAF1D1108250040AC23 /* Details.swift */; };
 		DD4F0AB21D1108710040AC23 /* Summary.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4F0AB11D1108710040AC23 /* Summary.swift */; };
 		DD4F0ABC1D11DD1B0040AC23 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4F0AB71D11DD1B0040AC23 /* CameraViewController.swift */; };
@@ -112,6 +135,13 @@
 		DD22EB281D146FDC00AB4017 /* PostDetails.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostDetails.swift; sourceTree = "<group>"; };
 		DD22EB2B1D14BD3D00AB4017 /* MessageThread.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageThread.swift; sourceTree = "<group>"; };
 		DD303AAE1D0CC82600E50D4B /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		DD3315E11D1B4BF800048548 /* BlockedUsers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockedUsers.swift; sourceTree = "<group>"; };
+		DD3315E31D1B4C4A00048548 /* BlockedUsersTableCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockedUsersTableCell.swift; sourceTree = "<group>"; };
+		DD3315E51D1B4F0A00048548 /* UsersProfile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UsersProfile.swift; sourceTree = "<group>"; };
+		DD3E32341D1C656300F66E0F /* Feedback.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Feedback.swift; sourceTree = "<group>"; };
+		DD3E32361D1C662B00F66E0F /* FeedbackTableCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FeedbackTableCell.swift; sourceTree = "<group>"; };
+		DD3E32421D1C9DA000F66E0F /* UsersRecentFeedBackCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UsersRecentFeedBackCell.swift; sourceTree = "<group>"; };
+		DD3E32441D1C9DC100F66E0F /* RecentFeedback.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecentFeedback.swift; sourceTree = "<group>"; };
 		DD4F0AAF1D1108250040AC23 /* Details.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Details.swift; sourceTree = "<group>"; };
 		DD4F0AB11D1108710040AC23 /* Summary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Summary.swift; sourceTree = "<group>"; };
 		DD4F0AB71D11DD1B0040AC23 /* CameraViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
@@ -325,6 +355,10 @@
 			children = (
 				DDF679E51D0D21A70006DF37 /* Profile.swift */,
 				DDBB74CA1D174D96001341E7 /* EditProfile.swift */,
+				DD3315E11D1B4BF800048548 /* BlockedUsers.swift */,
+				DD3315E51D1B4F0A00048548 /* UsersProfile.swift */,
+				DD3E32341D1C656300F66E0F /* Feedback.swift */,
+				DD3E32441D1C9DC100F66E0F /* RecentFeedback.swift */,
 			);
 			name = Profile;
 			sourceTree = "<group>";
@@ -370,6 +404,9 @@
 			children = (
 				DD62BBBA1D0CBEC4006DBD64 /* CustomTableCell.swift */,
 				DD1DF8851D0F8D8E00511810 /* CustomChatTableCell.swift */,
+				DD3315E31D1B4C4A00048548 /* BlockedUsersTableCell.swift */,
+				DD3E32361D1C662B00F66E0F /* FeedbackTableCell.swift */,
+				DD3E32421D1C9DA000F66E0F /* UsersRecentFeedBackCell.swift */,
 			);
 			name = TableView;
 			sourceTree = "<group>";
@@ -515,6 +552,22 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DD3E32461D1C9EF700F66E0F /* RecentFeedback.swift in Resources */,
+				DD3E32471D1C9EF700F66E0F /* UsersRecentFeedBackCell.swift in Resources */,
+				DD3E323D1D1C775C00F66E0F /* BlockedUsers.swift in Resources */,
+				DD3E323E1D1C775C00F66E0F /* BlockedUsersTableCell.swift in Resources */,
+				DD3E323F1D1C775C00F66E0F /* FeedbackTableCell.swift in Resources */,
+				DD3E323C1D1C76BB00F66E0F /* Feedback.swift in Resources */,
+				DD3315E71D1B596200048548 /* UsersProfile.swift in Resources */,
+				DD429F631D1AFC23003B534D /* Search.swift in Resources */,
+				DD429F641D1AFC23003B534D /* Details.swift in Resources */,
+				DD429F651D1AFC23003B534D /* Summary.swift in Resources */,
+				DD429F661D1AFC23003B534D /* Chat.swift in Resources */,
+				DD429F671D1AFC23003B534D /* MessageThread.swift in Resources */,
+				DD429F681D1AFC23003B534D /* Profile.swift in Resources */,
+				DD429F691D1AFC23003B534D /* EditProfile.swift in Resources */,
+				DD429F6A1D1AFC23003B534D /* CustomChatTableCell.swift in Resources */,
+				DD429F621D1AFBAC003B534D /* Camera.swift in Resources */,
 				DDDA2A2A1D18D97900F55177 /* ViewImageVC.swift in Resources */,
 				DD22EB2A1D1477B100AB4017 /* PostDetails.swift in Resources */,
 				DD4F0AE01D11E62D0040AC23 /* ConfirmViewController.swift in Resources */,
@@ -656,9 +709,12 @@
 				DD4F0AC61D11DD350040AC23 /* CropOverlay.swift in Sources */,
 				DD4F0AC01D11DD1B0040AC23 /* PhotoLibraryViewController.swift in Sources */,
 				DD62BB7D1D0CAFAB006DBD64 /* AppDelegate.swift in Sources */,
+				DD3E32371D1C662B00F66E0F /* FeedbackTableCell.swift in Sources */,
 				DD4F0ABC1D11DD1B0040AC23 /* CameraViewController.swift in Sources */,
 				DD1DF8861D0F8D8E00511810 /* CustomChatTableCell.swift in Sources */,
+				DD3E32431D1C9DA000F66E0F /* UsersRecentFeedBackCell.swift in Sources */,
 				DD4F0AD61D11DD4D0040AC23 /* PhotoLibraryAuthorizer.swift in Sources */,
+				DD3315E21D1B4BF800048548 /* BlockedUsers.swift in Sources */,
 				DD4F0AC81D11DD350040AC23 /* PermissionsView.swift in Sources */,
 				DD4F0ADC1D11DD4D0040AC23 /* VolumeControl.swift in Sources */,
 				DDF679DA1D0D1B610006DF37 /* Chat.swift in Sources */,
@@ -676,6 +732,7 @@
 				DDDA2A291D18D4B800F55177 /* ViewImageVC.swift in Sources */,
 				DD62BBBF1D0CBED8006DBD64 /* JSSAlertView.swift in Sources */,
 				DD62BBBB1D0CBEC4006DBD64 /* CustomTableCell.swift in Sources */,
+				DD3E32351D1C656300F66E0F /* Feedback.swift in Sources */,
 				DD8739621D0CEECA00A37FF5 /* LoginViewController.swift in Sources */,
 				DD4F0AC51D11DD350040AC23 /* CameraView.swift in Sources */,
 				DD4F0AB01D1108250040AC23 /* Details.swift in Sources */,
@@ -684,9 +741,12 @@
 				DDF679E21D0D216D0006DF37 /* Search.swift in Sources */,
 				DD4F0ADA1D11DD4D0040AC23 /* UIViewExtensions.swift in Sources */,
 				DD4F0AC71D11DD350040AC23 /* ImageCell.swift in Sources */,
+				DD3E32451D1C9DC100F66E0F /* RecentFeedback.swift in Sources */,
 				DD4F0ABE1D11DD1B0040AC23 /* ConfirmViewController.swift in Sources */,
 				DD8739661D0CF7E300A37FF5 /* MainFeed.swift in Sources */,
+				DD3315E41D1B4C4A00048548 /* BlockedUsersTableCell.swift in Sources */,
 				DD22EB291D146FDC00AB4017 /* PostDetails.swift in Sources */,
+				DD3315E61D1B4F0A00048548 /* UsersProfile.swift in Sources */,
 				DD4F0AD91D11DD4D0040AC23 /* UIButtonExtensions.swift in Sources */,
 				DD62BBBD1D0CBECE006DBD64 /* Constants.swift in Sources */,
 			);

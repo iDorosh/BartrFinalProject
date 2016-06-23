@@ -9,6 +9,7 @@
 import UIKit
 import MapKit
 import Social
+import Firebase
 
 class PostDetails: UIViewController {
     
@@ -26,6 +27,8 @@ class PostDetails: UIViewController {
     //Current views for the listing
     var postViews : Int = Int()
     
+    var currentUser : String = String()
+    
     //Name of the previous view controller to show and
     //hide UI items
     var previousVC : String = String()
@@ -42,6 +45,8 @@ class PostDetails: UIViewController {
     
     var titleEdit : String = String()
     
+    var decodedimage2 = UIImage()
+    
     
     //Outlets
     
@@ -56,6 +61,8 @@ class PostDetails: UIViewController {
     
     @IBOutlet weak var delete: UIButton!
     
+    @IBOutlet weak var editButton: UIButton!
+    
     @IBOutlet weak var webView: UIWebView!
     
     @IBOutlet weak var detailScrollView: UIScrollView!
@@ -66,6 +73,7 @@ class PostDetails: UIViewController {
     
     @IBOutlet weak var sold: UIButton!
     
+    
     //Labels and images for the selected post
     @IBOutlet weak var postUserProfileImg: UIImageView!
     @IBOutlet weak var postImage: UIImageView!
@@ -75,6 +83,19 @@ class PostDetails: UIViewController {
     @IBOutlet weak var postLocation: UILabel!
     @IBOutlet weak var postDetails: UITextView!
     @IBOutlet weak var postType: UILabel!
+    @IBOutlet weak var showProfileButton: UIButton!
+    
+    
+    @IBAction func showProfile(sender: UIButton) {
+        if postUser.text == currentUser{
+            self.tabBarController?.tabBar.hidden = false
+            self.tabBarController?.selectedIndex = 4
+        
+        } else {
+            performSegueWithIdentifier("showUsersProfileSegue", sender: self)
+        }
+        
+    }
     
     //Send User a message
     @IBAction func messageAction(sender: UIButton) {
@@ -83,6 +104,10 @@ class PostDetails: UIViewController {
     //Delete post
     @IBAction func deletePost(sender: UIButton) {
         showAlertView("Delete Listing", text: "Are you sure that you want to remove this listing?", confirmButton: "Remove", cancelButton: "Cancel", callBack: "Delete")
+    }
+    
+    @IBAction func editPost(sender: UIButton) {
+        self.tabBarController?.selectedIndex = 2
     }
     
     //Mark as sold/traded or given away
@@ -94,6 +119,19 @@ class PostDetails: UIViewController {
     @IBAction func makeTweet(sender: UIButton) {
         postTweet()
     }
+    
+    @IBAction func backButton(sender: UIButton) {
+        if previousVC == "Profile"{
+            performSegueWithIdentifier("FinishedSegue", sender: self)
+        } else if previousVC == "UsersFeed"{
+            self.navigationController?.popViewControllerAnimated(true)
+        } else if previousVC == "Search"{
+            performSegueWithIdentifier("BackToSearchSegue", sender: self)
+        } else {
+            performSegueWithIdentifier("MainFeedUnwind", sender: self)
+        }
+    }
+    
     
     //Webview Actions
     
@@ -114,7 +152,7 @@ class PostDetails: UIViewController {
     
     
     override func viewWillAppear(animated: Bool) {
-        self.tabBarController?.tabBar.hidden = true
+        //self.tabBarController?.tabBar.hidden = true
         
         //SetupUI
         hideItems()
@@ -122,12 +160,15 @@ class PostDetails: UIViewController {
         loadWebView()
         loadLabels()
         decodeImages()
-        setMapLocation()
+        
+        
+       
     }
     
     override func viewDidLoad() {
         //Add a view to selected listing
         addView()
+        setMapLocation()
         super.viewDidLoad()
     }
 
@@ -149,8 +190,22 @@ class PostDetails: UIViewController {
             fbbutton.hidden = true
             instagrambutton.hidden = true
             sharePost.hidden = true
+            editButton.hidden = false
+            showProfileButton.hidden = true
             
             detailScrollView.contentSize.height = 1400
+        } else if previousVC == "UsersFeed"{
+            delete.hidden = true
+            message.hidden = false
+            sold.hidden = true
+            webView.hidden = false
+            twitterButton.hidden = false
+            fbbutton.hidden = false
+            instagrambutton.hidden = false
+            sharePost.hidden = false
+            editButton.hidden = true
+            detailScrollView.contentSize.height = 1880
+            showProfileButton.hidden = true
         } else {
             delete.hidden = true
             message.hidden = false
@@ -160,6 +215,7 @@ class PostDetails: UIViewController {
             fbbutton.hidden = false
             instagrambutton.hidden = false
             sharePost.hidden = false
+            editButton.hidden = true
             detailScrollView.contentSize.height = 1880
         }
     }
@@ -193,6 +249,8 @@ class PostDetails: UIViewController {
         postLocation.text = selectedLocation
         postType.text = "    \(selectedType!)"
         postPrice.text = selectedPrice
+        postDetails.text = selectedDetails
+        postDetails.font = UIFont(name: "Avenir", size: 17)
     }
     
     //Decodes images stored on Firbase
@@ -200,14 +258,14 @@ class PostDetails: UIViewController {
         let decodedData = NSData(base64EncodedString: selectedImage! , options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters)
         
         let decodedimage = UIImage(data: decodedData!)
-        print(decodedimage)
+        
         postImage.image = decodedimage! as UIImage
         
         let decodedData2 = NSData(base64EncodedString: selectedProfileImg! , options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters)
         
-        let decodedimage2 = UIImage(data: decodedData2!)
-        print(decodedimage2)
-        postUserProfileImg.image = decodedimage2! as UIImage
+        decodedimage2 = UIImage(data: decodedData2!)!
+       
+        postUserProfileImg.image = decodedimage2 as UIImage
     }
     
     //Sets map to the location listed under the post.
@@ -230,13 +288,19 @@ class PostDetails: UIViewController {
     
     //Adding a view to the current listing if the click was from main feed or search
     func addView(){
+        
         if previousVC != "Profile" {
-            let updatedViews : Int = postViews + 1
-            
-            let selectedPostRef = DataService.dataService.POST_REF.childByAppendingPath(key)
-            let nickname = ["views": updatedViews]
-            
-            selectedPostRef.updateChildValues(nickname)
+                DataService.dataService.CURRENT_USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
+                    self.currentUser = snapshot.value.objectForKey("username") as! String
+                    if self.selectedUser != self.currentUser{
+                        let updatedViews : Int = self.postViews + 1
+
+                        let selectedPostRef = DataService.dataService.POST_REF.childByAppendingPath(self.key)
+                        let nickname = ["views": updatedViews]
+                        
+                        selectedPostRef.updateChildValues(nickname)
+                    }
+                })
         }
     }
 
@@ -275,6 +339,7 @@ class PostDetails: UIViewController {
             alertview.addAction(completeCallBack)
         case "Rate":
             alertview.addAction(rateCallBack)
+            alertview.addCancelAction(rateLater)
         default:
             break
         }
@@ -294,7 +359,15 @@ class PostDetails: UIViewController {
     
     //Will allow the current user to select and rate a user
     func rateCallBack(){
-        
+        performSegueWithIdentifier("LeaveFeedbackSegue", sender: self)
+    }
+    
+    func rateLater(){
+        let selectedPostRef = DataService.dataService.POST_REF.childByAppendingPath(self.key)
+        selectedPostRef.updateChildValues([
+            "postComplete": true,
+            ])
+        performSegueWithIdentifier("FinishedSegue", sender: self)
     }
     
     //Will show a larger view of the clicked image
@@ -302,6 +375,34 @@ class PostDetails: UIViewController {
         if (segue.identifier == "ShowLargeImage"){
             let largeImageView : ViewImageVC = segue.destinationViewController as! ViewImageVC
             largeImageView.showImage = postImage.image!
+        }
+        
+        if (segue.identifier == "EditPostSegue"){
+            let camera : Camera = segue.destinationViewController as! Camera
+            camera.editedTitle = postTitle.text
+            camera.editedPrice = postPrice.text
+            camera.editedLocation = postLocation.text
+            camera.editedPhoto = postImage.image
+            camera.editedProfileImg = selectedProfileImg
+            camera.editedUser = selectedUser
+            camera.editedDetails = postDetails.text
+            camera.editedType = selectedType!
+            camera.editKey = key
+            camera.previousScreen = "EditView"
+            
+        }
+        
+        if segue.identifier == "showUsersProfileSegue"{
+            let usersProfile : UsersProfile = segue.destinationViewController as! UsersProfile
+            usersProfile.usersName = selectedUser!
+            usersProfile.profileUIImage = decodedimage2
+            usersProfile.ratingString = "89%"
+        }
+        
+        
+        if segue.identifier == "LeaveFeedbackSegue"{
+            let feedback : Feedback = segue.destinationViewController as! Feedback
+            feedback.postKey = key
         }
     }
 
