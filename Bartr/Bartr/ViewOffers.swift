@@ -37,11 +37,7 @@ class ViewOffers: UIViewController {
         offerUserString = offer.offerUser
         offerTextString = offer.offerText
         
-        let decodedData = NSData(base64EncodedString: offerImageString , options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters)
-        
-        let decodedimage = UIImage(data: decodedData!)
-        
-        offerImage.image = decodedimage! as UIImage
+        offerImage.image = UIImage(named: "placeholderImg")
     }
     
 }

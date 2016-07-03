@@ -30,7 +30,7 @@ class FeedbackTableCell: UITableViewCell {
     func tableConfig(offer : Offers){
         allOffers = offer
         
-        profileImage.image = UIImage(named: "placeHolder")
+        profileImage.image = UIImage(named: "placeholderImg")
 
         userName.text = offer.offerUser
         offerText.text = offer.offerText
