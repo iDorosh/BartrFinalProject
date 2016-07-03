@@ -37,6 +37,7 @@ class PostDetails: UIViewController {
     //Listing key is passed from the previous screen to
     //add a view to the listing
     var key : String = String()
+    var postKey : String = String()
     
     //Current views for the listing
     var postViews : Int = Int()
@@ -219,7 +220,7 @@ class PostDetails: UIViewController {
     override func viewWillAppear(animated: Bool) {
         self.navigationController?.navigationBarHidden = true
         self.tabBarController?.tabBar.hidden = false
-        updatePosts()
+        
         //SetupUI
         
         
@@ -229,11 +230,16 @@ class PostDetails: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        updatePosts()
+        addView()
+        
     }
 
     
     func setVariables(){
         let post = selectedPost[0]
+        postKey = post.postKey
+        key = post.postUID
         selectedTitle = post.postTitle
         selectedProfileImg = post.postUserImage
         selectedImage = post.postImage
@@ -245,7 +251,6 @@ class PostDetails: UIViewController {
         selectedPrice = post.postPrice
         selectedTime = post.postDate
         selectedExperation = post.expireDate
-        key = post.postUID
         addTapRecognizer()
         loadUI()
     }
@@ -259,13 +264,13 @@ class PostDetails: UIViewController {
             self.currentUser = snapshot.value.objectForKey("username") as! String
             
             //Add a view to selected listing
-            self.addView()
+            
             self.setMapLocation()
             self.getSelectedUID()
             self.hideItems()
         })
         
-        getUserInfo()
+        
         
         var test : CGRect = postDetails.frame;
         test.size.height = postDetails.contentSize.height;
@@ -279,6 +284,8 @@ class PostDetails: UIViewController {
         self.blurView.addSubview(blurEffectView)
         
         updateFeedback(selectedUser!)
+        
+       
 
     }
     
@@ -375,7 +382,7 @@ class PostDetails: UIViewController {
             locationView.hidden = true
             amazonView.hidden = true
             offerButton.hidden = true
-             checkExperation()
+            checkExperation()
             detailScrollView.contentSize.height = 1110
         }
     }
@@ -410,14 +417,9 @@ class PostDetails: UIViewController {
         var viewsOrView : String = "View"
         var totalViews : String = ""
         
-        if currentUser != selectedUser {
-            totalViews = "\(selectedViews! + 1)"
-        } else {
-            totalViews = "\(selectedViews!)"
-        }
-        
         experationLabel.text = getExperationDate(selectedExperation!)
 
+        totalViews = "\(selectedViews!)"
         
         if (selectedViews > 1){
             viewsOrView = "Views"
@@ -441,6 +443,7 @@ class PostDetails: UIViewController {
         postPrice.text = selectedPrice
         postDetails.text = selectedDetails
         postDetails.font = UIFont(name: "Avenir", size: 13)
+        
     }
     
     //Decodes images stored on Firbase
@@ -498,19 +501,18 @@ class PostDetails: UIViewController {
     func addView(){
         
         if previousVC != "Profile" {
-                DataService.dataService.CURRENT_USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
-                    self.currentUser = snapshot.value.objectForKey("username") as! String
-                    if self.selectedUser != self.currentUser{
-                        let updatedViews : Int = self.postViews + 1
-
-                        let selectedPostRef = DataService.dataService.POST_REF.childByAppendingPath(self.key)
-                        let nickname = ["views": updatedViews]
-                        
-                        selectedPostRef.updateChildValues(nickname)
-                    }
-                })
-        }
-    }
+            DataService.dataService.CURRENT_USER_REF.observeSingleEventOfType(FEventType.Value, withBlock: { snapshot in
+                self.currentUser = snapshot.value.objectForKey("username") as! String
+                if self.selectedUser != self.currentUser{
+                    let updatedViews : Int = self.selectedViews! + 1
+                    
+                    let selectedPostRef = DataService.dataService.POST_REF.childByAppendingPath(self.postKey)
+                    let nickname = ["views": updatedViews]
+                    
+                    selectedPostRef.updateChildValues(nickname)
+                }
+            })
+        }    }
 
     //Creates a Tweet using the account on the device
     func postTweet(){
@@ -663,7 +665,7 @@ class PostDetails: UIViewController {
         
         if segue.identifier == "LeaveFeedbackSegue"{
             let feedback : Feedback = segue.destinationViewController as! Feedback
-            feedback.postKey = key
+            feedback.postKey = postKey
         }
         
         if segue.identifier == "NewMessage"{
@@ -693,7 +695,7 @@ class PostDetails: UIViewController {
     
     func sendOffer(){
         
-            let itemRef = DataService.dataService.USER_REF.childByAppendingPath(selectedPost[0].postUID).childByAppendingPath("offers").childByAutoId() // 1
+            let itemRef = DataService.dataService.USER_REF.childByAppendingPath(key).childByAppendingPath("offers").childByAutoId() // 1
         
             sendOfferRef = itemRef
       
