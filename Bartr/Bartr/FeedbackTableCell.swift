@@ -29,11 +29,8 @@ class FeedbackTableCell: UITableViewCell {
     //Creating table view cells
     func tableConfig(offer : Offers){
         allOffers = offer
-        let decodedData = NSData(base64EncodedString: offer.offerProfileImage, options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters)
         
-        let decodedimage = UIImage(data: decodedData!)
-        
-        profileImage.image = decodedimage! as UIImage
+        profileImage.image = UIImage(named: "placeHolder")
 
         userName.text = offer.offerUser
         offerText.text = offer.offerText
