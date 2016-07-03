@@ -674,7 +674,7 @@ class PostDetails: UIViewController {
             chatVc.senderId = DataService.dataService.USER_REF.authData.uid
             chatVc.recieverUsername = postUser.text!
             chatVc.senderDisplayName = ""
-            chatVc.recieverUID = recieverUID
+            chatVc.recieverUID = key
             chatVc.ref = ref
             chatVc.selectedTitle = selectedTitle!
             chatVc.selectedImage = selectedProfileImg!
