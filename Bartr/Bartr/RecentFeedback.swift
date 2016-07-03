@@ -7,15 +7,18 @@
 //
 
 import UIKit
+import Firebase
 
 class RecentFeedback: UIViewController {
     var previousSegue : String = String()
     var username : String = String()
     
+    @IBOutlet weak var ratingLabel: UILabel!
     
     @IBOutlet weak var currentUserLabel: UILabel!
     
     
+    @IBOutlet weak var floatRatingView: FloatRatingView!
     
     @IBOutlet weak var tableView: UITableView!
     
@@ -36,11 +39,33 @@ class RecentFeedback: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
         self.navigationController?.navigationBarHidden = true
         UIApplication.sharedApplication().statusBarStyle = .Default
         currentUserLabel.text = username
+        updateFeedback()
+       
     }
     
+    func updateFeedback(){
+        DataService.dataService.USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
+            if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
+                
+                for snap in snapshots {
+                    let test = snap.value.objectForKey("username") as! String
+                    if (test == self.username){
+                        self.floatRatingView.rating = Float(snap.value.objectForKey("rating") as! String)!
+                        self.ratingLabel.text = "\(snap.value.objectForKey("rating") as! String) Star Rating"
+                    }
+                }
+            }
+            
+        })
+        
+    }
+
+    
+
    
     override func viewWillAppear(animated: Bool) {
         self.tabBarController?.tabBar.hidden = false

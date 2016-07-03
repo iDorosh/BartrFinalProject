@@ -14,6 +14,8 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     
     @IBAction func backToPhoto(segue: UIStoryboardSegue){}
     
+    var postForEdit = [Post]()
+    
     //Variables
     var croppingEnabled: Bool = false
     var libraryEnabled: Bool = true
@@ -24,17 +26,20 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     var capturedImage : UIImage = UIImage()
     let locationManager = CLLocationManager()
     var currentUsername = ""
+    var orignalView : String = ""
     
     var previousScreen : String?
     var editedTitle : String?
     var editedPrice : String?
     var editedLocation : String?
-    var editedPhoto : UIImage?
+    var editedPhoto : String?
     var editedType : String = String()
     var editedProfileImg : String?
     var editedUser : String?
     var editedDetails : String?
     var editKey : String = String()
+    
+    var decodedPreviewImage : UIImage = UIImage()
     
     
     //----Outlets----//
@@ -55,6 +60,7 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     @IBOutlet weak var priceField: UITextField!
     //Title
     @IBOutlet weak var screenTitle: UILabel!
+    
     
     
     //----Actions----//
@@ -79,12 +85,6 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
         croppingEnabled = !croppingEnabled
     }
     
-    //Close Post
-    @IBAction func dissmissNewPost(sender: UIButton) {
-        titleField.text = ""
-        previewImage.image = UIImage(named: "placeHolderImg")
-        self.dismissViewControllerAnimated(true, completion: nil)
-    }
     
     @IBAction func discardListing(sender: UIButton) {
         showAlertView("Discard Listing", text: "Listing will be discarded", confirmButton: "Discard", cancelButton: "Cancel")
@@ -99,20 +99,59 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     //Load UI
     override func viewWillAppear(animated: Bool) {
         self.tabBarController?.tabBar.hidden = true
+        
     }
     
     override func viewDidLoad() {
         self.navigationController?.setNavigationBarHidden(true, animated: true)
         super.viewDidLoad()
+        if previousScreen == "EditView"{
+            updatePosts()
+            self.tabBarController?.selectedIndex = 2
+        } else {
+            loadUI()
+        }
+
+    }
+    
+    func setVariables(){
+        let post = postForEdit[0]
+        editedTitle = post.postTitle
+        editedPrice = post.postPrice
+        editedLocation = post.postLocation
+        editedPhoto = post.postImage
+        editedProfileImg = post.postUserImage
+        editedUser = post.username
+        editedDetails = post.postText
+        editedType = post.postType
+        
+        decodeImages()
+        addTapRecognizer()
+        
+        loadUI()
+    }
+    
+    func loadUI(){
         setUpTextFields()
         addBlurrEffect()
         addTapRecognizer()
         getCurrentUser()
         if previousScreen != "EditView"{
             setLocationManager()
+            
         }
-       openCamera()
     }
+    
+    func decodeImages(){
+        let decodedData = NSData(base64EncodedString: editedPhoto! , options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters)
+        
+        let decodedimage = UIImage(data: decodedData!)
+        
+        decodedPreviewImage = decodedimage! as UIImage
+        
+    }
+
+
     
     
     override func didReceiveMemoryWarning() {
@@ -136,7 +175,7 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
             priceField.text = editedPrice
             cityField.text = editedLocation
             screenTitle.text = "Edit About"
-            previewImage.image = editedPhoto
+            previewImage.image = decodedPreviewImage
         } else {
             screenTitle.text = "About"
             titleField.text = ""
@@ -228,7 +267,6 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     func openCamera()
     {
         let cameraViewController = CameraViewController(croppingEnabled: croppingEnabled, allowsLibraryAccess: libraryEnabled) { [weak self] image, asset in
-            print(image)
             if (image != nil){
                self!.previewImage.image = image 
             }
@@ -292,9 +330,10 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
         priceField.text = ""
         previewImage.image = UIImage(named: "placeholderImg")
         if previousScreen == "EditView"{
-            performSegueWithIdentifier("BackToProfileSegue", sender: self)
+            dismissViewControllerAnimated(true, completion: nil)
         } else {
-            performSegueWithIdentifier("MainSegue", sender: self)
+            self.tabBarController?.selectedIndex = 0
+            
         }
         
     }
@@ -305,7 +344,6 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
         
         if (segue.identifier == "NextInfoSegue"){
             if(previousScreen == "EditView"){
-                print(editedType)
                 let details : Details = segue.destinationViewController as! Details
                 details.editType = editedType
                 details.previousScreen = "EditView"
@@ -338,4 +376,26 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
             
         }
     }
+    
+    func updatePosts(){
+        DataService.dataService.POST_REF.childByAppendingPath(editKey).observeSingleEventOfType(.Value, withBlock: { snapshot in
+            self.postForEdit = []
+            
+            
+            if snapshot.children.allObjects is [FDataSnapshot] {
+                
+                
+                if let postDictionary = snapshot.value as? Dictionary<String, AnyObject> {
+                    let key = snapshot.key
+                    let post = Post(key: key, dictionary: postDictionary)
+                    self.postForEdit.insert(post, atIndex: 0)
+                    self.setVariables()
+                } else {
+                    self.navigationController?.popViewControllerAnimated(true)
+                }
+            }
+            
+        })
+    }
+
 }

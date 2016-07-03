@@ -180,7 +180,7 @@ class Register: UIViewController, UITextFieldDelegate {
                         // Create and Login the New User with authUser
                         DataService.dataService.BASE_REF.authUser(email, password: password, withCompletionBlock: {
                             err, authData in
-                            let user = ["provider": authData.provider!, "email": email!, "username": username!, "profileImage" : base64String]
+                            let user = ["provider": authData.provider!, "email": email!, "username": username!, "profileImage" : base64String, "rating" : "5.0"]
                             // Send Data to DataService.swift
                             DataService.dataService.createNewAccount(authData.uid, user: user)
                         })

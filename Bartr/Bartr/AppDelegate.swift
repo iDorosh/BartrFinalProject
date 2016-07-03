@@ -12,12 +12,58 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-
+   
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
        
         NSThread.sleepForTimeInterval(2.0);
+        
+        /*
+        let bounds: CGRect = UIScreen.mainScreen().bounds
+        let screenHeight: NSNumber = bounds.size.height
+        
+        var mainView: UIStoryboard!
+        mainView = UIStoryboard(name: "Main", bundle: nil)
+        let viewcontroller : UIViewController = mainView.instantiateViewControllerWithIdentifier("Login") as UIViewController
+        self.window!.rootViewController = viewcontroller
+        
+        if screenHeight == 736  {
+            // Load Storyboard with name: iPhone4
+            var mainView: UIStoryboard!
+            mainView = UIStoryboard(name: "Main", bundle: nil)
+            let viewcontroller : UIViewController = mainView.instantiateViewControllerWithIdentifier("Login") as UIViewController
+            self.window!.rootViewController = viewcontroller
+            
+        }
+        
+        if screenHeight == 568{
+            // Load Storyboard with name: iPhone4
+            var mainView: UIStoryboard!
+            mainView = UIStoryboard(name: "iPhone5", bundle: nil)
+            let viewcontroller : UIViewController = mainView.instantiateViewControllerWithIdentifier("iPhone5") as UIViewController
+            self.window!.rootViewController = viewcontroller
+            
+        }
+        
+        if screenHeight == 480{
+            // Load Storyboard with name: iPhone4
+            var mainView: UIStoryboard!
+            mainView = UIStoryboard(name: "iPhone4", bundle: nil)
+            let viewcontroller : UIViewController = mainView.instantiateViewControllerWithIdentifier("iPhone4") as UIViewController
+            self.window!.rootViewController = viewcontroller
+            
+        }
+        
+        if (UIDevice.currentDevice().userInterfaceIdiom == .Pad){
+            var mainView: UIStoryboard!
+            mainView = UIStoryboard(name: "iPad", bundle: nil)
+            let viewcontroller : UIViewController = mainView.instantiateViewControllerWithIdentifier("iPad") as UIViewController
+            self.window!.rootViewController = viewcontroller
+            
+        }*/
+
         // Override point for customization after application launch.
+        UIApplication.sharedApplication().statusBarHidden = false
         UIApplication.sharedApplication().statusBarStyle = .LightContent
         return true
     }

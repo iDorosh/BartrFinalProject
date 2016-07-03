@@ -36,6 +36,9 @@ class Search: UIViewController, CLLocationManagerDelegate, UITableViewDataSource
     
     @IBOutlet weak var searchBar: UITextField!
     
+    @IBOutlet weak var spin: UIActivityIndicatorView!
+    
+    
     @IBAction func listingType(sender: UISegmentedControl) {
         let selectedIndex : Int = sender.selectedSegmentIndex
         
@@ -82,6 +85,8 @@ class Search: UIViewController, CLLocationManagerDelegate, UITableViewDataSource
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        spin.startAnimating()
+        spin.hidden = false
         UIApplication.sharedApplication().statusBarStyle = .Default
         self.navigationController?.setNavigationBarHidden(true, animated: true)
         //Update firebase data and Table View
@@ -93,6 +98,10 @@ class Search: UIViewController, CLLocationManagerDelegate, UITableViewDataSource
         let blurEffectView = UIVisualEffectView(effect: blurEffect)
         blurEffectView.frame = self.view.bounds
         self.blurView.addSubview(blurEffectView)
+    }
+    
+    override func viewWillAppear(animated: Bool) {
+        
     }
 
     override func didReceiveMemoryWarning() {
@@ -137,7 +146,12 @@ class Search: UIViewController, CLLocationManagerDelegate, UITableViewDataSource
             if !filtered{
                 for i in self.posts
                 {
-                    if !i.postComplete && !i.postFL{
+                    let eDateString : String = i.expireDate
+                    let eDate = dateFormatter().dateFromString(eDateString)
+                    
+                    let eseconds = eDate!.secondsFrom(NSDate())
+                    
+                    if !i.postComplete && !i.postFL && eseconds > 0{
                         self.filteredPosts = self.posts
                     }
                 }
@@ -153,7 +167,8 @@ class Search: UIViewController, CLLocationManagerDelegate, UITableViewDataSource
             }
             
 
-            
+            self.spin.stopAnimating()
+            self.spin.hidden = true
             self.tabletView.reloadData()
             self.blurView.hidden = true
             self.filterView.hidden = true
@@ -211,11 +226,7 @@ class Search: UIViewController, CLLocationManagerDelegate, UITableViewDataSource
                     }
                 })
 
-            }
-            
-            
-            
-            
+            }  
             
         } else {
             mapView.hidden = true
@@ -229,14 +240,6 @@ class Search: UIViewController, CLLocationManagerDelegate, UITableViewDataSource
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if (segue.identifier == "detailSegue"){
             let details : PostDetails = segue.destinationViewController as! PostDetails
-            details.selectedTitle = posts[selectedPost].postTitle
-            details.selectedProfileImg = posts[selectedPost].postUserImage
-            details.selectedImage = posts[selectedPost].postImage
-            details.selectedUser = posts[selectedPost].username
-            details.selectedLocation = posts[selectedPost].postLocation
-            details.selectedDetails = posts[selectedPost].postText
-            details.selectedType = posts[selectedPost].postType
-            details.selectedPrice = posts[selectedPost].postPrice
             details.key = posts[selectedPost].postKey
             details.previousVC = "Search"
         }

@@ -7,15 +7,12 @@
 //
 
 import UIKit
+import Firebase
 
 class CustomChatTableCell: UITableViewCell {
     
-    //Place holder information for chat threads
-    var userNames : [String] = ["Mac>Windows", "Sell24/7", "Mac4Lyfe"]
-    var listing : [String] = ["MacBook Pro 15in (Late 2013)", "Physics 101 TextBook", "Dinning Table with 6 Chairs"]
-    var images : [String] = ["Image1", "Image2", "Image3"]
-    var new : [String] = ["yes", "no", "no"]
-    var timeStamps : [String] = ["5:14 PM", "10:20 AM", "Yesterday"]
+    var ref = Firebase(url: BASE_URL)
+    
     
     //Outlets
     @IBOutlet weak var newIndicator: UIImageView!
@@ -28,6 +25,9 @@ class CustomChatTableCell: UITableViewCell {
     
     @IBOutlet weak var timeStamp: UILabel!
     
+    var imgString : String = ""
+    
+    
     override func awakeFromNib() {
         super.awakeFromNib()
     }
@@ -36,17 +36,31 @@ class CustomChatTableCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
     }
     
-    //Creating table view cells
-    func tableConfig(index : Int){
-        if new[index] == "yes"{
-        newIndicator.image = UIImage(named: "New")
-        } else {
-            newIndicator.image = UIImage(named: "NotNew")
-        }
+    
+    //Creating table view cells  "users\(withUserId)"
+    func tableConfig(recent : NSDictionary){
+
+        //let withUserId = (recent.objectForKey("withUserUserId") as? String)!
+        let withUsername = (recent.objectForKey("withUserUsername") as? String)!
+        let listingTitle = (recent.objectForKey("listingTitle") as? String)!
+        let dateString = (recent.objectForKey("date") as? String)!
+        let pImg : String = (recent.objectForKey("usersProfileImage") as? String)!
+        userName.text = withUsername
         
-        profileImage.image = UIImage(named: images[index])
-        userName.text = userNames[index]
-        post.text = listing[index]
-        timeStamp.text = timeStamps[index]
+        
+        let decodedData2 = NSData(base64EncodedString: pImg, options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters)
+        
+        let decodedimage2 = UIImage(data: decodedData2!)
+        
+        profileImage.image = decodedimage2! as UIImage
+ 
+        
+        post.text = listingTitle
+        let date = dateFormatter().dateFromString(dateString)
+        let seconds = NSDate().timeIntervalSinceDate(date!)
+        
+        timeStamp.text = elapsedTime(seconds)
+        
+           }
+    
     }
-}

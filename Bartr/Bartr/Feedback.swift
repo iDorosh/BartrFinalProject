@@ -11,15 +11,15 @@ import Firebase
 
 class Feedback: UIViewController {
     
+    var allOffers = [Offers]()
+    var selectedOffers = [Offers]()
+    var viewOffer : Offers!
+    
     var postKey : String = String()
     var previousSegue : String = String()
+    var selectedTitle : String = String()
     
-    @IBOutlet weak var blurrView: UIView!
-    
-    @IBOutlet weak var feedback: UIView!
-    
-    @IBOutlet var stars: [UIImageView]!
-    
+   
     @IBAction func backButton(sender: UIButton) {
         if previousSegue == "Profile"{
             performSegueWithIdentifier("BackToProfile", sender: self)
@@ -34,13 +34,6 @@ class Feedback: UIViewController {
         performSegueWithIdentifier("BackToProfile", sender: self)
     }
  
-    @IBAction func closeFeedBack(sender: UIButton) {
-        blurrView.hidden = true
-        feedback.hidden = true
-        for i in stars {
-            stars[stars.indexOf(i)!].image = UIImage(named: "blankStar")
-        }
-    }
     
     //Back to Chat Action
     @IBAction func backToFeedback(segue: UIStoryboardSegue){}
@@ -52,58 +45,10 @@ class Feedback: UIViewController {
         super.viewDidLoad()
         self.navigationController?.navigationBarHidden = true
         UIApplication.sharedApplication().statusBarStyle = .Default
-        blurrView.hidden = true
-        feedback.hidden = true
-        setupStars()
         
-        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.Dark)
-        let blurEffectView = UIVisualEffectView(effect: blurEffect)
-        blurEffectView.frame = self.view.bounds
-        self.blurrView.addSubview(blurEffectView)
+        observeOffers()
     }
     
-    func setupStars(){
-        for index in 0 ... stars.count - 1{
-            let getstureRecognizer = UITapGestureRecognizer(target: self, action: #selector (starTapped))
-            getstureRecognizer.numberOfTapsRequired = 1
-            
-            stars[index].addGestureRecognizer(getstureRecognizer)
-        }
-    }
-    
-    func starTapped(recognizer: UITapGestureRecognizer){
-        let tapped = recognizer.view
-        let tappedTag = tapped!.tag
-        
-        for i in stars {
-            stars[stars.indexOf(i)!].image = UIImage(named: "blankStar")
-        }
-        switch tappedTag{
-        case 0:
-            stars[0].image = UIImage(named: "clickedStar")
-        case 1:
-            stars[0].image = UIImage(named: "clickedStar")
-            stars[1].image = UIImage(named: "clickedStar")
-        case 2:
-            stars[0].image = UIImage(named: "clickedStar")
-            stars[1].image = UIImage(named: "clickedStar")
-            stars[2].image = UIImage(named: "clickedStar")
-        case 3:
-            stars[0].image = UIImage(named: "clickedStar")
-            stars[1].image = UIImage(named: "clickedStar")
-            stars[2].image = UIImage(named: "clickedStar")
-            stars[3].image = UIImage(named: "clickedStar")
-        case 4:
-            stars[0].image = UIImage(named: "clickedStar")
-            stars[1].image = UIImage(named: "clickedStar")
-            stars[2].image = UIImage(named: "clickedStar")
-            stars[3].image = UIImage(named: "clickedStar")
-            stars[4].image = UIImage(named: "clickedStar")
-        default:
-            break
-        }
-    }
-
     
     override func viewWillAppear(animated: Bool) {
         self.tabBarController?.tabBar.hidden = false
@@ -115,21 +60,56 @@ class Feedback: UIViewController {
     
     //Set Up Table View
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 2
+        return selectedOffers.count
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell{
-        let post = indexPath.row
+        let offer = selectedOffers[indexPath.row]
         let cell : FeedbackTableCell = tableView.dequeueReusableCellWithIdentifier("FeedbackCell")! as! FeedbackTableCell
         
-        cell.tableConfig(post)
+        cell.tableConfig(offer)
         return cell
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath){
-        blurrView.hidden = false
-        feedback.hidden = false
+        viewOffer = selectedOffers[indexPath.row]
+        performSegueWithIdentifier("ViewOfferSegue", sender: self)
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
+    }
+    
+    func observeOffers() {
+        DataService.dataService.CURRENT_USER_REF.childByAppendingPath("offers").observeEventType(.Value, withBlock: { snapshot in
+            // 3
+            self.allOffers = []
+            self.selectedOffers = []
+            
+        if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
+                for snap in snapshots{
+                    
+                    if let offersDictionary = snap.value as? Dictionary<String, AnyObject> {
+                        let key = snap.key
+                        let offer = Offers(key: key, dictionary: offersDictionary)
+                        self.allOffers.insert(offer, atIndex: 0)
+                    }
+                }
+            
+            for offers in self.allOffers{
+                if offers.offerTitle == self.selectedTitle{
+                    self.selectedOffers.append(offers)
+                }
+            }
+            }
+            self.tabletView.reloadData()
+        })
+    }
+    
+
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if (segue.identifier == "ViewOfferSegue"){
+            let offer : ViewOffers = segue.destinationViewController as! ViewOffers
+            offer.offer = viewOffer
+        }
+
     }
     
 }

@@ -9,7 +9,7 @@
 import UIKit
 import Firebase
 
-class Profile: UIViewController, UITableViewDataSource {
+class Profile: UIViewController, UITableViewDataSource, FloatRatingViewDelegate {
     
     //Back to Profile View Controller
     @IBAction func backToProfile(segue: UIStoryboardSegue){}
@@ -20,7 +20,21 @@ class Profile: UIViewController, UITableViewDataSource {
     var userPosts = [Post]()
     var selectedPost : Int = Int()
     
+    
+    @IBOutlet weak var spin: UIActivityIndicatorView!
+    
+    
+    @IBOutlet weak var floatRatingView: FloatRatingView!
+    
   
+    func floatRatingView(ratingView: FloatRatingView, isUpdating rating:Float) {
+        
+    }
+    
+    func floatRatingView(ratingView: FloatRatingView, didUpdate rating: Float) {
+        
+    }
+    
     
     //Variables
     var currentUser : String = String()
@@ -32,7 +46,7 @@ class Profile: UIViewController, UITableViewDataSource {
     
     @IBOutlet weak var userName: UILabel!
     
-    @IBOutlet weak var rating: UILabel!
+    @IBOutlet weak var ratingLabel: UILabel!
     
     @IBOutlet weak var posts: UILabel!
     
@@ -44,6 +58,9 @@ class Profile: UIViewController, UITableViewDataSource {
     
     @IBOutlet weak var userInfoView: UIView!
     
+    //Refresh control to manually update the Main Feed TableView
+    var refreshControl: UIRefreshControl!
+    
     
     @IBAction func showRatings(sender: UIButton) {
         performSegueWithIdentifier("ShowRecentUserFeedback", sender: self)
@@ -51,11 +68,22 @@ class Profile: UIViewController, UITableViewDataSource {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.floatRatingView.delegate = self
+        self.spin.startAnimating()
+        self.spin.hidden = false
         UIApplication.sharedApplication().statusBarStyle = .Default
         self.navigationController?.setNavigationBarHidden(true, animated: true)
+        
+ 
+            
+       // let timer = NSTimer.scheduledTimerWithTimeInterval(30, target: self, selector: #selector(manualUpdate), userInfo: nil, repeats: true)
+        
+        floatRatingView.rating = 4.50
+        setUpRefreshControl()
     }
     
     override func viewWillAppear(animated: Bool) {
+        self.tabBarController?.tabBar.hidden = false
         //Fill in user info
         getCurrentUserData()
     }
@@ -88,6 +116,14 @@ class Profile: UIViewController, UITableViewDataSource {
 
     //Functions
     
+    //Adds pull to refresh to the main table view
+    func setUpRefreshControl(){
+        refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(manualUpdate), forControlEvents: UIControlEvents.ValueChanged)
+        tableView.addSubview(refreshControl)
+        
+    }
+    
     //Update Firebase Data and Table View
     func updatePosts(){
         DataService.dataService.POST_REF.observeEventType(.Value, withBlock: { snapshot in
@@ -111,7 +147,9 @@ class Profile: UIViewController, UITableViewDataSource {
                     self.userPosts.append(i)
                 }
             }
-            
+            self.refreshControl.endRefreshing()
+            self.spin.stopAnimating()
+            self.spin.hidden = true
             self.tableView.reloadData()
             self.posts.text = "\(self.userPosts.count) Posts"
             self.userInfoView.hidden = false
@@ -119,13 +157,54 @@ class Profile: UIViewController, UITableViewDataSource {
         })
     }
     
+    func manualUpdate(){
+        DataService.dataService.POST_REF.observeSingleEventOfType(.Value, withBlock: { snapshot in
+            self.allPosts = []
+            self.userPosts = []
+            
+            if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
+                for snap in snapshots {
+                    if let postDictionary = snap.value as? Dictionary<String, AnyObject> {
+                        let key = snap.key
+                        let post = Post(key: key, dictionary: postDictionary)
+                        self.allPosts.insert(post, atIndex: 0)
+                    }
+                }
+            }
+            
+            //Get current users posts
+            for i in self.allPosts
+            {
+                if i.username == self.currentUser{
+                    self.userPosts.append(i)
+                }
+            }
+            self.refreshControl.endRefreshing()
+            self.spin.stopAnimating()
+            self.spin.hidden = true
+            self.tableView.reloadData()
+            self.posts.text = "\(self.userPosts.count) Posts"
+            self.userInfoView.hidden = false
+            self.tableView.hidden = false
+        })
+
+    }
+    
+    func renewListing(){
+        
+    }
+    
     //Load current user information
     func getCurrentUserData(){
         DataService.dataService.CURRENT_USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
             self.currentUser = snapshot.value.objectForKey("username") as! String
             let currentProfileImg = snapshot.value.objectForKey("profileImage") as! String
+            let userRating : Float = Float(snapshot.value.objectForKey("rating") as! String)!
+            self.ratingLabel.text = "\(snapshot.value.objectForKey("rating") as! String) Star Rating"
+
+            self.floatRatingView.rating = userRating
             self.userName.text = self.currentUser
-            self.rating.text = "87%"
+            
             
             let decodedData = NSData(base64EncodedString: currentProfileImg, options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters)
             
@@ -157,16 +236,7 @@ class Profile: UIViewController, UITableViewDataSource {
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if (segue.identifier == "detailSegue2"){
             let details : PostDetails = segue.destinationViewController as! PostDetails
-            details.selectedTitle = userPosts[selectedPost].postTitle
-            details.selectedProfileImg = userPosts[selectedPost].postUserImage
-            details.selectedImage = userPosts[selectedPost].postImage
-            details.selectedUser = userPosts[selectedPost].username
-            details.selectedLocation = userPosts[selectedPost].postLocation
-            details.selectedDetails = userPosts[selectedPost].postText
-            details.selectedType = userPosts[selectedPost].postType
             details.key = userPosts[selectedPost].postKey
-            details.selectedPrice = userPosts[selectedPost].postPrice
-            print(" Hello \(selectedPost)")
             details.previousVC = "Profile"
         }
         

@@ -11,12 +11,26 @@ import MapKit
 import Social
 import Firebase
 
+
+
 class PostDetails: UIViewController {
+    
+    var ref = Firebase(url: BASE_URL)
+
+    
+    var selectedPost = [Post]()
+    
     
     //Back to Post Details View Controller
     @IBAction func backToPostDetails(segue: UIStoryboardSegue)
     {
     }
+    
+    
+    @IBOutlet weak var ratingView: FloatRatingView!
+    
+    
+    @IBOutlet weak var extendOrRenew: UIButton!
   
     //Variables
     
@@ -27,11 +41,14 @@ class PostDetails: UIViewController {
     //Current views for the listing
     var postViews : Int = Int()
     
-    var currentUser : String = String()
+    var currentUser : String = ""
     
     //Name of the previous view controller to show and
     //hide UI items
     var previousVC : String = String()
+    
+    var recieverUID : String = ""
+    var senderUID : String = ""
     
     //Data passed from the previous screen
     var selectedTitle: String?
@@ -42,6 +59,11 @@ class PostDetails: UIViewController {
     var selectedLocation: String?
     var selectedDetails: String?
     var selectedType: String?
+    var selectedTime: String?
+    var selectedViews : Int?
+    var selectedExperation : String?
+    var expireString : String = String()
+    
     
     var titleEdit : String = String()
     
@@ -50,7 +72,25 @@ class PostDetails: UIViewController {
     
     //Outlets
     
+    //Views
+    @IBOutlet weak var locationView: UIView!
+    @IBOutlet weak var socialView: UIView!
+    @IBOutlet weak var amazonView: UIView!
+    
+    @IBOutlet weak var blurView: UIView!
+    @IBOutlet weak var makeOfferView: UIView!
+    
+    
+    
     //UI Elements
+    @IBOutlet weak var offerString: UITextView!
+    
+    @IBOutlet weak var makeOfferButton: UIButton!
+    
+    @IBOutlet weak var viewsLabel: UILabel!
+    
+    @IBOutlet weak var timeStamp: UILabel!
+    
     @IBOutlet weak var twitterButton: UIButton!
     
     @IBOutlet weak var fbbutton: UIButton!
@@ -73,6 +113,8 @@ class PostDetails: UIViewController {
     
     @IBOutlet weak var sold: UIButton!
     
+    @IBOutlet weak var experationLabel: UILabel!
+    
     
     //Labels and images for the selected post
     @IBOutlet weak var postUserProfileImg: UIImageView!
@@ -84,7 +126,28 @@ class PostDetails: UIViewController {
     @IBOutlet weak var postDetails: UITextView!
     @IBOutlet weak var postType: UILabel!
     @IBOutlet weak var showProfileButton: UIButton!
+    @IBOutlet weak var offerButton: UIButton!
     
+
+    
+    @IBAction func sendOffer(sender: UIButton) {
+        sendOffer()
+    }
+
+    @IBAction func renewOrExtendAction(sender: UIButton) {
+        renewListing()
+    }
+    
+    @IBAction func makeOfferAction(sender: UIButton) {
+        blurView.hidden = false
+        makeOfferView.hidden = false
+        
+    }
+
+    @IBAction func hideOfferView(sender: UIButton) {
+        blurView.hidden = true
+        makeOfferView.hidden = true
+    }
     
     @IBAction func showProfile(sender: UIButton) {
         if postUser.text == currentUser{
@@ -99,6 +162,7 @@ class PostDetails: UIViewController {
     
     //Send User a message
     @IBAction func messageAction(sender: UIButton) {
+        performSegueWithIdentifier("NewMessage", sender: self)
     }
     
     //Delete post
@@ -107,12 +171,13 @@ class PostDetails: UIViewController {
     }
     
     @IBAction func editPost(sender: UIButton) {
-        self.tabBarController?.selectedIndex = 2
+        performSegueWithIdentifier("EditCurrentListing", sender: self)
+        
     }
     
     //Mark as sold/traded or given away
-    @IBAction func soldAction(sender: UIButton) {
-        showAlertView("Bartr Complete", text: "Please confirm a completed transaction", confirmButton: "Confirm", cancelButton: "Cancel", callBack: "Complete")
+    @IBAction func viewOffersAction(sender: UIButton) {
+        performSegueWithIdentifier("LeaveFeedbackSegue", sender: self)
     }
     
     //Share on Twitter
@@ -152,28 +217,102 @@ class PostDetails: UIViewController {
     
     
     override func viewWillAppear(animated: Bool) {
-        //self.tabBarController?.tabBar.hidden = true
-        
+        self.navigationController?.navigationBarHidden = true
+        self.tabBarController?.tabBar.hidden = false
+        updatePosts()
         //SetupUI
-        hideItems()
-        addTapRecognizer()
-        loadWebView()
-        loadLabels()
-        decodeImages()
+        
         
         
        
     }
     
     override func viewDidLoad() {
-        //Add a view to selected listing
-        addView()
-        setMapLocation()
         super.viewDidLoad()
     }
 
+    
+    func setVariables(){
+        let post = selectedPost[0]
+        selectedTitle = post.postTitle
+        selectedProfileImg = post.postUserImage
+        selectedImage = post.postImage
+        selectedUser = post.username
+        selectedLocation = post.postLocation
+        selectedDetails = post.postText
+        selectedType = post.postType
+        selectedViews = post.postviews
+        selectedPrice = post.postPrice
+        selectedTime = post.postDate
+        selectedExperation = post.expireDate
+        key = post.postUID
+        addTapRecognizer()
+        loadUI()
+    }
+    
+    func loadUI(){
+        loadWebView()
+        loadLabels()
+        decodeImages()
+        
+        DataService.dataService.CURRENT_USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
+            self.currentUser = snapshot.value.objectForKey("username") as! String
+            
+            //Add a view to selected listing
+            self.addView()
+            self.setMapLocation()
+            self.getSelectedUID()
+            self.hideItems()
+        })
+        
+        getUserInfo()
+        
+        var test : CGRect = postDetails.frame;
+        test.size.height = postDetails.contentSize.height;
+        postDetails.frame = test
+        
+        postDetails.scrollEnabled = false
+        
+        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.Light)
+        let blurEffectView = UIVisualEffectView(effect: blurEffect)
+        blurEffectView.frame = self.view.bounds
+        self.blurView.addSubview(blurEffectView)
+        
+        updateFeedback(selectedUser!)
+
+    }
+    
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
+    }
+    
+    func getSelectedUID(){
+        DataService.dataService.USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
+            if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
+                
+                for snap in snapshots {
+                    let test = snap.value.objectForKey("username") as! String
+                    if (test == self.selectedUser){
+                        self.recieverUID = snap.key
+                    }
+                }
+            }
+            
+        })
+        
+        DataService.dataService.USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
+            if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
+                
+                for snap in snapshots {
+                    let test = snap.value.objectForKey("username") as! String
+                    if (test == self.currentUser){
+                        self.senderUID = snap.key
+                    }
+                }
+            }
+            
+        })
     }
     
     
@@ -181,42 +320,63 @@ class PostDetails: UIViewController {
     
     //Will hide UI elements depending on what the previous screen was
     func hideItems(){
+       
         if (previousVC == "Profile"){
             delete.hidden = false
             message.hidden = true
             sold.hidden = false
-            webView.hidden = true
-            twitterButton.hidden = true
-            fbbutton.hidden = true
-            instagrambutton.hidden = true
-            sharePost.hidden = true
+            amazonView.hidden = false
+            socialView.hidden = false
+            locationView.hidden = false
             editButton.hidden = false
             showProfileButton.hidden = true
+            mapView.hidden = true
+            offerButton.hidden = true
             
-            detailScrollView.contentSize.height = 1400
+            
+            checkExperation()
+
+            
+            
+            detailScrollView.contentSize.height = 1110
         } else if previousVC == "UsersFeed"{
             delete.hidden = true
             message.hidden = false
             sold.hidden = true
-            webView.hidden = false
-            twitterButton.hidden = false
-            fbbutton.hidden = false
-            instagrambutton.hidden = false
-            sharePost.hidden = false
+            amazonView.hidden = false
+            socialView.hidden = false
+            locationView.hidden = false
             editButton.hidden = true
-            detailScrollView.contentSize.height = 1880
+            offerButton.hidden = false
+             extendOrRenew.hidden = true
+            detailScrollView.contentSize.height = 1950
             showProfileButton.hidden = true
         } else {
             delete.hidden = true
             message.hidden = false
             sold.hidden = true
-            webView.hidden = false
-            twitterButton.hidden = false
-            fbbutton.hidden = false
-            instagrambutton.hidden = false
-            sharePost.hidden = false
+            amazonView.hidden = false
+            socialView.hidden = false
+            locationView.hidden = false
             editButton.hidden = true
-            detailScrollView.contentSize.height = 1880
+            offerButton.hidden = false
+             extendOrRenew.hidden = true
+            detailScrollView.contentSize.height = 1950
+        }
+        
+   
+        if (postUser.text! == currentUser){
+            delete.hidden = false
+            message.hidden = true
+            sold.hidden = false
+            socialView.hidden = true
+            editButton.hidden = false
+            showProfileButton.hidden = true
+            locationView.hidden = true
+            amazonView.hidden = true
+            offerButton.hidden = true
+             checkExperation()
+            detailScrollView.contentSize.height = 1110
         }
     }
     
@@ -243,14 +403,44 @@ class PostDetails: UIViewController {
     
     //Loads all information into the labels
     func loadLabels(){
+        let dateString : String = selectedTime!
+        
+        let date = dateFormatter().dateFromString(dateString)
+        let seconds = NSDate().timeIntervalSinceDate(date!)
+        var viewsOrView : String = "View"
+        var totalViews : String = ""
+        
+        if currentUser != selectedUser {
+            totalViews = "\(selectedViews! + 1)"
+        } else {
+            totalViews = "\(selectedViews!)"
+        }
+        
+        experationLabel.text = getExperationDate(selectedExperation!)
+
+        
+        if (selectedViews > 1){
+            viewsOrView = "Views"
+            viewsLabel.text = "\(totalViews) \(viewsOrView)"
+        } else if selectedViews == 0 {
+            viewsOrView = "No Views"
+            viewsLabel.text = viewsOrView
+        } else {
+            viewsOrView = "View"
+            viewsLabel.text = "\(totalViews) \(viewsOrView)"
+        }
+        
+        
+        
+        timeStamp.text = elapsedTime(seconds)
         postTitle.text = selectedTitle
         postPrice.text = "$199"
         postUser.text = selectedUser
         postLocation.text = selectedLocation
-        postType.text = "    \(selectedType!)"
+        postType.text = "\(selectedType!)"
         postPrice.text = selectedPrice
         postDetails.text = selectedDetails
-        postDetails.font = UIFont(name: "Avenir", size: 17)
+        postDetails.font = UIFont(name: "Avenir", size: 13)
     }
     
     //Decodes images stored on Firbase
@@ -285,6 +475,24 @@ class PostDetails: UIViewController {
             }
         })
     }
+    
+    func updateFeedback(userName : String){
+        DataService.dataService.USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
+            if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
+                
+                for snap in snapshots {
+                    let test = snap.value.objectForKey("username") as! String
+                    if (test == userName){
+                        self.ratingView.rating = Float(snap.value.objectForKey("rating") as! String)!
+                    }
+                }
+            }
+            
+        })
+        
+    }
+
+    
     
     //Adding a view to the current listing if the click was from main feed or search
     func addView(){
@@ -370,6 +578,67 @@ class PostDetails: UIViewController {
         performSegueWithIdentifier("FinishedSegue", sender: self)
     }
     
+    
+    func checkExperation(){
+        extendOrRenew.hidden = true
+        let eDateString : String = selectedExperation!
+        let eDate = dateFormatter().dateFromString(eDateString)
+        
+        let days = eDate!.daysFrom(NSDate())
+        let eseconds = eDate!.secondsFrom(NSDate())
+        
+        if days == 0 || days == 1 || days == 2 {
+            extendOrRenew.setTitle("Extend Listing", forState: .Normal)
+            extendOrRenew.hidden = false
+        }
+        
+        if eseconds < 0 {
+            extendOrRenew.setTitle("Renew Listing", forState: .Normal)
+            extendOrRenew.hidden = false
+        }
+    }
+    
+    
+    func renewListing(){
+        let currentDate = NSDate()
+        let experationDate = dateFormatter().stringFromDate(currentDate.dateByAddingTimeInterval(60*60*24*11))
+        let selectedPostRef = DataService.dataService.POST_REF.childByAppendingPath(key)
+        selectedPostRef.updateChildValues([
+            "postExpireDate": experationDate,
+            ])
+        
+       
+        _ = JSSAlertView().show(
+            self,
+            title: "Listing Extended",
+            text: "Your listing has been extened and will expire in 10 days",
+            buttonText: "Dismiss"
+        )
+    }
+    
+    
+    func updatePosts(){
+        DataService.dataService.POST_REF.childByAppendingPath(key).observeEventType(.Value, withBlock: { snapshot in
+            self.selectedPost = []
+            
+            
+            if snapshot.children.allObjects is [FDataSnapshot] {
+                
+                
+                if let postDictionary = snapshot.value as? Dictionary<String, AnyObject> {
+                    let key = snapshot.key
+                    let post = Post(key: key, dictionary: postDictionary)
+                    self.selectedPost.insert(post, atIndex: 0)
+                    self.setVariables()
+                } else {
+                    //self.navigationController?.popViewControllerAnimated(true)
+                }
+            }
+            
+        })
+    }
+
+    
     //Will show a larger view of the clicked image
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if (segue.identifier == "ShowLargeImage"){
@@ -377,18 +646,11 @@ class PostDetails: UIViewController {
             largeImageView.showImage = postImage.image!
         }
         
-        if (segue.identifier == "EditPostSegue"){
+        if (segue.identifier == "EditCurrentListing"){
             let camera : Camera = segue.destinationViewController as! Camera
-            camera.editedTitle = postTitle.text
-            camera.editedPrice = postPrice.text
-            camera.editedLocation = postLocation.text
-            camera.editedPhoto = postImage.image
-            camera.editedProfileImg = selectedProfileImg
-            camera.editedUser = selectedUser
-            camera.editedDetails = postDetails.text
-            camera.editedType = selectedType!
             camera.editKey = key
             camera.previousScreen = "EditView"
+            camera.orignalView = previousVC
             
         }
         
@@ -396,7 +658,6 @@ class PostDetails: UIViewController {
             let usersProfile : UsersProfile = segue.destinationViewController as! UsersProfile
             usersProfile.usersName = selectedUser!
             usersProfile.profileUIImage = decodedimage2
-            usersProfile.ratingString = "89%"
         }
         
         
@@ -404,6 +665,60 @@ class PostDetails: UIViewController {
             let feedback : Feedback = segue.destinationViewController as! Feedback
             feedback.postKey = key
         }
-    }
+        
+        if segue.identifier == "NewMessage"{
+            
+            let chatVc : ChatViewController = segue.destinationViewController as! ChatViewController
+            chatVc.senderId = DataService.dataService.USER_REF.authData.uid
+            chatVc.recieverUsername = postUser.text!
+            chatVc.senderDisplayName = ""
+            chatVc.recieverUID = recieverUID
+            chatVc.ref = ref
+            chatVc.selectedTitle = selectedTitle!
+            chatVc.selectedImage = selectedProfileImg!
+            chatVc.selectedUser = selectedUser!
+            chatVc.currentUser = currentUser
+            chatVc.senderUID = senderUID
+            chatVc.title = selectedUser
+          
+        }
+        
+        if segue.identifier == "LeaveFeedbackSegue"{
+            
+            let offersVC : Feedback = segue.destinationViewController as! Feedback
+            offersVC.selectedTitle = selectedTitle!
+        }
 
+    }
+    
+    func sendOffer(){
+        
+            let itemRef = DataService.dataService.USER_REF.childByAppendingPath(selectedPost[0].postUID).childByAppendingPath("offers").childByAutoId() // 1
+        
+            sendOfferRef = itemRef
+      
+            let offerItem = [ // 2
+                "senderUsername": currentUser,
+                "listingTitle": selectedTitle,
+                "offerText" : offerString.text,
+                "offerChecked" : "false",
+                "currentProfileImage" : currentProfileImg
+                ]
+        
+        DataService.dataService.createNewOffer(offerItem)
+        
+        blurView.hidden = true
+        makeOfferView.hidden = true
+        self.view.endEditing(true)
+        
+        _ = JSSAlertView().show(
+            self,
+            title: "Offer Sent",
+            text: "Your offer has been sent to \(selectedUser!)",
+            buttonText: "Dismiss"
+        )
+    }
+    
+    
+        
 }

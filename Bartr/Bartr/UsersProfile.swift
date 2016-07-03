@@ -13,14 +13,25 @@ class UsersProfile: UIViewController, UITableViewDataSource {
     
      @IBAction func backToUsersProfile(segue: UIStoryboardSegue){}
     
+    
+    
+    @IBOutlet weak var ratingLabel: UILabel!
     var usersName : String = String()
     var profileUIImage : UIImage = UIImage()
     var ratingString : String = String()
     var previousScreen : String = String()
+    
+    @IBOutlet weak var floatRating: FloatRatingView!
+    
+    @IBOutlet weak var spin: UIActivityIndicatorView!
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
         updatePosts()
+        self.spin.startAnimating()
+        self.spin.hidden = false
+        updateFeedback()
         // Do any additional setup after loading the view.
     }
 
@@ -43,7 +54,6 @@ class UsersProfile: UIViewController, UITableViewDataSource {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var posts: UILabel!
     @IBOutlet weak var userNameLabel: UILabel!
-    @IBOutlet weak var ratingLabel: UILabel!
     @IBOutlet weak var postLabel: UILabel!
     @IBOutlet weak var profileImage: UIImageView!
     
@@ -68,6 +78,7 @@ class UsersProfile: UIViewController, UITableViewDataSource {
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath){
         selectedPost = indexPath.row
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
         performSegueWithIdentifier("detailSegue2", sender: self)
     }
     
@@ -96,6 +107,8 @@ class UsersProfile: UIViewController, UITableViewDataSource {
                 }
             }
             
+            self.spin.stopAnimating()
+            self.spin.hidden = true
             self.tableView.reloadData()
             self.posts.text = "\(self.userPosts.count) Posts"
             self.userInfoView.hidden = false
@@ -103,21 +116,30 @@ class UsersProfile: UIViewController, UITableViewDataSource {
         })
     }
     
+
+    func updateFeedback(){
+        DataService.dataService.USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
+            if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
+                
+                for snap in snapshots {
+                    let test = snap.value.objectForKey("username") as! String
+                    if (test == self.usersName){
+                        self.floatRating.rating = Float(snap.value.objectForKey("rating") as! String)!
+                        self.ratingLabel.text = "\(snap.value.objectForKey("rating") as! String) Star Rating"
+                    }
+                }
+            }
+            
+        })
+
+    }
+    
     //Send data to the Detail View
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         
         if (segue.identifier == "detailSegue2"){
             let details : PostDetails = segue.destinationViewController as! PostDetails
-            details.selectedTitle = userPosts[selectedPost].postTitle
-            details.selectedProfileImg = userPosts[selectedPost].postUserImage
-            details.selectedImage = userPosts[selectedPost].postImage
-            details.selectedUser = userPosts[selectedPost].username
-            details.selectedLocation = userPosts[selectedPost].postLocation
-            details.selectedDetails = userPosts[selectedPost].postText
-            details.selectedType = userPosts[selectedPost].postType
             details.key = userPosts[selectedPost].postKey
-            details.postViews = userPosts[selectedPost].postviews
-            details.selectedPrice = userPosts[selectedPost].postPrice
             details.previousVC = "UsersFeed"
         }
         

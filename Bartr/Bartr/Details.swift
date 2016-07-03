@@ -93,7 +93,6 @@ class Details: UIViewController, UITextViewDelegate {
                 Image4.image = Checked
                 type.append("Free")
             }
-            print(editDetails)
             pickedDescription.text = editDetails
 
         }

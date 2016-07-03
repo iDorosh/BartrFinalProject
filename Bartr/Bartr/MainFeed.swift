@@ -15,6 +15,7 @@ class MainFeed: UIViewController, UITableViewDataSource {
     @IBAction func backToMain(segue: UIStoryboardSegue){}
     
     //Variables
+    var currentUser : String = ""
     
     //All posts class
     var posts = [Post]()
@@ -25,6 +26,13 @@ class MainFeed: UIViewController, UITableViewDataSource {
     
     //Refresh control to manually update the Main Feed TableView
     var refreshControl: UIRefreshControl!
+    
+    
+    
+    
+    @IBOutlet weak var spin: UIActivityIndicatorView!
+   
+    
     
     //Outlets
     @IBOutlet weak var tableView: UITableView!
@@ -42,11 +50,19 @@ class MainFeed: UIViewController, UITableViewDataSource {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        spin.startAnimating()
+        spin.hidden = false
+        
         self.navigationController?.navigationBarHidden = true
         UIApplication.sharedApplication().statusBarStyle = .Default
         updatePosts()
         setUserDefaults()
         setUpRefreshControl()
+       
+        
+        
+        
     }
 
     override func didReceiveMemoryWarning() {
@@ -96,9 +112,9 @@ class MainFeed: UIViewController, UITableViewDataSource {
     //Adds pull to refresh to the main table view
     func setUpRefreshControl(){
         refreshControl = UIRefreshControl()
-        refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
         refreshControl.addTarget(self, action: #selector(MainFeed.refresh(_:)), forControlEvents: UIControlEvents.ValueChanged)
         tableView.addSubview(refreshControl)
+         
     }
     
     //Sign user out when the alert view confirm button is clicked
@@ -147,43 +163,38 @@ class MainFeed: UIViewController, UITableViewDataSource {
                     }
                 }
             }
-            
+
+
             
                 for i in self.posts
                 {
-                    if !i.postComplete && !i.postFL{
+                    
+                    let eDateString : String = i.expireDate
+                    let eDate = dateFormatter().dateFromString(eDateString)
+                    
+                    let eseconds = eDate!.secondsFrom(NSDate())
+                    
+                    if !i.postComplete && !i.postFL && eseconds > 0{
                         self.hideCompleteSales.append(i)
                     }
                 }
             
-            
-            
             self.tableView.reloadData()
             self.refreshControl.endRefreshing()
+            self.spin.hidden = true
+            self.spin.stopAnimating()
         })
     }
 
-    //Send data to the Detail View
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         
         if (segue.identifier == "detailSegue"){
             let details : PostDetails = segue.destinationViewController as! PostDetails
-            details.selectedTitle = posts[selectedPost].postTitle
-            details.selectedProfileImg = posts[selectedPost].postUserImage
-            details.selectedImage = posts[selectedPost].postImage
-            details.selectedUser = posts[selectedPost].username
-            details.selectedLocation = posts[selectedPost].postLocation
-            details.selectedDetails = posts[selectedPost].postText
-            details.selectedType = posts[selectedPost].postType
+            details.currentUser = currentUser
             details.key = posts[selectedPost].postKey
-            details.postViews = posts[selectedPost].postviews
-            details.selectedPrice = posts[selectedPost].postPrice
             details.previousVC = "MainFeed"
         }
     }
-
-    
-    
 }
 
 

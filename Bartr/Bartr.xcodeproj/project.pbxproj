@@ -7,11 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3C6D28028F71F0DC4FF69D59 /* Pods_BartrTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C179B8F2B45D83B0A71DE43 /* Pods_BartrTests.framework */; };
+		97C18C37924060B103276E90 /* Pods_BartrUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 02DD6E3EE3C777BA65BC5E31 /* Pods_BartrUITests.framework */; };
+		CD0D991FE2C14C8443F54156 /* Pods_Bartr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 620BCB50C8DDF013127818D0 /* Pods_Bartr.framework */; };
+		DD162B5B1D285A5A00D234DA /* Offers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD162B5A1D285A5A00D234DA /* Offers.swift */; };
+		DD162B5C1D285E7C00D234DA /* Offers.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD162B5A1D285A5A00D234DA /* Offers.swift */; };
+		DD162B5E1D2869C900D234DA /* ViewOffers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD162B5D1D2869C900D234DA /* ViewOffers.swift */; };
+		DD162B5F1D2869D300D234DA /* ViewOffers.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD162B5D1D2869C900D234DA /* ViewOffers.swift */; };
 		DD1762D21D0DADD200B49B97 /* Register.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1762D11D0DADD200B49B97 /* Register.swift */; };
 		DD1DF8861D0F8D8E00511810 /* CustomChatTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1DF8851D0F8D8E00511810 /* CustomChatTableCell.swift */; };
 		DD22EB291D146FDC00AB4017 /* PostDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22EB281D146FDC00AB4017 /* PostDetails.swift */; };
 		DD22EB2A1D1477B100AB4017 /* PostDetails.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD22EB281D146FDC00AB4017 /* PostDetails.swift */; };
-		DD22EB2C1D14BD3D00AB4017 /* MessageThread.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22EB2B1D14BD3D00AB4017 /* MessageThread.swift */; };
+		DD22EB2C1D14BD3D00AB4017 /* ChatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22EB2B1D14BD3D00AB4017 /* ChatViewController.swift */; };
 		DD303AAF1D0CC82600E50D4B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DD303AAE1D0CC82600E50D4B /* GoogleService-Info.plist */; };
 		DD3315E21D1B4BF800048548 /* BlockedUsers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3315E11D1B4BF800048548 /* BlockedUsers.swift */; };
 		DD3315E41D1B4C4A00048548 /* BlockedUsersTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3315E31D1B4C4A00048548 /* BlockedUsersTableCell.swift */; };
@@ -32,7 +39,7 @@
 		DD429F641D1AFC23003B534D /* Details.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD4F0AAF1D1108250040AC23 /* Details.swift */; };
 		DD429F651D1AFC23003B534D /* Summary.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD4F0AB11D1108710040AC23 /* Summary.swift */; };
 		DD429F661D1AFC23003B534D /* Chat.swift in Resources */ = {isa = PBXBuildFile; fileRef = DDF679D91D0D1B610006DF37 /* Chat.swift */; };
-		DD429F671D1AFC23003B534D /* MessageThread.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD22EB2B1D14BD3D00AB4017 /* MessageThread.swift */; };
+		DD429F671D1AFC23003B534D /* ChatViewController.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD22EB2B1D14BD3D00AB4017 /* ChatViewController.swift */; };
 		DD429F681D1AFC23003B534D /* Profile.swift in Resources */ = {isa = PBXBuildFile; fileRef = DDF679E51D0D21A70006DF37 /* Profile.swift */; };
 		DD429F691D1AFC23003B534D /* EditProfile.swift in Resources */ = {isa = PBXBuildFile; fileRef = DDBB74CA1D174D96001341E7 /* EditProfile.swift */; };
 		DD429F6A1D1AFC23003B534D /* CustomChatTableCell.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD1DF8851D0F8D8E00511810 /* CustomChatTableCell.swift */; };
@@ -106,6 +113,8 @@
 		DDBB74CB1D174D96001341E7 /* EditProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBB74CA1D174D96001341E7 /* EditProfile.swift */; };
 		DDDA2A291D18D4B800F55177 /* ViewImageVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDA2A281D18D4B800F55177 /* ViewImageVC.swift */; };
 		DDDA2A2A1D18D97900F55177 /* ViewImageVC.swift in Resources */ = {isa = PBXBuildFile; fileRef = DDDA2A281D18D4B800F55177 /* ViewImageVC.swift */; };
+		DDEDD6B91D24AA7B009806E1 /* FloatRatingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEDD6B81D24AA7B009806E1 /* FloatRatingView.swift */; };
+		DDEDD6BA1D24AA8F009806E1 /* FloatRatingView.swift in Resources */ = {isa = PBXBuildFile; fileRef = DDEDD6B81D24AA7B009806E1 /* FloatRatingView.swift */; };
 		DDF679DA1D0D1B610006DF37 /* Chat.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF679D91D0D1B610006DF37 /* Chat.swift */; };
 		DDF679E21D0D216D0006DF37 /* Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF679E11D0D216D0006DF37 /* Search.swift */; };
 		DDF679E41D0D21870006DF37 /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF679E31D0D21870006DF37 /* Camera.swift */; };
@@ -130,10 +139,19 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		02DD6E3EE3C777BA65BC5E31 /* Pods_BartrUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BartrUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		068F3806C152861E12EE8912 /* Pods-BartrTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BartrTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-BartrTests/Pods-BartrTests.release.xcconfig"; sourceTree = "<group>"; };
+		1C179B8F2B45D83B0A71DE43 /* Pods_BartrTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BartrTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		1F2AF06CDDDE9A3E1AB9695F /* Pods-Bartr.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Bartr.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Bartr/Pods-Bartr.debug.xcconfig"; sourceTree = "<group>"; };
+		3050136592EA3E5E07A96A16 /* Pods-Bartr.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Bartr.release.xcconfig"; path = "Pods/Target Support Files/Pods-Bartr/Pods-Bartr.release.xcconfig"; sourceTree = "<group>"; };
+		56D8EF63FA476B4A55304D1E /* Pods-BartrTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BartrTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-BartrTests/Pods-BartrTests.debug.xcconfig"; sourceTree = "<group>"; };
+		620BCB50C8DDF013127818D0 /* Pods_Bartr.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Bartr.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		DD162B5A1D285A5A00D234DA /* Offers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Offers.swift; sourceTree = "<group>"; };
+		DD162B5D1D2869C900D234DA /* ViewOffers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewOffers.swift; sourceTree = "<group>"; };
 		DD1762D11D0DADD200B49B97 /* Register.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Register.swift; sourceTree = "<group>"; };
 		DD1DF8851D0F8D8E00511810 /* CustomChatTableCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomChatTableCell.swift; sourceTree = "<group>"; };
 		DD22EB281D146FDC00AB4017 /* PostDetails.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostDetails.swift; sourceTree = "<group>"; };
-		DD22EB2B1D14BD3D00AB4017 /* MessageThread.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageThread.swift; sourceTree = "<group>"; };
+		DD22EB2B1D14BD3D00AB4017 /* ChatViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatViewController.swift; sourceTree = "<group>"; };
 		DD303AAE1D0CC82600E50D4B /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		DD3315E11D1B4BF800048548 /* BlockedUsers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockedUsers.swift; sourceTree = "<group>"; };
 		DD3315E31D1B4C4A00048548 /* BlockedUsersTableCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockedUsersTableCell.swift; sourceTree = "<group>"; };
@@ -190,10 +208,13 @@
 		DD8739651D0CF7E300A37FF5 /* MainFeed.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainFeed.swift; sourceTree = "<group>"; };
 		DDBB74CA1D174D96001341E7 /* EditProfile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditProfile.swift; sourceTree = "<group>"; };
 		DDDA2A281D18D4B800F55177 /* ViewImageVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewImageVC.swift; sourceTree = "<group>"; };
+		DDEDD6B81D24AA7B009806E1 /* FloatRatingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FloatRatingView.swift; sourceTree = "<group>"; };
 		DDF679D91D0D1B610006DF37 /* Chat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Chat.swift; sourceTree = "<group>"; };
 		DDF679E11D0D216D0006DF37 /* Search.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Search.swift; path = ../Search.swift; sourceTree = "<group>"; };
 		DDF679E31D0D21870006DF37 /* Camera.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Camera.swift; path = ../Camera.swift; sourceTree = "<group>"; };
 		DDF679E51D0D21A70006DF37 /* Profile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
+		DE385ECE4F4F8173242E8600 /* Pods-BartrUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BartrUITests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-BartrUITests/Pods-BartrUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		FA62476841527C05D35BBEDB /* Pods-BartrUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BartrUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-BartrUITests/Pods-BartrUITests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -207,6 +228,7 @@
 				DD87395A1D0CECF600A37FF5 /* CFNetwork.framework in Frameworks */,
 				DD8739581D0CECEF00A37FF5 /* Security.framework in Frameworks */,
 				DD8739561D0CECE700A37FF5 /* SystemConfiguration.framework in Frameworks */,
+				CD0D991FE2C14C8443F54156 /* Pods_Bartr.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -214,6 +236,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3C6D28028F71F0DC4FF69D59 /* Pods_BartrTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -221,12 +244,26 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				97C18C37924060B103276E90 /* Pods_BartrUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4273E0F7147A35BB2FE00941 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				1F2AF06CDDDE9A3E1AB9695F /* Pods-Bartr.debug.xcconfig */,
+				3050136592EA3E5E07A96A16 /* Pods-Bartr.release.xcconfig */,
+				56D8EF63FA476B4A55304D1E /* Pods-BartrTests.debug.xcconfig */,
+				068F3806C152861E12EE8912 /* Pods-BartrTests.release.xcconfig */,
+				DE385ECE4F4F8173242E8600 /* Pods-BartrUITests.debug.xcconfig */,
+				FA62476841527C05D35BBEDB /* Pods-BartrUITests.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 		DD4F0ADD1D11E0950040AC23 /* Custom Camera ViewController */ = {
 			isa = PBXGroup;
 			children = (
@@ -262,6 +299,7 @@
 				DD62BB921D0CAFAB006DBD64 /* BartrTests */,
 				DD62BB9D1D0CAFAB006DBD64 /* BartrUITests */,
 				DD62BB7A1D0CAFAB006DBD64 /* Products */,
+				4273E0F7147A35BB2FE00941 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -344,8 +382,8 @@
 		DDDA2A2F1D19B8D800F55177 /* Chat */ = {
 			isa = PBXGroup;
 			children = (
+				DD22EB2B1D14BD3D00AB4017 /* ChatViewController.swift */,
 				DDF679D91D0D1B610006DF37 /* Chat.swift */,
-				DD22EB2B1D14BD3D00AB4017 /* MessageThread.swift */,
 			);
 			name = Chat;
 			sourceTree = "<group>";
@@ -359,6 +397,7 @@
 				DD3315E51D1B4F0A00048548 /* UsersProfile.swift */,
 				DD3E32341D1C656300F66E0F /* Feedback.swift */,
 				DD3E32441D1C9DC100F66E0F /* RecentFeedback.swift */,
+				DD162B5D1D2869C900D234DA /* ViewOffers.swift */,
 			);
 			name = Profile;
 			sourceTree = "<group>";
@@ -372,6 +411,9 @@
 				DD8739591D0CECF600A37FF5 /* CFNetwork.framework */,
 				DD8739571D0CECEF00A37FF5 /* Security.framework */,
 				DD8739551D0CECE700A37FF5 /* SystemConfiguration.framework */,
+				620BCB50C8DDF013127818D0 /* Pods_Bartr.framework */,
+				1C179B8F2B45D83B0A71DE43 /* Pods_BartrTests.framework */,
+				02DD6E3EE3C777BA65BC5E31 /* Pods_BartrUITests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -395,6 +437,7 @@
 				DD62BBB61D0CBE9C006DBD64 /* Post.swift */,
 				DD62BBB81D0CBEBF006DBD64 /* DataService.swift */,
 				DD62BBBC1D0CBECE006DBD64 /* Constants.swift */,
+				DD162B5A1D285A5A00D234DA /* Offers.swift */,
 			);
 			name = FireBaseData;
 			sourceTree = "<group>";
@@ -437,6 +480,7 @@
 				DD303AAE1D0CC82600E50D4B /* GoogleService-Info.plist */,
 				DD62BB8A1D0CAFAB006DBD64 /* Info.plist */,
 				DD62BBBE1D0CBED8006DBD64 /* JSSAlertView.swift */,
+				DDEDD6B81D24AA7B009806E1 /* FloatRatingView.swift */,
 			);
 			name = "Supporting Files";
 			path = Bartr;
@@ -449,9 +493,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = DD62BBA31D0CAFAB006DBD64 /* Build configuration list for PBXNativeTarget "Bartr" */;
 			buildPhases = (
+				E61E1131881889648A85A39F /* [CP] Check Pods Manifest.lock */,
 				DD62BB751D0CAFAB006DBD64 /* Sources */,
 				DD62BB761D0CAFAB006DBD64 /* Frameworks */,
 				DD62BB771D0CAFAB006DBD64 /* Resources */,
+				40698DAB7506760CF6B718BD /* [CP] Embed Pods Frameworks */,
+				F6E73E0AF6E144BE8A41AF91 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -552,6 +599,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DD162B5F1D2869D300D234DA /* ViewOffers.swift in Resources */,
+				DD162B5C1D285E7C00D234DA /* Offers.swift in Resources */,
+				DDEDD6BA1D24AA8F009806E1 /* FloatRatingView.swift in Resources */,
 				DD3E32461D1C9EF700F66E0F /* RecentFeedback.swift in Resources */,
 				DD3E32471D1C9EF700F66E0F /* UsersRecentFeedBackCell.swift in Resources */,
 				DD3E323D1D1C775C00F66E0F /* BlockedUsers.swift in Resources */,
@@ -563,7 +613,7 @@
 				DD429F641D1AFC23003B534D /* Details.swift in Resources */,
 				DD429F651D1AFC23003B534D /* Summary.swift in Resources */,
 				DD429F661D1AFC23003B534D /* Chat.swift in Resources */,
-				DD429F671D1AFC23003B534D /* MessageThread.swift in Resources */,
+				DD429F671D1AFC23003B534D /* ChatViewController.swift in Resources */,
 				DD429F681D1AFC23003B534D /* Profile.swift in Resources */,
 				DD429F691D1AFC23003B534D /* EditProfile.swift in Resources */,
 				DD429F6A1D1AFC23003B534D /* CustomChatTableCell.swift in Resources */,
@@ -652,6 +702,21 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-BartrUITests/Pods-BartrUITests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		40698DAB7506760CF6B718BD /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Bartr/Pods-Bartr-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		5E6E4DF69D780C86BB4AA61C /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -697,6 +762,36 @@
 			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
+		E61E1131881889648A85A39F /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		F6E73E0AF6E144BE8A41AF91 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Bartr/Pods-Bartr-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -715,11 +810,12 @@
 				DD3E32431D1C9DA000F66E0F /* UsersRecentFeedBackCell.swift in Sources */,
 				DD4F0AD61D11DD4D0040AC23 /* PhotoLibraryAuthorizer.swift in Sources */,
 				DD3315E21D1B4BF800048548 /* BlockedUsers.swift in Sources */,
+				DD162B5E1D2869C900D234DA /* ViewOffers.swift in Sources */,
 				DD4F0AC81D11DD350040AC23 /* PermissionsView.swift in Sources */,
 				DD4F0ADC1D11DD4D0040AC23 /* VolumeControl.swift in Sources */,
 				DDF679DA1D0D1B610006DF37 /* Chat.swift in Sources */,
 				DDBB74CB1D174D96001341E7 /* EditProfile.swift in Sources */,
-				DD22EB2C1D14BD3D00AB4017 /* MessageThread.swift in Sources */,
+				DD22EB2C1D14BD3D00AB4017 /* ChatViewController.swift in Sources */,
 				DD1762D21D0DADD200B49B97 /* Register.swift in Sources */,
 				DD4F0AD41D11DD4D0040AC23 /* CameraShot.swift in Sources */,
 				DD4F0AB21D1108710040AC23 /* Summary.swift in Sources */,
@@ -729,6 +825,7 @@
 				DD62BBB91D0CBEBF006DBD64 /* DataService.swift in Sources */,
 				DD4F0AD81D11DD4D0040AC23 /* SingleImageSaver.swift in Sources */,
 				DD62BBB71D0CBE9C006DBD64 /* Post.swift in Sources */,
+				DD162B5B1D285A5A00D234DA /* Offers.swift in Sources */,
 				DDDA2A291D18D4B800F55177 /* ViewImageVC.swift in Sources */,
 				DD62BBBF1D0CBED8006DBD64 /* JSSAlertView.swift in Sources */,
 				DD62BBBB1D0CBEC4006DBD64 /* CustomTableCell.swift in Sources */,
@@ -746,6 +843,7 @@
 				DD8739661D0CF7E300A37FF5 /* MainFeed.swift in Sources */,
 				DD3315E41D1B4C4A00048548 /* BlockedUsersTableCell.swift in Sources */,
 				DD22EB291D146FDC00AB4017 /* PostDetails.swift in Sources */,
+				DDEDD6B91D24AA7B009806E1 /* FloatRatingView.swift in Sources */,
 				DD3315E61D1B4F0A00048548 /* UsersProfile.swift in Sources */,
 				DD4F0AD91D11DD4D0040AC23 /* UIButtonExtensions.swift in Sources */,
 				DD62BBBD1D0CBECE006DBD64 /* Constants.swift in Sources */,
@@ -888,6 +986,7 @@
 		};
 		DD62BBA41D0CAFAB006DBD64 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1F2AF06CDDDE9A3E1AB9695F /* Pods-Bartr.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -906,6 +1005,7 @@
 		};
 		DD62BBA51D0CAFAB006DBD64 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3050136592EA3E5E07A96A16 /* Pods-Bartr.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -924,6 +1024,7 @@
 		};
 		DD62BBA71D0CAFAB006DBD64 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 56D8EF63FA476B4A55304D1E /* Pods-BartrTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				INFOPLIST_FILE = BartrTests/Info.plist;
@@ -936,6 +1037,7 @@
 		};
 		DD62BBA81D0CAFAB006DBD64 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 068F3806C152861E12EE8912 /* Pods-BartrTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				INFOPLIST_FILE = BartrTests/Info.plist;
@@ -948,6 +1050,7 @@
 		};
 		DD62BBAA1D0CAFAB006DBD64 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = DE385ECE4F4F8173242E8600 /* Pods-BartrUITests.debug.xcconfig */;
 			buildSettings = {
 				INFOPLIST_FILE = BartrUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
@@ -959,6 +1062,7 @@
 		};
 		DD62BBAB1D0CAFAB006DBD64 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = FA62476841527C05D35BBEDB /* Pods-BartrUITests.release.xcconfig */;
 			buildSettings = {
 				INFOPLIST_FILE = BartrUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";

@@ -71,6 +71,7 @@ class Summary: UIViewController {
     func getCurrentUser(){
         DataService.dataService.CURRENT_USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
             self.currentUser.text = snapshot.value.objectForKey("username") as? String
+            currentUserUID = snapshot.key
         })
     }
     
@@ -80,7 +81,7 @@ class Summary: UIViewController {
         previewTitle.text = pickedTitle
         previewLocation.text = pickedLocation
         previewDescription.text = pickedDescription
-        previewType.text = "    \(pickedTypes)"
+        previewType.text = "\(pickedTypes)"
         previewPrice.text = pickedPrice
         if previousVC == "EditView"{
             postLabel.setTitle("Update Listing", forState: .Normal)
@@ -108,7 +109,7 @@ class Summary: UIViewController {
     //Load UI
     override func viewDidLoad() {
         super.viewDidLoad()
-        ScrollView.contentSize.height = 850
+        ScrollView.contentSize.height = 900
         getCurrentUser()
         loadLabels()
         loadLocation()
@@ -146,7 +147,7 @@ class Summary: UIViewController {
                 "postImage": self.base64String,
                 "postLocation": self.pickedLocation,
                 "userProfileImg": self.currentProfileImg,
-                "postPrice": self.pickedPrice
+                "postPrice": self.pickedPrice,
                 ])
                 self.performSegueWithIdentifier("GoBackToProfileSegue", sender: self)
             })
@@ -197,11 +198,15 @@ class Summary: UIViewController {
         let postText = pickedDescription
         let postTitle = pickedTitle
         let postType = pickedTypes
+        let date = dateFormatter().stringFromDate(NSDate())
+        let currentDate = NSDate()
+        let experationDate = dateFormatter().stringFromDate(currentDate.dateByAddingTimeInterval(60*60*24*11))
         getCurrentDate()
         
-        DataService.dataService.CURRENT_USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
+        DataService.dataService.CURRENT_USER_REF.observeSingleEventOfType(FEventType.Value, withBlock: { snapshot in
             self.currentProfileImg = snapshot.value.objectForKey("profileImage") as! String
             self.getCurrentUser()
+            
     
             if postText != "" {
                 // Build the new post.
@@ -214,15 +219,19 @@ class Summary: UIViewController {
                     "postImage": self.base64String,
                     "postLocation": self.pickedLocation,
                     "userProfileImg": self.currentProfileImg,
-                    "postDate": "\(self.month)/\(self.day)/\(self.year)",
+                    "postDate": date,
                     "postPrice": self.pickedPrice,
                     "postFeedbackLeft" : false,
-                    "postComplete" : false
+                    "postUID" : currentUserUID,
+                    "postComplete" : false,
+                    "postExpireDate" : experationDate,
+                    "postExpired" : false 
                 ]
         
                 DataService.dataService.createNewPost(newpost)
                 self.blurView.hidden = false
                 self.shareToSocialMedia.hidden = false
+                self.tabBarController?.tabBar.hidden = false
             }
         })
     }

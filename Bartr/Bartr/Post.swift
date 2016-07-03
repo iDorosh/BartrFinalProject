@@ -26,6 +26,9 @@ class Post {
     private var _postPrice: String!
     private var _postComplete: Bool!
     private var _postFL: Bool!
+    private var _postUID: String!
+    private var _postExpireDate : String!
+    private var _postExpired : Bool!
     
     //Information Getters
     var postKey: String {
@@ -72,12 +75,24 @@ class Post {
         return _postPrice
     }
     
+    var postUID : String {
+        return _postUID
+    }
+    
+    var expireDate : String {
+        return _postExpireDate
+    }
+    
     var postComplete : Bool {
         return _postComplete
     }
     
     var postFL :  Bool {
         return _postFL
+    }
+    
+    var postExpired :  Bool {
+        return _postExpired
     }
     
     // Initialize the new post
@@ -122,8 +137,20 @@ class Post {
             self._postPrice = postP
         }
         
+        if let postUi = dictionary["postUID"] as? String {
+            self._postUID = postUi
+        }
+        
+        if let postED = dictionary["postExpireDate"] as? String {
+            self._postExpireDate = postED
+        }
+        
         if let postC = dictionary["postComplete"] as? Bool {
             self._postComplete = postC
+        }
+        
+        if let postE = dictionary["postExpired"] as? Bool {
+            self._postExpired = postE
         }
         
         if let postFL = dictionary["postFeedbackLeft"] as? Bool {

@@ -10,16 +10,13 @@ import UIKit
 
 class FeedbackTableCell: UITableViewCell {
     
-    //Place holder information for chat threads
-    var userNames : [String] = ["Mac>Windows", "Sell24/7", "Mac4Lyfe"]
-    var listing : [String] = ["MacBook Pro 15in (Late 2013)", "MacBook Pro 15in (Late 2013)", "MacBook Pro 15in (Late 2013)"]
-    var images : [String] = ["Image1", "Image2", "Image3"]
+    var allOffers: Offers!
     
     @IBOutlet weak var profileImage: UIImageView!
     
     @IBOutlet weak var userName: UILabel!
     
-    @IBOutlet weak var post: UILabel!
+    @IBOutlet weak var offerText: UILabel!
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -30,10 +27,16 @@ class FeedbackTableCell: UITableViewCell {
     }
     
     //Creating table view cells
-    func tableConfig(index : Int){
-        profileImage.image = UIImage(named: images[index])
-        userName.text = userNames[index]
-        post.text = listing[index]
+    func tableConfig(offer : Offers){
+        allOffers = offer
+        let decodedData = NSData(base64EncodedString: offer.offerProfileImage, options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters)
+        
+        let decodedimage = UIImage(data: decodedData!)
+        
+        profileImage.image = decodedimage! as UIImage
+
+        userName.text = offer.offerUser
+        offerText.text = offer.offerText
     }
     
 }

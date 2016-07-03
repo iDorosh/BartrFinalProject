@@ -48,4 +48,10 @@ class DataService {
         let firebaseNewPost = POST_REF.childByAutoId()
         firebaseNewPost.setValue(post)
     }
+    
+    func createNewOffer(offer: Dictionary<String, AnyObject>) {
+        let firebaseNewPost = sendOfferRef
+        firebaseNewPost.setValue(offer)
+    }
+    
 }
