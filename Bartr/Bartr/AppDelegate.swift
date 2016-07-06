@@ -9,6 +9,8 @@
 import UIKit
 
 @UIApplicationMain
+
+
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
@@ -65,6 +67,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         UIApplication.sharedApplication().statusBarHidden = false
         UIApplication.sharedApplication().statusBarStyle = .LightContent
+        
+        var mainView: UIStoryboard!
+        mainView = UIStoryboard(name: "Main", bundle: nil)
+        
+        if NSUserDefaults.standardUserDefaults().valueForKey("uid") != nil && DataService.dataService.CURRENT_USER_REF.authData != nil {
+            let viewcontroller : UIViewController = mainView.instantiateViewControllerWithIdentifier("MainTabController") as UIViewController
+            self.window!.rootViewController = viewcontroller
+        } else {
+            let viewcontroller : UIViewController = mainView.instantiateViewControllerWithIdentifier("Login") as UIViewController
+            self.window!.rootViewController = viewcontroller
+        }
+        
         return true
     }
 

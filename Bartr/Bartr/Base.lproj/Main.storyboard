@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10117" systemVersion="16A201w" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" initialViewController="t9T-Oc-Itb">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10117" systemVersion="16A239j" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" initialViewController="t9T-Oc-Itb">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
@@ -428,7 +428,7 @@
                                                     <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
                                                 </userDefinedRuntimeAttributes>
                                             </textField>
-                                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Location" textAlignment="center" minimumFontSize="17" id="jOt-ly-y2c">
+                                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Location" textAlignment="center" minimumFontSize="17" id="jOt-ly-y2c" customClass="AutoCompleteTextField" customModule="Bartr" customModuleProvider="target">
                                                 <rect key="frame" x="48" y="302" width="222" height="40"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 <color key="backgroundColor" red="0.90184294870000004" green="0.90184294870000004" blue="0.90184294870000004" alpha="1" colorSpace="calibratedRGB"/>
@@ -591,7 +591,7 @@
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina55"/>
                     <connections>
                         <outlet property="bgImage" destination="QbR-mv-rpP" id="UOn-a0-j5G"/>
-                        <outlet property="cityField" destination="jOt-ly-y2c" id="2hJ-rt-ehg"/>
+                        <outlet property="cityField" destination="jOt-ly-y2c" id="ZIj-kv-gvH"/>
                         <outlet property="previewImage" destination="q62-BT-S3U" id="k2j-rI-6S1"/>
                         <outlet property="priceField" destination="ksb-ca-UKA" id="Nfe-In-pAR"/>
                         <outlet property="screenTitle" destination="HA8-sK-YPI" id="ymr-Zl-sOk"/>
@@ -775,10 +775,10 @@
             </objects>
             <point key="canvasLocation" x="-1661" y="-502"/>
         </scene>
-        <!--Tab Bar Controller-->
+        <!--MainTabController-->
         <scene sceneID="yl2-sM-qoP">
             <objects>
-                <tabBarController id="49e-Tb-3d3" sceneMemberID="viewController">
+                <tabBarController storyboardIdentifier="MainTabController" title="MainTabController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="49e-Tb-3d3" sceneMemberID="viewController">
                     <simulatedStatusBarMetrics key="simulatedStatusBarMetrics" statusBarStyle="lightContent"/>
                     <nil key="simulatedBottomBarMetrics"/>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina55"/>
@@ -1812,16 +1812,16 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Background" id="p49-51-oPh">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </imageView>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" id="YuS-xG-j0X">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <subviews>
-                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Background" id="p49-51-oPh">
-                                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                    </imageView>
                                     <view contentMode="scaleToFill" id="DSu-cb-KO1">
-                                        <rect key="frame" x="69" y="207" width="276" height="426"/>
+                                        <rect key="frame" x="69" y="207" width="276" height="455"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Register" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="k6N-HC-Ud5">
@@ -1832,7 +1832,7 @@
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Email" textAlignment="center" minimumFontSize="17" id="TN8-E9-cUK">
-                                                <rect key="frame" x="38" y="144" width="201" height="40"/>
+                                                <rect key="frame" x="38" y="152" width="201" height="40"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 <color key="backgroundColor" red="0.90184294870000004" green="0.90184294870000004" blue="0.90184294870000004" alpha="1" colorSpace="calibratedRGB"/>
                                                 <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="14"/>
@@ -1845,7 +1845,7 @@
                                                 </userDefinedRuntimeAttributes>
                                             </textField>
                                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Password" textAlignment="center" minimumFontSize="17" id="AbZ-uh-VPM">
-                                                <rect key="frame" x="38" y="200" width="201" height="40"/>
+                                                <rect key="frame" x="38" y="220" width="201" height="40"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 <color key="backgroundColor" red="0.90184294870000004" green="0.90184294870000004" blue="0.90184294870000004" alpha="1" colorSpace="calibratedRGB"/>
                                                 <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="14"/>
@@ -1858,7 +1858,7 @@
                                                 </userDefinedRuntimeAttributes>
                                             </textField>
                                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Confirm Password" textAlignment="center" minimumFontSize="17" id="8Tl-rW-99X">
-                                                <rect key="frame" x="38" y="254" width="201" height="40"/>
+                                                <rect key="frame" x="38" y="289" width="201" height="40"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 <color key="backgroundColor" red="0.90184294870000004" green="0.90184294870000004" blue="0.90184294870000004" alpha="1" colorSpace="calibratedRGB"/>
                                                 <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="14"/>
@@ -1871,7 +1871,7 @@
                                                 </userDefinedRuntimeAttributes>
                                             </textField>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" hasAttributedTitle="YES" id="DTh-Yw-8sY">
-                                                <rect key="frame" x="73" y="370" width="130" height="30"/>
+                                                <rect key="frame" x="73" y="407" width="130" height="30"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 <state key="normal">
                                                     <attributedString key="attributedTitle">
@@ -1889,11 +1889,11 @@
                                                 </connections>
                                             </button>
                                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Username" textAlignment="center" minimumFontSize="17" id="ZHB-nx-CeM">
-                                                <rect key="frame" x="38" y="88" width="201" height="40"/>
+                                                <rect key="frame" x="38" y="83" width="201" height="40"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 <color key="backgroundColor" red="0.90184294870000004" green="0.90184294870000004" blue="0.90184294870000004" alpha="1" colorSpace="calibratedRGB"/>
                                                 <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="14"/>
-                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" keyboardType="emailAddress"/>
+                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no"/>
                                                 <userDefinedRuntimeAttributes>
                                                     <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
                                                         <integer key="value" value="10"/>
@@ -1901,8 +1901,36 @@
                                                     <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
                                                 </userDefinedRuntimeAttributes>
                                             </textField>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Profile Photo" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="pde-5l-OzT">
+                                                <rect key="frame" x="94" y="30" width="89" height="21"/>
+                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="13"/>
+                                                <color key="textColor" red="0.1647058824" green="0.1647058824" blue="0.1647058824" alpha="1" colorSpace="calibratedRGB"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="6-18 Characters, No Spaces" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="CV0-hP-Hlq">
+                                                <rect key="frame" x="38" y="123" width="201" height="21"/>
+                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="13"/>
+                                                <color key="textColor" red="0.78012329660071711" green="0.78986700109139951" blue="0.79760866116751272" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Provide a valid email" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="8Uc-WA-A7W">
+                                                <rect key="frame" x="38" y="191" width="201" height="21"/>
+                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="13"/>
+                                                <color key="textColor" red="0.78012329660000002" green="0.78986700109999997" blue="0.79760866119999996" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="6-18 Characters, No Spaces" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="dpc-lh-n2n">
+                                                <rect key="frame" x="38" y="260" width="201" height="21"/>
+                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="13"/>
+                                                <color key="textColor" red="0.78012329660000002" green="0.78986700109999997" blue="0.79760866119999996" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="jDC-EE-SIM">
-                                                <rect key="frame" x="38" y="312" width="201" height="40"/>
+                                                <rect key="frame" x="38" y="354" width="201" height="40"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 <color key="backgroundColor" red="0.12549019610000001" green="0.14117647059999999" blue="0.2156862745" alpha="1" colorSpace="calibratedRGB"/>
                                                 <fontDescription key="fontDescription" name="Avenir-Medium" family="Avenir" pointSize="15"/>
@@ -1919,11 +1947,11 @@
                                                     <action selector="registerAction:" destination="yzf-5Y-zBz" eventType="touchUpInside" id="7la-h9-Onz"/>
                                                 </connections>
                                             </button>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Profile Photo" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="pde-5l-OzT">
-                                                <rect key="frame" x="94" y="30" width="89" height="21"/>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="6-18 Characters, No Spaces" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="1cp-nU-RPU">
+                                                <rect key="frame" x="38" y="327" width="201" height="21"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="13"/>
-                                                <color key="textColor" red="0.1647058824" green="0.1647058824" blue="0.1647058824" alpha="1" colorSpace="calibratedRGB"/>
+                                                <color key="textColor" red="0.78012329660000002" green="0.78986700109999997" blue="0.79760866119999996" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                         </subviews>
@@ -1961,8 +1989,12 @@
                                             <action selector="addImageAction:" destination="yzf-5Y-zBz" eventType="touchUpInside" id="10H-ee-c5Q"/>
                                         </connections>
                                     </button>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Bartr Logo" id="EKY-hJ-CCD">
+                                        <rect key="frame" x="18" y="55" width="379" height="92"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    </imageView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" hasAttributedTitle="YES" id="O7G-5Y-TDR">
-                                        <rect key="frame" x="155" y="641" width="105" height="37"/>
+                                        <rect key="frame" x="155" y="670" width="105" height="37"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <state key="normal">
                                             <attributedString key="attributedTitle">
@@ -1975,14 +2007,7 @@
                                                 </fragment>
                                             </attributedString>
                                         </state>
-                                        <connections>
-                                            <segue destination="49e-Tb-3d3" kind="modal" identifier="registerSegue" id="rpj-JP-2vo"/>
-                                        </connections>
                                     </button>
-                                    <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Bartr Logo" id="EKY-hJ-CCD">
-                                        <rect key="frame" x="18" y="55" width="379" height="92"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                    </imageView>
                                 </subviews>
                             </scrollView>
                         </subviews>
@@ -1993,11 +2018,15 @@
                         <outlet property="BG" destination="p49-51-oPh" id="nMX-w7-nOn"/>
                         <outlet property="addImage" destination="610-wJ-Meh" id="V9b-za-e6I"/>
                         <outlet property="confirmPasswordField" destination="8Tl-rW-99X" id="6uk-me-BMR"/>
+                        <outlet property="confirmPasswordLabel" destination="1cp-nU-RPU" id="Rqj-O3-tIz"/>
                         <outlet property="emailField" destination="TN8-E9-cUK" id="IiI-Iq-UV6"/>
                         <outlet property="passwordField" destination="AbZ-uh-VPM" id="7tA-8G-FmK"/>
+                        <outlet property="passwordRequirements" destination="dpc-lh-n2n" id="lOY-c0-ytj"/>
                         <outlet property="profileImage" destination="nH9-pV-oYR" id="uGc-cD-Kjo"/>
                         <outlet property="scrollView" destination="YuS-xG-j0X" id="0jR-ph-flh"/>
+                        <outlet property="userNameRequirements" destination="CV0-hP-Hlq" id="NB2-Zf-IgC"/>
                         <outlet property="usernameField" destination="ZHB-nx-CeM" id="sfS-Gc-RGA"/>
+                        <segue destination="49e-Tb-3d3" kind="modal" identifier="registerSegue" id="geg-Ej-unx"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="rbI-NM-LdD" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -4416,13 +4445,13 @@
         <image name="twitterButton" width="172" height="180"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="jvM-PK-faZ"/>
-        <segue reference="J6e-xE-Ql3"/>
+        <segue reference="geg-Ej-unx"/>
         <segue reference="zvq-Wn-n5N"/>
+        <segue reference="qFJ-NM-7X0"/>
+        <segue reference="jvM-PK-faZ"/>
         <segue reference="Tu4-vi-dge"/>
         <segue reference="qbU-I8-E4g"/>
         <segue reference="3cg-BM-pqL"/>
-        <segue reference="aak-hp-jvU"/>
     </inferredMetricsTieBreakers>
     <color key="tintColor" red="0.12549019610000001" green="0.14117647059999999" blue="0.2156862745" alpha="1" colorSpace="calibratedRGB"/>
 </document>

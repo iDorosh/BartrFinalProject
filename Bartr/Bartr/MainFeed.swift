@@ -102,6 +102,7 @@ class MainFeed: UIViewController, UITableViewDataSource {
     
     //Check if user is signed in
     func setUserDefaults(){
+        print(NSUserDefaults.standardUserDefaults().valueForKey("uid"))
         if NSUserDefaults.standardUserDefaults().valueForKey("uid") != nil && DataService.dataService.CURRENT_USER_REF.authData != nil {
             LogInLogOut.setTitle("Sign Out", forState: UIControlState.Normal)
         } else {

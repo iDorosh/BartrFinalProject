@@ -12,9 +12,24 @@ import MapKit
 
 class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     
+    private var responseData:NSMutableData?
+    private var selectedPointAnnotation:MKPointAnnotation?
+    private var dataTask:NSURLSessionDataTask?
+    
+    private let googleMapsKey = "AIzaSyBLSMsmrcBiwQ6kMbRiT_DffmnLD6qhJJs"
+    private let baseURLString = "https://maps.googleapis.com/maps/api/place/autocomplete/json"
+
+    
     @IBAction func backToPhoto(segue: UIStoryboardSegue){}
     
     var postForEdit = [Post]()
+    
+    var alertController = UIAlertController()
+    
+    var errorMessage : String = ""
+    
+    var defaultColor = UIColor()
+    var defaultBorderColor = UIColor()
     
     //Variables
     var croppingEnabled: Bool = false
@@ -47,7 +62,7 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     //Title text field
     @IBOutlet weak var titleField: UITextField!
     //City text field
-    @IBOutlet weak var cityField: UITextField!
+    @IBOutlet weak var cityField: AutoCompleteTextField!
     //Description Text Box
     @IBOutlet weak var textBox: UITextView!
     //PreviewImage
@@ -91,7 +106,7 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     }
     
     @IBAction func nextClicked(sender: UIButton) {
-        performSegueWithIdentifier("NextInfoSegue", sender: self)
+        checkFields()
     }
     
     
@@ -105,6 +120,10 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     override func viewDidLoad() {
         self.navigationController?.setNavigationBarHidden(true, animated: true)
         super.viewDidLoad()
+   
+        handleTextFieldInterfaces()
+        defaultColor = titleField.textColor!
+        defaultBorderColor = titleField.backgroundColor!
         if previousScreen == "EditView"{
             updatePosts()
             self.tabBarController?.selectedIndex = 2
@@ -166,6 +185,8 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     
     //Text Field Set Up
     func setUpTextFields(){
+        titleField.addTarget(self, action: #selector(self.textViewDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
+        cityField.addTarget(self, action: #selector(self.textViewDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
         titleField.delegate = self
         cityField.delegate = self
         priceField.delegate = self
@@ -338,6 +359,52 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
         
     }
     
+    //Check Fields
+    func checkFields(){
+        if Int(priceField.text!) == nil{
+            setError(priceField)
+            priceField.becomeFirstResponder()
+        }
+        if cityField.text == ""{
+            setError(cityField)
+            cityField.becomeFirstResponder()
+        }
+        if titleField.text == "" {
+            setError(titleField)
+            titleField.becomeFirstResponder()
+        }
+        
+        
+        
+        
+        
+        //performSegueWithIdentifier("NextInfoSegue", sender: self)
+    }
+    
+    private func handleTextFieldInterfaces(){
+        cityField.onTextChange = {[weak self] text in
+            if !text.isEmpty{
+                if let dataTask = self?.dataTask {
+                    dataTask.cancel()
+                }
+                self?.fetchAutocompletePlaces(text)
+            }
+        }
+        
+    
+    }
+
+    
+    func textViewDidChange(textView: UITextView) {
+        if textView === titleField && titleField.text?.characters.count > 6{
+            setGoodToGo(titleField)
+        } else {
+            setError(titleField)
+        }
+        
+        textView.textColor = defaultColor
+    }
+    
     //Sends data to next view controller
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         UIApplication.sharedApplication().statusBarHidden = false
@@ -397,5 +464,81 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
             
         })
     }
+    
+    //Show alert view
+    func loginErrorAlert(title: String, message: String) {
+        let alert = JSSAlertView().show(self, title: title, text: message)
+        alert.addAction(setFirstResponder)
+    }
+    
+    func setFirstResponder(){
+        if errorMessage == "Email"{
+            titleField.becomeFirstResponder()
+            setError(titleField)
+        } else if errorMessage == "Invalid"{
+            cityField.becomeFirstResponder()
+            setError(cityField)
+        }else {
+            priceField.becomeFirstResponder()
+            setError(priceField)
+        }
+    }
+    
+    func setError(textField : UITextField){
+        textField.layer.borderColor = hexStringToUIColor("#f27163").CGColor
+        textField.layer.cornerRadius = 10.0
+        textField.layer.masksToBounds = true
+        textField.layer.borderWidth = 1
+    }
+    
+    func setGoodToGo(textField : UITextField){
+        textField.layer.borderColor = hexStringToUIColor("#91c769").CGColor
+        textField.layer.cornerRadius = 10.0
+        textField.layer.masksToBounds = true
+        textField.layer.borderWidth = 1
+    }
+    
+    
+    private func fetchAutocompletePlaces(keyword:String) {
+        let urlString = "\(baseURLString)?key=\(googleMapsKey)&input=\(keyword)"
+        let s = NSCharacterSet.URLQueryAllowedCharacterSet().mutableCopy() as! NSMutableCharacterSet
+        s.addCharactersInString("+&")
+        if let encodedString = urlString.stringByAddingPercentEncodingWithAllowedCharacters(s) {
+            if let url = NSURL(string: encodedString) {
+                let request = NSURLRequest(URL: url)
+                dataTask = NSURLSession.sharedSession().dataTaskWithRequest(request, completionHandler: { (data, response, error) -> Void in
+                    if let data = data{
+                        
+                        do{
+                            let result = try NSJSONSerialization.JSONObjectWithData(data, options: .AllowFragments)
+                            
+                            if let status = result["status"] as? String{
+                                if status == "OK"{
+                                    if let predictions = result["predictions"] as? NSArray{
+                                        var locations = [String]()
+                                        for dict in predictions as! [NSDictionary]{
+                                            locations.append(dict["description"] as! String)
+                                        }
+                                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                            self.cityField.autoCompleteStrings = locations
+                                        })
+                                        return
+                                    }
+                                }
+                            }
+                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                self.cityField.autoCompleteStrings = nil
+                            })
+                        }
+                        catch let error as NSError{
+                            print("Error: \(error.localizedDescription)")
+                        }
+                    }
+                })
+                dataTask?.resume()
+            }
+        }
+    }
+
 
 }

@@ -24,6 +24,13 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     //FireBase URL
     let ref = Firebase(url: BASE_URL)
     
+    var alertController = UIAlertController()
+    
+    var errorMessage : String = ""
+    
+    var defaultColor = UIColor()
+    var defaultBorderColor = UIColor()
+    
     //----Outlets----//
     
     //User Email
@@ -65,6 +72,8 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        defaultColor = loginEmail.textColor!
+        defaultBorderColor = loginEmail.backgroundColor!
         UIApplication.sharedApplication().statusBarStyle = .Default
         setUpTextFields()
         setUpBackground()
@@ -74,9 +83,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-        if NSUserDefaults.standardUserDefaults().valueForKey("uid") != nil && DataService.dataService.CURRENT_USER_REF.authData != nil {
-            self.performSegueWithIdentifier("skipLoginSegue", sender: nil)
-        }
+        alertController = showLoading("Signing In...")
     }
 
     override func didReceiveMemoryWarning() {
@@ -116,7 +123,11 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     func setUpTextFields(){
         loginEmail.delegate = self
         loginPassword.delegate = self
+        loginEmail.addTarget(self, action: #selector(self.textViewDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
+        loginPassword.addTarget(self, action: #selector(self.textViewDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
     }
+    
+    
     
     //Next text field
     func textFieldShouldReturn(textField: UITextField) -> Bool {
@@ -125,6 +136,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         } else if (textField === loginPassword) {
             loginPassword.resignFirstResponder()
             scrollView.setContentOffset(CGPointMake(0,0), animated: true)
+            self.presentViewController(alertController, animated: true, completion: nil)
             logInClicked()
         } else {
         }
@@ -147,6 +159,13 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         }
     }
     
+    func textViewDidChange(textView: UITextView) {
+        if textView === loginEmail{
+            loginEmail.layer.borderColor = defaultBorderColor.CGColor
+        }
+        textView.textColor = defaultColor
+    }
+    
     //Calls this function when the tap is recognized.
     func dismissKeyboard() {
         //Resets view offset
@@ -156,25 +175,47 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     
     //Log In Button has been clicked
     func logInClicked(){
+        errorMessage = ""
+        
             let email = loginEmail.text
             let password = loginPassword.text
             
             if email != "" && password != "" {
+                dismissKeyboard()
+                self.presentViewController(alertController, animated: true, completion: nil)
                 // Login with the Firebase's authUser method
                 DataService.dataService.BASE_REF.authUser(email, password: password, withCompletionBlock: { error, authData in
-                    
-                    if error != nil {
-                        print(error)
-                        self.loginErrorAlert("Oops!", message: "Check your username and password.")
-                    } else {
+                    if error != nil{
+                        if let errorCode = FAuthenticationError(rawValue: error.code) {
+                            switch (errorCode) {
+                            case .UserDoesNotExist:
+                                self.errorMessage = "Invalid"
+                                self.alertController.dismissViewControllerAnimated(true, completion: nil)
+                                self.loginErrorAlert("Oops!", message: "This email is not associated with an account")
+                            case .InvalidEmail:
+                                self.errorMessage = "Email"
+                                self.alertController.dismissViewControllerAnimated(true, completion: nil)
+                                self.loginErrorAlert("Oops!", message: "The specified email address is invalid")
+                            case .InvalidPassword:
+                                self.errorMessage = "Password"
+                                self.alertController.dismissViewControllerAnimated(true, completion: nil)
+                                self.loginErrorAlert("Oops!", message: "The specified password is invalid")
+                            default:
+                                print("Handle default situation")
+                            }
+                        }
+                    }
+                    else {
                         // Storing User UID
                         NSUserDefaults.standardUserDefaults().setValue(authData.uid, forKey: "uid")
+                        self.alertController.dismissViewControllerAnimated(true, completion: nil)
                         // Enter Main Feed
                         self.performSegueWithIdentifier("skipLoginSegue", sender: nil)
                     }
                 })
             } else {
                 // There was a problem
+                self.alertController.dismissViewControllerAnimated(true, completion: nil)
                 loginErrorAlert("Oops!", message: "Don't forget to enter your email and password.")
             }
     }
@@ -204,7 +245,37 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     
     //Show alert view
     func loginErrorAlert(title: String, message: String) {
-        JSSAlertView().show(self, title: title, text: message)
+        let alert = JSSAlertView().show(self, title: title, text: message)
+        alert.addAction(setFirstResponder)
     }
+    
+    func setFirstResponder(){
+        if errorMessage == "Email"{
+        loginEmail.becomeFirstResponder()
+            setError(loginEmail)
+        } else if errorMessage == "Invalid"{
+            loginEmail.becomeFirstResponder()
+            setError(loginEmail)
+        }else {
+           loginPassword.becomeFirstResponder()
+           setError(loginPassword)
+        }
+    }
+    
+    func setError(textField : UITextField){
+        textField.layer.borderColor = hexStringToUIColor("#f27163").CGColor
+        textField.layer.cornerRadius = 10.0
+        textField.layer.masksToBounds = true
+        textField.layer.borderWidth = 1
+    }
+    
+    func setGoodToGo(textField : UITextField){
+        textField.layer.borderColor = hexStringToUIColor("#91c769").CGColor
+        textField.layer.cornerRadius = 10.0
+        textField.layer.masksToBounds = true
+        textField.layer.borderWidth = 1
+    }
+
+    
 
 }

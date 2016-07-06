@@ -82,6 +82,8 @@
 		DD4F0AED1D11E62D0040AC23 /* UIViewExtensions.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD4F0AD01D11DD4D0040AC23 /* UIViewExtensions.swift */; };
 		DD4F0AEE1D11E62D0040AC23 /* Utilities.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD4F0AD11D11DD4D0040AC23 /* Utilities.swift */; };
 		DD4F0AEF1D11E62D0040AC23 /* VolumeControl.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD4F0AD21D11DD4D0040AC23 /* VolumeControl.swift */; };
+		DD5AB7521D2D7F4A0030D5D9 /* AutoCompleteTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5AB7511D2D7F4A0030D5D9 /* AutoCompleteTextField.swift */; };
+		DD5AB7531D2D7F540030D5D9 /* AutoCompleteTextField.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD5AB7511D2D7F4A0030D5D9 /* AutoCompleteTextField.swift */; };
 		DD62BB7D1D0CAFAB006DBD64 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD62BB7C1D0CAFAB006DBD64 /* AppDelegate.swift */; };
 		DD62BB841D0CAFAB006DBD64 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DD62BB821D0CAFAB006DBD64 /* Main.storyboard */; };
 		DD62BB861D0CAFAB006DBD64 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DD62BB851D0CAFAB006DBD64 /* Assets.xcassets */; };
@@ -99,6 +101,10 @@
 		DD62BBC51D0CC013006DBD64 /* CustomTableCell.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD62BBBA1D0CBEC4006DBD64 /* CustomTableCell.swift */; };
 		DD62BBC61D0CC013006DBD64 /* JSSAlertView.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD62BBBE1D0CBED8006DBD64 /* JSSAlertView.swift */; };
 		DD62BBC71D0CC013006DBD64 /* Constants.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD62BBBC1D0CBECE006DBD64 /* Constants.swift */; };
+		DD6E53961D2D847A001D0340 /* MKMapViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6E53941D2D847A001D0340 /* MKMapViewExtension.swift */; };
+		DD6E53971D2D847A001D0340 /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6E53951D2D847A001D0340 /* Location.swift */; };
+		DD6E53981D2D84D1001D0340 /* MKMapViewExtension.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD6E53941D2D847A001D0340 /* MKMapViewExtension.swift */; };
+		DD6E53991D2D84D1001D0340 /* Location.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD6E53951D2D847A001D0340 /* Location.swift */; };
 		DD8739561D0CECE700A37FF5 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD8739551D0CECE700A37FF5 /* SystemConfiguration.framework */; };
 		DD8739581D0CECEF00A37FF5 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD8739571D0CECEF00A37FF5 /* Security.framework */; };
 		DD87395A1D0CECF600A37FF5 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD8739591D0CECF600A37FF5 /* CFNetwork.framework */; };
@@ -181,6 +187,7 @@
 		DD4F0AD01D11DD4D0040AC23 /* UIViewExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIViewExtensions.swift; sourceTree = "<group>"; };
 		DD4F0AD11D11DD4D0040AC23 /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		DD4F0AD21D11DD4D0040AC23 /* VolumeControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VolumeControl.swift; sourceTree = "<group>"; };
+		DD5AB7511D2D7F4A0030D5D9 /* AutoCompleteTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AutoCompleteTextField.swift; sourceTree = "<group>"; };
 		DD62BB791D0CAFAB006DBD64 /* Bartr.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bartr.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD62BB7C1D0CAFAB006DBD64 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DD62BB831D0CAFAB006DBD64 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -198,6 +205,8 @@
 		DD62BBBA1D0CBEC4006DBD64 /* CustomTableCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomTableCell.swift; sourceTree = "<group>"; };
 		DD62BBBC1D0CBECE006DBD64 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		DD62BBBE1D0CBED8006DBD64 /* JSSAlertView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSSAlertView.swift; sourceTree = "<group>"; };
+		DD6E53941D2D847A001D0340 /* MKMapViewExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MKMapViewExtension.swift; sourceTree = "<group>"; };
+		DD6E53951D2D847A001D0340 /* Location.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		DD8739551D0CECE700A37FF5 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		DD8739571D0CECEF00A37FF5 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		DD8739591D0CECF600A37FF5 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
@@ -476,6 +485,9 @@
 		DDF679E01D0D211B0006DF37 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				DD6E53941D2D847A001D0340 /* MKMapViewExtension.swift */,
+				DD6E53951D2D847A001D0340 /* Location.swift */,
+				DD5AB7511D2D7F4A0030D5D9 /* AutoCompleteTextField.swift */,
 				DD62BB851D0CAFAB006DBD64 /* Assets.xcassets */,
 				DD303AAE1D0CC82600E50D4B /* GoogleService-Info.plist */,
 				DD62BB8A1D0CAFAB006DBD64 /* Info.plist */,
@@ -599,6 +611,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DD6E53981D2D84D1001D0340 /* MKMapViewExtension.swift in Resources */,
+				DD6E53991D2D84D1001D0340 /* Location.swift in Resources */,
+				DD5AB7531D2D7F540030D5D9 /* AutoCompleteTextField.swift in Resources */,
 				DD162B5F1D2869D300D234DA /* ViewOffers.swift in Resources */,
 				DD162B5C1D285E7C00D234DA /* Offers.swift in Resources */,
 				DDEDD6BA1D24AA8F009806E1 /* FloatRatingView.swift in Resources */,
@@ -821,7 +836,9 @@
 				DD4F0AB21D1108710040AC23 /* Summary.swift in Sources */,
 				DD4F0AD31D11DD4D0040AC23 /* CameraGlobals.swift in Sources */,
 				DD4F0AD71D11DD4D0040AC23 /* SingleImageFetcher.swift in Sources */,
+				DD6E53971D2D847A001D0340 /* Location.swift in Sources */,
 				DD4F0ABD1D11DD1B0040AC23 /* CameraViewControllerConstraint.swift in Sources */,
+				DD5AB7521D2D7F4A0030D5D9 /* AutoCompleteTextField.swift in Sources */,
 				DD62BBB91D0CBEBF006DBD64 /* DataService.swift in Sources */,
 				DD4F0AD81D11DD4D0040AC23 /* SingleImageSaver.swift in Sources */,
 				DD62BBB71D0CBE9C006DBD64 /* Post.swift in Sources */,
@@ -843,6 +860,7 @@
 				DD8739661D0CF7E300A37FF5 /* MainFeed.swift in Sources */,
 				DD3315E41D1B4C4A00048548 /* BlockedUsersTableCell.swift in Sources */,
 				DD22EB291D146FDC00AB4017 /* PostDetails.swift in Sources */,
+				DD6E53961D2D847A001D0340 /* MKMapViewExtension.swift in Sources */,
 				DDEDD6B91D24AA7B009806E1 /* FloatRatingView.swift in Sources */,
 				DD3315E61D1B4F0A00048548 /* UsersProfile.swift in Sources */,
 				DD4F0AD91D11DD4D0040AC23 /* UIButtonExtensions.swift in Sources */,

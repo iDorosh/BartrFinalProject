@@ -8,6 +8,7 @@
 
 import Foundation
 import Firebase
+import UIKit
 
 //Data Base reference
 let BASE_URL = "https://vulkanbartr.firebaseio.com"
@@ -233,6 +234,48 @@ extension NSDate {
         return ""
     }
 }
+
+func showLoading(message : String) -> UIAlertController{
+    let alertController = UIAlertController(title: nil, message: message, preferredStyle: UIAlertControllerStyle.Alert)
+    
+    let spinnerIndicator: UIActivityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.WhiteLarge)
+    
+    spinnerIndicator.center = CGPointMake(135.0, 65.5)
+    spinnerIndicator.color = UIColor.blackColor()
+    spinnerIndicator.startAnimating()
+    
+
+    alertController.view.addSubview(spinnerIndicator)
+    
+    let height:NSLayoutConstraint = NSLayoutConstraint(item: alertController.view, attribute: NSLayoutAttribute.Height, relatedBy: NSLayoutRelation.Equal, toItem: nil, attribute: NSLayoutAttribute.NotAnAttribute, multiplier: 1, constant: 100)
+    
+    alertController.view.addConstraint(height)
+    return alertController
+
+}
+
+func hexStringToUIColor (hex:String) -> UIColor {
+    var cString:String = hex.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet() as NSCharacterSet).uppercaseString
+    
+    if (cString.hasPrefix("#")) {
+        cString = cString.substringFromIndex(cString.startIndex.advancedBy(1))
+    }
+    
+    if ((cString.characters.count) != 6) {
+        return UIColor.grayColor()
+    }
+    
+    var rgbValue:UInt32 = 0
+    NSScanner(string: cString).scanHexInt(&rgbValue)
+    
+    return UIColor(
+        red: CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
+        green: CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0,
+        blue: CGFloat(rgbValue & 0x0000FF) / 255.0,
+        alpha: CGFloat(1.0)
+    )
+}
+
 
 
 
