@@ -7,21 +7,21 @@
 	<key>AD_UNIT_ID_FOR_INTERSTITIAL_TEST</key>
 	<string>ca-app-pub-3940256099942544/4411468910</string>
 	<key>CLIENT_ID</key>
-	<string>687419173821-8lismcbmgbg6aoo7ttmsbi3qo58r9577.apps.googleusercontent.com</string>
+	<string>571533088487-v931m3ds56omjfdcrd3ssq0p45b1e4dp.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.687419173821-8lismcbmgbg6aoo7ttmsbi3qo58r9577</string>
+	<string>com.googleusercontent.apps.571533088487-v931m3ds56omjfdcrd3ssq0p45b1e4dp</string>
 	<key>API_KEY</key>
-	<string>AIzaSyCIWXCSQbYuO3vNyNzWSn13MOP51seNMfU</string>
+	<string>AIzaSyD8_iuVHutAVZW5VJ9rHgL3fd57B1esj5g</string>
 	<key>GCM_SENDER_ID</key>
-	<string>687419173821</string>
+	<string>571533088487</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.vulkan.Bartr</string>
 	<key>PROJECT_ID</key>
-	<string>bartr-e77bd</string>
+	<string>bartr-cdc1a</string>
 	<key>STORAGE_BUCKET</key>
-	<string>bartr-e77bd.appspot.com</string>
+	<string>bartr-cdc1a.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<true/>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -33,8 +33,8 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true/>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:687419173821:ios:93566b1448d9e4cf</string>
+	<string>1:571533088487:ios:93566b1448d9e4cf</string>
 	<key>DATABASE_URL</key>
-	<string>https://bartr-e77bd.firebaseio.com</string>
+	<string>https://bartr-cdc1a.firebaseio.com</string>
 </dict>
 </plist>

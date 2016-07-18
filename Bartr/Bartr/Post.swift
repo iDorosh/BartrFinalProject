@@ -8,9 +8,10 @@
 
 import Foundation
 import Firebase
+import FirebaseDatabase
 
 class Post {
-    private var _postRef: Firebase!
+    private var _postRef: FIRDatabaseReference!
     
     //Post Information
     private var _postKey: String!
@@ -164,6 +165,6 @@ class Post {
         }
         
         // The above properties are assigned to their key.
-        self._postRef = DataService.dataService.POST_REF.childByAppendingPath(self._postKey)
+        self._postRef = DataService.dataService.POST_REF.child(self._postKey)
     }
 }

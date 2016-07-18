@@ -8,17 +8,27 @@
 
 import Foundation
 import Firebase
+import FirebaseDatabase
 
 class Offers {
-    private var _offerRef: Firebase!
+    private var _offerRef: FIRDatabaseReference
     
     //Post Information
     private var _offerKey: String!
     private var _offerUser: String!
     private var _offerTitle: String!
     private var _offerText: String!
-    private var _offerChecked: Bool!
+    private var _offerChecked: String!
     private var _offerProfileImage: String!
+    private var _offerUID: String!
+    private var _offerAccepted: String!
+    private var _offerDeclined: String!
+    private var _offerRating: String!
+    private var _offerDate: String!
+    private var _offerStatus: String!
+    
+    private var _recieverUsername: String!
+    private var _recieverImage: String!
   
     
     //Information Getters
@@ -38,12 +48,44 @@ class Offers {
         return _offerText
     }
     
-    var offerChecked: Bool {
+    var offerChecked: String {
         return _offerChecked
     }
     
     var offerProfileImage: String {
         return _offerProfileImage
+    }
+    
+    var offerUID: String {
+        return _offerUID
+    }
+    
+    var offerAccepted: String {
+        return _offerAccepted
+    }
+    
+    var offerDeclined: String {
+        return _offerDeclined
+    }
+    
+    var offerRating: String {
+        return _offerRating
+    }
+    
+    var offerDate: String {
+        return _offerDate
+    }
+    
+    var offerStatus: String {
+        return _offerStatus
+    }
+    
+    var recieverUsername: String {
+        return _recieverUsername
+    }
+    
+    var recieverImage: String {
+        return _recieverImage
     }
     
     // Initialize the new offer
@@ -64,12 +106,44 @@ class Offers {
             self._offerText = offerD
         }
         
-        if let offerC = dictionary["offerChecked"] as? Bool {
+        if let offerC = dictionary["offerChecked"] as? String {
             self._offerChecked = offerC
         }
         
         if let offerP = dictionary["currentProfileImage"] as? String {
             self._offerProfileImage = offerP
+        }
+        
+        if let offerU = dictionary["senderUID"] as? String {
+            self._offerUID = offerU
+        }
+        
+        if let offerA = dictionary["offerAccepted"] as? String {
+            self._offerAccepted = offerA
+        }
+        
+        if let offerD = dictionary["offerDeclined"] as? String {
+            self._offerDeclined = offerD
+        }
+        
+        if let offerRA = dictionary["senderRating"] as? String {
+            self._offerRating = offerRA
+        }
+        
+        if let offerDA = dictionary["offerDate"] as? String {
+            self._offerDate = offerDA
+        }
+        
+        if let offerST = dictionary["offerStatus"] as? String {
+            self._offerStatus = offerST
+        }
+        
+        if let recieverIM = dictionary["recieverImage"] as? String {
+            self._recieverImage = recieverIM
+        }
+        
+        if let recieverUN = dictionary["recieverUsername"] as? String {
+            self._recieverUsername = recieverUN
         }
         
         // The above properties are assigned to their key.

@@ -8,6 +8,7 @@
 
 import UIKit
 import Firebase
+import SCLAlertView
 
 
 
@@ -46,6 +47,7 @@ class MainFeed: UIViewController, UITableViewDataSource {
     
     override func viewWillAppear(animated: Bool) {
         self.tabBarController?.tabBar.hidden = false
+        updatePosts()
     }
     
     override func viewDidLoad() {
@@ -103,7 +105,7 @@ class MainFeed: UIViewController, UITableViewDataSource {
     //Check if user is signed in
     func setUserDefaults(){
         print(NSUserDefaults.standardUserDefaults().valueForKey("uid"))
-        if NSUserDefaults.standardUserDefaults().valueForKey("uid") != nil && DataService.dataService.CURRENT_USER_REF.authData != nil {
+        if NSUserDefaults.standardUserDefaults().valueForKey("uid") != nil && FIRAuth.auth()?.currentUser?.uid != nil {
             LogInLogOut.setTitle("Sign Out", forState: UIControlState.Normal)
         } else {
             LogInLogOut.setTitle("Sign In", forState: UIControlState.Normal)
@@ -120,7 +122,7 @@ class MainFeed: UIViewController, UITableViewDataSource {
     
     //Sign user out when the alert view confirm button is clicked
     func signOutCallBack() {
-        DataService.dataService.CURRENT_USER_REF.unauth()
+        try! FIRAuth.auth()!.signOut()
         
         NSUserDefaults.standardUserDefaults().setValue(nil, forKey: "uid")
         
@@ -133,13 +135,14 @@ class MainFeed: UIViewController, UITableViewDataSource {
     func logOutUser(){
         if (LogInLogOut.currentTitle == "Sign Out"){
             
-            let alertview = JSSAlertView().show(
-                self,
-                title: "Sign Out Current User?",
-                buttonText: "Sign Out",
-                cancelButtonText: "Cancel" // This tells JSSAlertView to create a two-button alert
-            )
-            alertview.addAction(signOutCallBack)
+            
+                let alertView = SCLAlertView()
+                alertView.addButton("Sign Out", target:self, selector:#selector(MainFeed.signOutCallBack))
+                
+                alertView.showCloseButton = true
+                
+                alertView.showWarning("Sign out", subTitle: "Sign out current user?")
+        
             
         } else {
             let loginViewController = self.storyboard!.instantiateViewControllerWithIdentifier("Login")
@@ -150,11 +153,11 @@ class MainFeed: UIViewController, UITableViewDataSource {
     
     //Update Firebase and Table View
     func updatePosts(){
-        DataService.dataService.POST_REF.observeEventType(.Value, withBlock: { snapshot in
+        DataService.dataService.POST_REF.observeSingleEventOfType(.Value, withBlock: { snapshot in
             self.posts = []
             self.hideCompleteSales = []
             
-            if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
+            if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
                 
                 for snap in snapshots {
                     if let postDictionary = snap.value as? Dictionary<String, AnyObject> {
@@ -165,8 +168,6 @@ class MainFeed: UIViewController, UITableViewDataSource {
                 }
             }
 
-
-            
                 for i in self.posts
                 {
                     
@@ -177,6 +178,7 @@ class MainFeed: UIViewController, UITableViewDataSource {
                     
                     if !i.postComplete && !i.postFL && eseconds > 0{
                         self.hideCompleteSales.append(i)
+                        print(i.postTitle)
                     }
                 }
             
@@ -191,8 +193,7 @@ class MainFeed: UIViewController, UITableViewDataSource {
         
         if (segue.identifier == "detailSegue"){
             let details : PostDetails = segue.destinationViewController as! PostDetails
-            details.currentUser = currentUser
-            details.key = posts[selectedPost].postKey
+            details.key = hideCompleteSales[selectedPost].postKey
             details.previousVC = "MainFeed"
         }
     }

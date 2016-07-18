@@ -10,23 +10,29 @@ import UIKit
 
 class ViewImageVC: UIViewController {
     
-    //Holds the selected image
+    //Variables
     var showImage : UIImage = UIImage()
     
-    //Displays the selected image
+    //Outlets
     @IBOutlet weak var largerImage: UIImageView!
-
+    
+    //Actions
+    @IBAction func saveImage(sender: UIButton) {
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
     }
     
     override func viewWillAppear(animated: Bool) {
+        loadUI()
+    }
+    
+    override func didReceiveMemoryWarning() {super.didReceiveMemoryWarning()}
+    
+    func loadUI(){
         //Set UIImage View to the proper image
         largerImage.image = showImage
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+        self.tabBarController?.tabBar.hidden = true
     }
 }

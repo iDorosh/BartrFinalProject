@@ -8,17 +8,14 @@
 
 import UIKit
 import Firebase
-import MapKit
+import ALCameraViewController
+import FirebaseDatabase
+import SCLAlertView
 
-class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
-    
-    private var responseData:NSMutableData?
-    private var selectedPointAnnotation:MKPointAnnotation?
-    private var dataTask:NSURLSessionDataTask?
-    
-    private let googleMapsKey = "AIzaSyBLSMsmrcBiwQ6kMbRiT_DffmnLD6qhJJs"
-    private let baseURLString = "https://maps.googleapis.com/maps/api/place/autocomplete/json"
 
+
+
+class Camera: UIViewController, UITextFieldDelegate {
     
     @IBAction func backToPhoto(segue: UIStoryboardSegue){}
     
@@ -30,6 +27,11 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     
     var defaultColor = UIColor()
     var defaultBorderColor = UIColor()
+    var defaultLabelColor = UIColor()
+    
+    var cameraOpened : Bool = false
+    
+    @IBOutlet weak var requiredCharacterFields: UILabel!
     
     //Variables
     var croppingEnabled: Bool = false
@@ -39,7 +41,6 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     var typeString : String = String()
     var imagePicker: UIImagePickerController!
     var capturedImage : UIImage = UIImage()
-    let locationManager = CLLocationManager()
     var currentUsername = ""
     var orignalView : String = ""
     
@@ -57,12 +58,11 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     var decodedPreviewImage : UIImage = UIImage()
     
     
+    
     //----Outlets----//
     
     //Title text field
     @IBOutlet weak var titleField: UITextField!
-    //City text field
-    @IBOutlet weak var cityField: AutoCompleteTextField!
     //Description Text Box
     @IBOutlet weak var textBox: UITextView!
     //PreviewImage
@@ -102,7 +102,7 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     
     
     @IBAction func discardListing(sender: UIButton) {
-        showAlertView("Discard Listing", text: "Listing will be discarded", confirmButton: "Discard", cancelButton: "Cancel")
+        discardNew("Discard Listing", subTitle: "Listing will be discarded")
     }
     
     @IBAction func nextClicked(sender: UIButton) {
@@ -114,23 +114,31 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     //Load UI
     override func viewWillAppear(animated: Bool) {
         self.tabBarController?.tabBar.hidden = true
+        scrollView.setContentOffset(CGPointMake(0,0), animated: true)
+        if NSUserDefaults.standardUserDefaults().stringForKey("posted") == "true"{
+            let defaults = NSUserDefaults.standardUserDefaults()
+            defaults.setObject("false", forKey: "posted")
+            viewDidLoad()
+            
+        }
         
     }
     
     override func viewDidLoad() {
         self.navigationController?.setNavigationBarHidden(true, animated: true)
+        print(previousScreen)
         super.viewDidLoad()
-   
-        handleTextFieldInterfaces()
+        defaultLabelColor = requiredCharacterFields.textColor
         defaultColor = titleField.textColor!
         defaultBorderColor = titleField.backgroundColor!
+        titleField.layer.borderColor = defaultBorderColor.CGColor
+        priceField.layer.borderColor = defaultBorderColor.CGColor
         if previousScreen == "EditView"{
             updatePosts()
             self.tabBarController?.selectedIndex = 2
         } else {
             loadUI()
         }
-
     }
     
     func setVariables(){
@@ -155,10 +163,6 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
         addBlurrEffect()
         addTapRecognizer()
         getCurrentUser()
-        if previousScreen != "EditView"{
-            setLocationManager()
-            
-        }
     }
     
     func decodeImages(){
@@ -185,24 +189,22 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     
     //Text Field Set Up
     func setUpTextFields(){
-        titleField.addTarget(self, action: #selector(self.textViewDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
-        cityField.addTarget(self, action: #selector(self.textViewDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
         titleField.delegate = self
-        cityField.delegate = self
         priceField.delegate = self
+        titleField.addTarget(self, action: #selector(self.textViewDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
+        priceField.addTarget(self, action: #selector(self.textViewDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
+
         
         if previousScreen == "EditView"{
             titleField.text = editedTitle
             priceField.text = editedPrice
-            cityField.text = editedLocation
             screenTitle.text = "Edit About"
             previewImage.image = decodedPreviewImage
         } else {
             screenTitle.text = "About"
             titleField.text = ""
-            cityField.text = ""
             priceField.text = ""
-            previewImage.image = UIImage(named: "placeholderImg")
+            previewImage.image = UIImage(named: "NoImageSelected")
         }
         
     }
@@ -210,13 +212,10 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     //Next text field
     func textFieldShouldReturn(textField: UITextField) -> Bool {
         if (textField === titleField) {
-            cityField.becomeFirstResponder()
-        } else if (textField === cityField) {
             priceField.becomeFirstResponder()
         } else if (textField === priceField) {
             priceField.resignFirstResponder()
             scrollView.setContentOffset(CGPointMake(0,0), animated: true)
-            
         } else {
         }
         return true
@@ -226,8 +225,6 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     func textFieldDidBeginEditing(textField: UITextField) {
         UIApplication.sharedApplication().statusBarHidden = true
         if (textField == titleField){
-            scrollView.setContentOffset(CGPointMake(0,200), animated: true)
-        } else if (textField == cityField){
             scrollView.setContentOffset(CGPointMake(0,200), animated: true)
         } else if (textField == priceField){
             scrollView.setContentOffset(CGPointMake(0,200), animated: true)
@@ -244,6 +241,21 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     
     //Resets view
     func textFieldDidEndEditing(textField: UITextField) {
+       /*
+            if textField === titleField && titleField.text?.characters.count > 6{
+                requiredCharacterFields.textColor = defaultLabelColor
+                requiredCharacterFields.text = "Short description 6-24 Characters"
+            } else if textField === titleField && titleField.text?.characters.count < 6{
+                setError(titleField)
+                requiredCharacterFields.textColor = hexStringToUIColor("#f27163")
+                requiredCharacterFields.text = "Title to short"
+            } else if textField === titleField && titleField.text?.characters.count > 24{
+                requiredCharacterFields.textColor = hexStringToUIColor("#f27163")
+                requiredCharacterFields.text = "Title to long"
+        }
+         */
+        
+        
         if (textField == priceField){
             scrollView.setContentOffset(CGPointMake(0,0), animated: true)
         }
@@ -267,22 +279,14 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     //Get current user to add it to the listing details
     func getCurrentUser(){
         // Get username of the current user, and set it to currentUsername, so it can add it to the post.
-        DataService.dataService.CURRENT_USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
-            let currentUser = snapshot.value.objectForKey("username") as! String
+        DataService.dataService.CURRENT_USER_REF.observeEventType(.Value, withBlock: { snapshot in
+            let currentUser = snapshot.value!.objectForKey("username") as! String
             self.currentUsername = currentUser
             }, withCancelBlock: { error in
         })
     }
     
-    //Set up loaction manager to get the current posistion
-    func setLocationManager(){
-        self.locationManager.requestWhenInUseAuthorization()
-        if CLLocationManager.locationServicesEnabled() {
-            locationManager.delegate = self
-            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-            locationManager.startUpdatingLocation()
-        }
-    }
+   
     
     //Opening custom CameraViewController
     func openCamera()
@@ -305,103 +309,50 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
         presentViewController(libraryViewController, animated: true, completion: nil)
     }
     
-    //Get Current Location
-    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        let locValue:CLLocationCoordinate2D = manager.location!.coordinate
-        
-        
-        let geoCoder = CLGeocoder()
-        let location = CLLocation(latitude: locValue.latitude, longitude: locValue.longitude)
-        geoCoder.reverseGeocodeLocation(location)
-        {
-            (placemarks, error) -> Void in
-            
-            let placeArray = placemarks as [CLPlacemark]!
-            
-            // Place details
-            var placeMark: CLPlacemark!
-            placeMark = placeArray?[0]
-        
-            if (!self.locationFound){
-                // City
-                if let city = placeMark.addressDictionary?["City"] as? NSString
-                {
-                  self.cityField.text = city as String + ", " + placeMark.administrativeArea!
-                }
-                self.locationFound = true
-            }
-        }
-    }
-    
-    //Alert to delete, mark as completed or rate
-    func showAlertView(title: String?, text: String?, confirmButton: String?, cancelButton: String?){
-        let alertview = JSSAlertView().show(
-            self,
-            title: title!,
-            text: text!,
-            buttonText: confirmButton!,
-            cancelButtonText: cancelButton!
-        )
-        alertview.addAction(removeListing)
-    }
     
     func removeListing(){
         titleField.text = ""
-        cityField.text = ""
         priceField.text = ""
-        previewImage.image = UIImage(named: "placeholderImg")
+        previewImage.image = UIImage(named: "NoImageSelected")
         if previousScreen == "EditView"{
             dismissViewControllerAnimated(true, completion: nil)
         } else {
-            self.tabBarController?.selectedIndex = 0
-            
+            performSegueWithIdentifier("MainSegue", sender: self)
+            self.dismissViewControllerAnimated(true, completion: nil)
         }
         
     }
     
     //Check Fields
     func checkFields(){
-        if Int(priceField.text!) == nil{
-            setError(priceField)
-            priceField.becomeFirstResponder()
+        if priceField.text == "" || titleField.text == "" || self.titleField.text?.characters.count < 7 {
+            errorInvalid("Missing Fields", subTitle: "Please fill in both fields")
+        } else {
+        performSegueWithIdentifier("locationSegue", sender: self)
         }
-        if cityField.text == ""{
-            setError(cityField)
-            cityField.becomeFirstResponder()
-        }
-        if titleField.text == "" {
-            setError(titleField)
-            titleField.becomeFirstResponder()
-        }
-        
-        
-        
-        
-        
-        //performSegueWithIdentifier("NextInfoSegue", sender: self)
     }
     
-    private func handleTextFieldInterfaces(){
-        cityField.onTextChange = {[weak self] text in
-            if !text.isEmpty{
-                if let dataTask = self?.dataTask {
-                    dataTask.cancel()
-                }
-                self?.fetchAutocompletePlaces(text)
-            }
-        }
-        
-    
-    }
-
     
     func textViewDidChange(textView: UITextView) {
-        if textView === titleField && titleField.text?.characters.count > 6{
-            setGoodToGo(titleField)
+        /*if textView == priceField {
+            if ((priceField.text?.characters.contains("$")) != nil && priceField.text != ""){
+                let wholeString = priceField.text!
+                let newString = wholeString.stringByReplacingOccurrencesOfString("$", withString: "")
+                print(newString)
+                if Int(newString) == nil{
+                    setError(priceField)
+                    priceField.becomeFirstResponder()
+                } 
+            }
         } else {
-            setError(titleField)
+ 
+            titleField.layer.borderColor = defaultBorderColor.CGColor
+            requiredCharacterFields.textColor = defaultLabelColor
+            requiredCharacterFields.text = "Short description 6-24 Characters"
+            
         }
-        
+        */
+        textView.layer.borderColor = defaultBorderColor.CGColor
         textView.textColor = defaultColor
     }
     
@@ -409,47 +360,45 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         UIApplication.sharedApplication().statusBarHidden = false
         
-        if (segue.identifier == "NextInfoSegue"){
-            if(previousScreen == "EditView"){
-                let details : Details = segue.destinationViewController as! Details
-                details.editType = editedType
-                details.previousScreen = "EditView"
-                details.pickedImage = previewImage.image!
-                details.pickedTitle = titleField.text!
-                details.pickedLocation = cityField.text!
-                details.editProfileImg = editedProfileImg!
-                details.editPhoto = previewImage.image!
-                details.editUser = editedUser!
-                details.editDetails = editedDetails!
-                details.editKey = editKey
-                details.pickedPrice = priceField.text!
-    
-                
+        if segue.identifier == "locationSegue"{
+            if previousScreen == "EditView"{
+                let listingLocation : ListingLocation = segue.destinationViewController as! ListingLocation
+                listingLocation.editType = editedType
+                listingLocation.previousScreen = "EditView"
+                listingLocation.pickedImage = previewImage.image!
+                listingLocation.pickedTitle = titleField.text!
+                listingLocation.pickedLocation = editedLocation!
+                listingLocation.editProfileImg = editedProfileImg!
+                listingLocation.editPhoto = previewImage.image!
+                listingLocation.editUser = editedUser!
+                listingLocation.editDetails = editedDetails!
+                listingLocation.editKey = editKey
+                listingLocation.pickedPrice = priceField.text!
             } else {
-                let details : Details = segue.destinationViewController as! Details
-                details.pickedImage = previewImage.image!
-                details.pickedTitle = titleField.text!
-                details.pickedLocation = cityField.text!
+                let listingLocation : ListingLocation = segue.destinationViewController as! ListingLocation
+                listingLocation.pickedImage = previewImage.image!
+                listingLocation.pickedTitle = titleField.text!
                 if priceField.text == ""{
-                    details.pickedPrice = priceField.placeholder!
+                    listingLocation.pickedPrice = priceField.placeholder!
                 } else {
                     if !(priceField.text?.characters.contains("$"))!{
-                        details.pickedPrice = "$\(priceField.text!)"
+                        listingLocation.pickedPrice = "$\(priceField.text!)"
                     } else {
-                        details.pickedPrice = priceField.text!
+                        listingLocation.pickedPrice = priceField.text!
                     }
                 }
+
             }
-            
         }
+        
     }
     
     func updatePosts(){
-        DataService.dataService.POST_REF.childByAppendingPath(editKey).observeSingleEventOfType(.Value, withBlock: { snapshot in
+        DataService.dataService.POST_REF.child(editKey).observeSingleEventOfType(.Value, withBlock: { snapshot in
             self.postForEdit = []
             
             
-            if snapshot.children.allObjects is [FDataSnapshot] {
+            if snapshot.children.allObjects is [FIRDataSnapshot] {
                 
                 
                 if let postDictionary = snapshot.value as? Dictionary<String, AnyObject> {
@@ -457,8 +406,9 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
                     let post = Post(key: key, dictionary: postDictionary)
                     self.postForEdit.insert(post, atIndex: 0)
                     self.setVariables()
+                    self.loadUI()
                 } else {
-                    self.navigationController?.popViewControllerAnimated(true)
+                    //self.navigationController?.popViewControllerAnimated(true)
                 }
             }
             
@@ -475,14 +425,40 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
         if errorMessage == "Email"{
             titleField.becomeFirstResponder()
             setError(titleField)
-        } else if errorMessage == "Invalid"{
-            cityField.becomeFirstResponder()
-            setError(cityField)
-        }else {
+        } else {
             priceField.becomeFirstResponder()
             setError(priceField)
         }
     }
+    
+    func errorInvalid(title : String, subTitle : String){
+        let alertView = SCLAlertView()
+        alertView.showCloseButton = false
+        alertView.addButton("Done") {
+            if Int(self.priceField.text!) == nil{
+                self.setError(self.priceField)
+                self.priceField.becomeFirstResponder()
+            }
+            if self.titleField.text == "" || self.titleField.text?.characters.count < 7 {
+                self.setError(self.titleField)
+                self.titleField.becomeFirstResponder()
+            }
+        }
+        alertView.showError(title, subTitle: subTitle)
+    }
+    
+    func discardNew(title : String, subTitle : String){
+        let alertView = SCLAlertView()
+        alertView.showCloseButton = false
+        alertView.addButton("Discard") {
+            self.removeListing()
+        }
+        alertView.addButton("Don't Discard") {
+            alertView.dismissViewControllerAnimated(true, completion: nil)
+        }
+        alertView.showWarning(title, subTitle: subTitle)
+    }
+
     
     func setError(textField : UITextField){
         textField.layer.borderColor = hexStringToUIColor("#f27163").CGColor
@@ -491,54 +467,8 @@ class Camera: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate {
         textField.layer.borderWidth = 1
     }
     
-    func setGoodToGo(textField : UITextField){
-        textField.layer.borderColor = hexStringToUIColor("#91c769").CGColor
-        textField.layer.cornerRadius = 10.0
-        textField.layer.masksToBounds = true
-        textField.layer.borderWidth = 1
+    func clearUI(){
+        previewImage.image = UIImage(named: "NoImageSelected")
     }
     
-    
-    private func fetchAutocompletePlaces(keyword:String) {
-        let urlString = "\(baseURLString)?key=\(googleMapsKey)&input=\(keyword)"
-        let s = NSCharacterSet.URLQueryAllowedCharacterSet().mutableCopy() as! NSMutableCharacterSet
-        s.addCharactersInString("+&")
-        if let encodedString = urlString.stringByAddingPercentEncodingWithAllowedCharacters(s) {
-            if let url = NSURL(string: encodedString) {
-                let request = NSURLRequest(URL: url)
-                dataTask = NSURLSession.sharedSession().dataTaskWithRequest(request, completionHandler: { (data, response, error) -> Void in
-                    if let data = data{
-                        
-                        do{
-                            let result = try NSJSONSerialization.JSONObjectWithData(data, options: .AllowFragments)
-                            
-                            if let status = result["status"] as? String{
-                                if status == "OK"{
-                                    if let predictions = result["predictions"] as? NSArray{
-                                        var locations = [String]()
-                                        for dict in predictions as! [NSDictionary]{
-                                            locations.append(dict["description"] as! String)
-                                        }
-                                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                                            self.cityField.autoCompleteStrings = locations
-                                        })
-                                        return
-                                    }
-                                }
-                            }
-                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                                self.cityField.autoCompleteStrings = nil
-                            })
-                        }
-                        catch let error as NSError{
-                            print("Error: \(error.localizedDescription)")
-                        }
-                    }
-                })
-                dataTask?.resume()
-            }
-        }
-    }
-
-
 }

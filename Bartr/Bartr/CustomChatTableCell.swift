@@ -11,8 +11,6 @@ import Firebase
 
 class CustomChatTableCell: UITableViewCell {
     
-    var ref = Firebase(url: BASE_URL)
-    
     
     //Outlets
     @IBOutlet weak var newIndicator: UIImageView!

@@ -8,7 +8,7 @@
 
 import UIKit
 import Firebase
-
+import SCLAlertView
 
 class LoginViewController: UIViewController, UITextFieldDelegate {
     //Will bring the user back to the login screen
@@ -20,9 +20,6 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     var emailTextFieldText : String = String()
     //password string from text field
     var passwordTextFieldText : String = String()
-    
-    //FireBase URL
-    let ref = Firebase(url: BASE_URL)
     
     var alertController = UIAlertController()
     
@@ -61,7 +58,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     }
     
     @IBAction func forgotPassword(sender: UIButton) {
-        forgotPassword()
+        enterEmail()
     }
     
     
@@ -95,12 +92,13 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     //----Functions----//
     
     //Sends current email a temporary password
-    func forgotPassword(){
-        ref.resetPasswordForUser(loginEmail.text) { (error : NSError!) in
-            if ((error) != nil) {
-                print(error)
+    func forgotPasswordSend(email : String){
+        
+        FIRAuth.auth()?.sendPasswordResetWithEmail(loginEmail.text!) { error in
+            if error != nil {
+                self.errorResetingPassword("Error", subTitle: "\(error)")
             } else {
-                print("Password reset email sent successfully!")
+                self.success("Email Sent", subTitle: "Follow the instructions in your email to reset your password")
             }
         }
     }
@@ -136,7 +134,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         } else if (textField === loginPassword) {
             loginPassword.resignFirstResponder()
             scrollView.setContentOffset(CGPointMake(0,0), animated: true)
-            self.presentViewController(alertController, animated: true, completion: nil)
+            //self.presentViewController(alertController, animated: true, completion: nil)
             logInClicked()
         } else {
         }
@@ -162,6 +160,8 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     func textViewDidChange(textView: UITextView) {
         if textView === loginEmail{
             loginEmail.layer.borderColor = defaultBorderColor.CGColor
+        } else {
+            loginPassword.layer.borderColor = defaultBorderColor.CGColor
         }
         textView.textColor = defaultColor
     }
@@ -184,39 +184,43 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                 dismissKeyboard()
                 self.presentViewController(alertController, animated: true, completion: nil)
                 // Login with the Firebase's authUser method
-                DataService.dataService.BASE_REF.authUser(email, password: password, withCompletionBlock: { error, authData in
+                
+                FIRAuth.auth()?.signInWithEmail(email!, password: password!) { (user, error) in
                     if error != nil{
-                        if let errorCode = FAuthenticationError(rawValue: error.code) {
+                        if let errorCode = FIRAuthErrorCode(rawValue: error!.code) {
                             switch (errorCode) {
-                            case .UserDoesNotExist:
+                            case .ErrorCodeInvalidEmail:
                                 self.errorMessage = "Invalid"
                                 self.alertController.dismissViewControllerAnimated(true, completion: nil)
-                                self.loginErrorAlert("Oops!", message: "This email is not associated with an account")
-                            case .InvalidEmail:
-                                self.errorMessage = "Email"
-                                self.alertController.dismissViewControllerAnimated(true, completion: nil)
-                                self.loginErrorAlert("Oops!", message: "The specified email address is invalid")
-                            case .InvalidPassword:
+                                self.errorSigningIn("Oops!", subTitle: "Please enter a valid email")
+                            case .ErrorCodeWrongPassword:
                                 self.errorMessage = "Password"
                                 self.alertController.dismissViewControllerAnimated(true, completion: nil)
-                                self.loginErrorAlert("Oops!", message: "The specified password is invalid")
+                                self.errorSigningIn("Oops!", subTitle : "The specified password is invalid")
+                            case .ErrorCodeUserNotFound:
+                                self.errorMessage = "Invalid"
+                                self.alertController.dismissViewControllerAnimated(true, completion: nil)
+                                self.errorSigningIn("Oops!", subTitle: "This email is not associated with an account")
                             default:
-                                print("Handle default situation")
+                                print(errorCode.rawValue)
                             }
                         }
                     }
                     else {
                         // Storing User UID
-                        NSUserDefaults.standardUserDefaults().setValue(authData.uid, forKey: "uid")
+                        NSUserDefaults.standardUserDefaults().setValue(user?.uid, forKey: "uid")
                         self.alertController.dismissViewControllerAnimated(true, completion: nil)
                         // Enter Main Feed
+                        self.success("Signed In!", subTitle: "Welcome to Bartr")
                         self.performSegueWithIdentifier("skipLoginSegue", sender: nil)
                     }
-                })
+                }
+                
+                
             } else {
                 // There was a problem
                 self.alertController.dismissViewControllerAnimated(true, completion: nil)
-                loginErrorAlert("Oops!", message: "Don't forget to enter your email and password.")
+                errorSigningIn("Oops!", subTitle: "Don't forget to enter your email and password.")
             }
     }
     
@@ -233,6 +237,31 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         }
     }
     
+    func success(title : String, subTitle : String){
+        let alertView = SCLAlertView()
+        alertView.showSuccess(title, subTitle: subTitle)
+    }
+    
+    func errorResetingPassword(title : String, subTitle : String){
+        let alertView = SCLAlertView()
+        alertView.showCloseButton = false
+        alertView.addButton("Try Again") {
+            self.enterEmail()
+        }
+        alertView.addButton("Cancel") {
+            alertView.dismissViewControllerAnimated(true, completion: nil)
+        }
+        alertView.showSuccess(title, subTitle: subTitle) 
+    }
+    
+    func errorSigningIn(title : String, subTitle : String){
+        let alertView = SCLAlertView()
+        alertView.addButton("Done", target:self, selector:#selector(setFirstResponder))
+        alertView.showCloseButton = false
+        
+        alertView.showError(title, subTitle: subTitle)
+    }
+    
     //Register Button has been clicked
     func registerClicked(){
             performSegueWithIdentifier("registerNew", sender: nil)
@@ -243,11 +272,6 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         performSegueWithIdentifier("skipLoginSegue", sender: nil)
     }
     
-    //Show alert view
-    func loginErrorAlert(title: String, message: String) {
-        let alert = JSSAlertView().show(self, title: title, text: message)
-        alert.addAction(setFirstResponder)
-    }
     
     func setFirstResponder(){
         if errorMessage == "Email"{
@@ -261,6 +285,18 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
            setError(loginPassword)
         }
     }
+    
+    func enterEmail(){
+        let alert = SCLAlertView()
+        alert.showCloseButton = false
+        let txt = alert.addTextField("Enter Email")
+        alert.addButton("Reset Password") {
+            self.forgotPasswordSend(txt.text!)
+        }
+        alert.addButton("Cancel"){ alert.dismissViewControllerAnimated(true, completion: nil)}
+        alert.showEdit("Forgot Password", subTitle: "Please enter an email address so we can send you a password reset link")
+    }
+
     
     func setError(textField : UITextField){
         textField.layer.borderColor = hexStringToUIColor("#f27163").CGColor

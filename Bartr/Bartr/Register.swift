@@ -8,7 +8,9 @@
 
 
 import UIKit
-import Firebase
+import ALCameraViewController
+import FirebaseDatabase
+import FirebaseAuth
 
 class Register: UIViewController, UITextFieldDelegate {
     
@@ -342,14 +344,17 @@ class Register: UIViewController, UITextFieldDelegate {
     }
     
     func getUsers(){
-        DataService.dataService.USER_REF.observeSingleEventOfType(FEventType.Value, withBlock: { snapshot in
-            if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
+        print("testing")
+        
+        DataService.dataService.USER_REF.observeEventType(.Value, withBlock: { snapshot in
+            if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
                 self.usernameExists = false
                 for snap in snapshots {
-                    let test = snap.value.objectForKey("username") as! String
+                    let test = snap.value!.objectForKey("username") as! String
                     self.users.append(test.lowercaseString)
                 }
             }
+            print(self.users.count)
         })
     }
     
@@ -375,51 +380,52 @@ class Register: UIViewController, UITextFieldDelegate {
                 if (confirmPassword == password){
                 self.presentViewController(alertController, animated: true, completion: nil)
                 
-                    DataService.dataService.USER_REF.observeSingleEventOfType(FEventType.Value, withBlock: { snapshot in
-                        if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
-                            self.usernameExists = false
-                            for snap in snapshots {
-                                let test = snap.value.objectForKey("username") as! String
-                                if (test == self.usernameField.text){
-                                    self.usernameExists = true
-                                }
-                            }
                             
                             if (!self.usernameExists) {
                                 // Set Email and Password for the New User.
-                                DataService.dataService.BASE_REF.createUser(email, password: password, withValueCompletionBlock: { error, result in
+                                FIRAuth.auth()?.createUserWithEmail(email!, password: password!) { (user, error) in
+                                    
                                     if error != nil {
-                                        
-                                        if let errorCode = FAuthenticationError(rawValue: error.code) {
+                                        print(FIRAuthErrorCode(rawValue: error!.code))
+                                        if let errorCode = FIRAuthErrorCode(rawValue: error!.code) {
+                                            
                                             switch (errorCode) {
-                                            case .EmailTaken:
+                                            case .ErrorCodeEmailAlreadyInUse:
                                                 self.errorMessage = "email"
                                                 self.alertController.dismissViewControllerAnimated(true, completion: nil)
                                                 self.signupErrorAlert("Oops!", message: "An account with this email address already exists")
-                                            case .InvalidEmail:
+                                            case .ErrorCodeInvalidEmail:
                                                 self.errorMessage = "email"
                                                 self.alertController.dismissViewControllerAnimated(true, completion: nil)
                                                 self.signupErrorAlert("Oops!", message: "Please enter a valid email address")
                                             default:
                                                 print("Handle default situation")
                                             }
+                                            
                                         }
+                                        
+                                        
                                     } else {
-                                        DataService.dataService.BASE_REF.authUser(email, password: password, withCompletionBlock: {
-                                            err, authData in
-                                            let user = ["provider": authData.provider!, "email": email!, "username": username!, "profileImage" : base64String, "rating" : "5.0"]
+                                        
+                                        FIRAuth.auth()?.signInWithEmail(email!, password: password!, completion: { (createdusername, error) in
+                                            let user = ["email": email!, "username": username!, "profileImage" : base64String, "rating" : "5.0"]
                                             // Send Data to DataService.swift
-                                            DataService.dataService.createNewAccount(authData.uid, user: user)
+                                            DataService.dataService.createNewAccount((createdusername?.uid)!, user: user)
                                             
                                             //Saving User uid to User Defaults
-                                            NSUserDefaults.standardUserDefaults().setValue(result ["uid"], forKey: "uid")
+                                            NSUserDefaults.standardUserDefaults().setValue(FIRAuth.auth()?.currentUser?.uid, forKey: "uid")
                                             
                                             //Opens Main Feed
                                             self.alertController.dismissViewControllerAnimated(true, completion: nil)
                                             self.performSegueWithIdentifier("registerSegue", sender: nil)
+
                                         })
+                                        
                                     }
-                                })
+                                    
+                                }
+                                
+                                
                                 
                                 
                             } else {
@@ -428,9 +434,9 @@ class Register: UIViewController, UITextFieldDelegate {
                                 self.signupErrorAlert("Oops!", message: "This username already exists")
                             }
                             
-                        }
                         
-                    })
+                        
+          
                     
 
             

@@ -48,14 +48,14 @@ class RecentFeedback: UIViewController {
     }
     
     func updateFeedback(){
-        DataService.dataService.USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
-            if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
+        DataService.dataService.USER_REF.observeEventType(FIRDataEventType.Value, withBlock: { snapshot in
+            if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
                 
                 for snap in snapshots {
-                    let test = snap.value.objectForKey("username") as! String
+                    let test = snap.value!.objectForKey("username") as! String
                     if (test == self.username){
-                        self.floatRatingView.rating = Float(snap.value.objectForKey("rating") as! String)!
-                        self.ratingLabel.text = "\(snap.value.objectForKey("rating") as! String) Star Rating"
+                        self.floatRatingView.rating = Float(snap.value!.objectForKey("rating") as! String)!
+                        self.ratingLabel.text = "\(snap.value!.objectForKey("rating") as! String) Star Rating"
                     }
                 }
             }

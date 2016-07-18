@@ -10,47 +10,24 @@ import UIKit
 import MapKit
 import Social
 import Firebase
+import SCLAlertView
+import FirebaseDatabase
 
 
 
 class PostDetails: UIViewController {
     
-    var ref = Firebase(url: BASE_URL)
-
+    //Back to Post Details View Controller
+    @IBAction func backToPostDetails(segue: UIStoryboardSegue){}
     
+    //Data
+    var allOffers = [Offers]()
+    var selectedOffers = [Offers]()
     var selectedPost = [Post]()
     
     
-    //Back to Post Details View Controller
-    @IBAction func backToPostDetails(segue: UIStoryboardSegue)
-    {
-    }
     
-    
-    @IBOutlet weak var ratingView: FloatRatingView!
-    
-    
-    @IBOutlet weak var extendOrRenew: UIButton!
-  
     //Variables
-    
-    //Listing key is passed from the previous screen to
-    //add a view to the listing
-    var key : String = String()
-    var postKey : String = String()
-    
-    //Current views for the listing
-    var postViews : Int = Int()
-    
-    var currentUser : String = ""
-    
-    //Name of the previous view controller to show and
-    //hide UI items
-    var previousVC : String = String()
-    
-    var recieverUID : String = ""
-    var senderUID : String = ""
-    
     //Data passed from the previous screen
     var selectedTitle: String?
     var selectedProfileImg: String?
@@ -64,22 +41,54 @@ class PostDetails: UIViewController {
     var selectedViews : Int?
     var selectedExperation : String?
     var expireString : String = String()
+    var currentRating : String = String()
+    var offertextFieldText = String()
+    var currentUserNameString = String()
+    //Listing key is passed from the previous screen to
+    //add a view to the listing
+    var key : String = String()
+    var postKey : String = String()
     
     
+    var rating : Float = Float()
+    
+    //Name of the previous view controller to show and
+    //hide UI items
+    var previousVC : String = String()
+    
+    //UID for offers and messages
+    var recieverUID : String = ""
+    var senderUID : String = ""
+    
+    //Search Amazon with edited title
     var titleEdit : String = String()
-    
     var decodedimage2 = UIImage()
+
+
+    
+    var newOffers = 0
+    var alertController = UIAlertController()
+
+    @IBAction func backbuttonClicked(sender: UIButton) {
+        unwind()
+    }
+    
+    @IBOutlet var mainView: UIView!
+    @IBOutlet weak var ratingView: FloatRatingView!
+    @IBOutlet weak var extendOrRenew: UIButton!
+  
+    
     
     
     //Outlets
     
     //Views
+    
+    @IBOutlet weak var descriptionView: UIView!
     @IBOutlet weak var locationView: UIView!
     @IBOutlet weak var socialView: UIView!
     @IBOutlet weak var amazonView: UIView!
-    
-    @IBOutlet weak var blurView: UIView!
-    @IBOutlet weak var makeOfferView: UIView!
+
     
     
     
@@ -132,7 +141,7 @@ class PostDetails: UIViewController {
 
     
     @IBAction func sendOffer(sender: UIButton) {
-        sendOffer()
+        
     }
 
     @IBAction func renewOrExtendAction(sender: UIButton) {
@@ -140,23 +149,36 @@ class PostDetails: UIViewController {
     }
     
     @IBAction func makeOfferAction(sender: UIButton) {
-        blurView.hidden = false
-        makeOfferView.hidden = false
+        //blurView.hidden = false
+        //makeOfferView.hidden = false
+        enterOffer()
         
+    }
+    
+    func enterOffer(){
+        self.alertController.dismissViewControllerAnimated(true, completion: nil)
+        let alert = SCLAlertView()
+        let txt = alert.addTextField("Make Offer")
+        txt.autocapitalizationType = UITextAutocapitalizationType.Sentences
+        alert.addButton("Send Offer") {
+            self.sendOfferText(txt.text!)
+        }
+        alert.showEdit("Make Offer", subTitle: "Send \(selectedUser!) an offer for this listing")
     }
 
     @IBAction func hideOfferView(sender: UIButton) {
-        blurView.hidden = true
-        makeOfferView.hidden = true
     }
     
     @IBAction func showProfile(sender: UIButton) {
-        if postUser.text == currentUser{
+        print("clicked")
+        if key == FIRAuth.auth()?.currentUser?.uid{
             self.tabBarController?.tabBar.hidden = false
             self.tabBarController?.selectedIndex = 4
         
         } else {
+            if previousVC != "UsersFeed" {
             performSegueWithIdentifier("showUsersProfileSegue", sender: self)
+            }
         }
         
     }
@@ -173,7 +195,6 @@ class PostDetails: UIViewController {
     
     @IBAction func editPost(sender: UIButton) {
         performSegueWithIdentifier("EditCurrentListing", sender: self)
-        
     }
     
     //Mark as sold/traded or given away
@@ -187,17 +208,10 @@ class PostDetails: UIViewController {
     }
     
     @IBAction func backButton(sender: UIButton) {
-        if previousVC == "Profile"{
-            performSegueWithIdentifier("FinishedSegue", sender: self)
-        } else if previousVC == "UsersFeed"{
-            self.navigationController?.popViewControllerAnimated(true)
-        } else if previousVC == "Search"{
-            performSegueWithIdentifier("BackToSearchSegue", sender: self)
-        } else {
-            performSegueWithIdentifier("MainFeedUnwind", sender: self)
-        }
+        
     }
     
+    @IBOutlet var firstView: UIView!
     
     //Webview Actions
     
@@ -220,22 +234,60 @@ class PostDetails: UIViewController {
     override func viewWillAppear(animated: Bool) {
         self.navigationController?.navigationBarHidden = true
         self.tabBarController?.tabBar.hidden = false
-        
-        //SetupUI
-        
-        
-        
-       
     }
+    
+    override func viewWillDisappear(animated: Bool) {
+        
+        
+    }
+    
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         updatePosts()
-        addView()
+        
+        
         
     }
-
     
+    func updateViews(){
+        let fixedWidth = postDetails.frame.size.width
+        postDetails.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.max))
+        let newSize = postDetails.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.max))
+        var newFrame = postDetails.frame
+        newFrame.size = CGSize(width: max(newSize.width, fixedWidth), height: newSize.height+10)
+        postDetails.frame = newFrame;
+        
+        let fixedWidth2 = descriptionView.frame.size.width
+        descriptionView.sizeThatFits(CGSize(width: fixedWidth2, height: CGFloat.max))
+        let newSize2 = descriptionView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.max))
+        var newFrame2 = descriptionView.frame
+        newFrame2.size = CGSize(width: max(newSize2.width, fixedWidth2), height: newSize.height + 30)
+        descriptionView.frame = newFrame2;
+        
+        locationView.frame.origin = CGPointMake(locationView.frame.origin.x, newSize.height + 398)
+        
+        socialView.frame.origin = CGPointMake(socialView.frame.origin.x, newSize.height + 609)
+        
+        amazonView.frame.origin = CGPointMake(amazonView.frame.origin.x, newSize.height + 720)
+        
+        if amazonView.hidden == false{
+        detailScrollView.contentSize.height = amazonView.frame.origin.y + 1140
+        mainView.hidden = false
+        } else {
+            detailScrollView.contentSize.height = newSize.height + 1010
+            self.getNewOffers()
+        }
+        
+        
+
+    }
+
+    override func viewDidDisappear(animated: Bool) {
+        
+        selectedPost.removeAll()
+    }
     func setVariables(){
         let post = selectedPost[0]
         postKey = post.postKey
@@ -256,18 +308,21 @@ class PostDetails: UIViewController {
     }
     
     func loadUI(){
-        loadWebView()
+        
         loadLabels()
         decodeImages()
         
-        DataService.dataService.CURRENT_USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
-            self.currentUser = snapshot.value.objectForKey("username") as! String
-            
-            //Add a view to selected listing
-            
-            self.setMapLocation()
+        DataService.dataService.CURRENT_USER_REF.observeSingleEventOfType(FIRDataEventType.Value, withBlock: { snapshot in
+            self.currentUserNameString = snapshot.value!.objectForKey("username") as! String
+            currentProfileImg = snapshot.value!.objectForKey("profileImage") as! String
+            self.ratingView.rating = Float(snapshot.value!.objectForKey("rating") as! String)!
             self.getSelectedUID()
             self.hideItems()
+            self.updateViews()
+            if self.key != FIRAuth.auth()?.currentUser?.uid{
+                self.setMapLocation()
+                self.loadWebView()
+            }
         })
         
         
@@ -277,13 +332,8 @@ class PostDetails: UIViewController {
         postDetails.frame = test
         
         postDetails.scrollEnabled = false
-        
-        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.Light)
-        let blurEffectView = UIVisualEffectView(effect: blurEffect)
-        blurEffectView.frame = self.view.bounds
-        self.blurView.addSubview(blurEffectView)
-        
-        updateFeedback(selectedUser!)
+        addView()
+       
         
        
 
@@ -291,35 +341,12 @@ class PostDetails: UIViewController {
     
     
     override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
+        
     }
     
     func getSelectedUID(){
-        DataService.dataService.USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
-            if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
-                
-                for snap in snapshots {
-                    let test = snap.value.objectForKey("username") as! String
-                    if (test == self.selectedUser){
-                        self.recieverUID = snap.key
-                    }
-                }
-            }
-            
-        })
-        
-        DataService.dataService.USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
-            if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
-                
-                for snap in snapshots {
-                    let test = snap.value.objectForKey("username") as! String
-                    if (test == self.currentUser){
-                        self.senderUID = snap.key
-                    }
-                }
-            }
-            
-        })
+        self.recieverUID = self.selectedPost[0].postUID
+        self.senderUID = (FIRAuth.auth()?.currentUser?.uid)!
     }
     
     
@@ -332,11 +359,10 @@ class PostDetails: UIViewController {
             delete.hidden = false
             message.hidden = true
             sold.hidden = false
-            amazonView.hidden = false
+            amazonView.hidden = true
             socialView.hidden = false
             locationView.hidden = false
             editButton.hidden = false
-            showProfileButton.hidden = true
             mapView.hidden = true
             offerButton.hidden = true
             
@@ -347,6 +373,7 @@ class PostDetails: UIViewController {
             
             detailScrollView.contentSize.height = 1110
         } else if previousVC == "UsersFeed"{
+            offerButton.hidden = false
             delete.hidden = true
             message.hidden = false
             sold.hidden = true
@@ -354,11 +381,10 @@ class PostDetails: UIViewController {
             socialView.hidden = false
             locationView.hidden = false
             editButton.hidden = true
-            offerButton.hidden = false
              extendOrRenew.hidden = true
             detailScrollView.contentSize.height = 1950
-            showProfileButton.hidden = true
         } else {
+            offerButton.hidden = false
             delete.hidden = true
             message.hidden = false
             sold.hidden = true
@@ -366,19 +392,17 @@ class PostDetails: UIViewController {
             socialView.hidden = false
             locationView.hidden = false
             editButton.hidden = true
-            offerButton.hidden = false
              extendOrRenew.hidden = true
             detailScrollView.contentSize.height = 1950
         }
         
    
-        if (postUser.text! == currentUser){
+        if (selectedPost[0].postUID == FIRAuth.auth()?.currentUser!.uid){
             delete.hidden = false
             message.hidden = true
             sold.hidden = false
             socialView.hidden = true
             editButton.hidden = false
-            showProfileButton.hidden = true
             locationView.hidden = true
             amazonView.hidden = true
             offerButton.hidden = true
@@ -442,7 +466,7 @@ class PostDetails: UIViewController {
         postType.text = "\(selectedType!)"
         postPrice.text = selectedPrice
         postDetails.text = selectedDetails
-        postDetails.font = UIFont(name: "Avenir", size: 13)
+        postDetails.font = UIFont(name: "Avenir", size: 15)
         
     }
     
@@ -479,34 +503,19 @@ class PostDetails: UIViewController {
         })
     }
     
-    func updateFeedback(userName : String){
-        DataService.dataService.USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
-            if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
-                
-                for snap in snapshots {
-                    let test = snap.value.objectForKey("username") as! String
-                    if (test == userName){
-                        self.ratingView.rating = Float(snap.value.objectForKey("rating") as! String)!
-                    }
-                }
-            }
-            
-        })
-        
-    }
+    
+    
 
-    
-    
     //Adding a view to the current listing if the click was from main feed or search
     func addView(){
         
         if previousVC != "Profile" {
-            DataService.dataService.CURRENT_USER_REF.observeSingleEventOfType(FEventType.Value, withBlock: { snapshot in
-                self.currentUser = snapshot.value.objectForKey("username") as! String
-                if self.selectedUser != self.currentUser{
+            DataService.dataService.CURRENT_USER_REF.observeSingleEventOfType(FIRDataEventType.Value, withBlock: { snapshot in
+                FIRAuth.auth()?.currentUser?.uid
+                if self.selectedPost[0].postUID != FIRAuth.auth()?.currentUser!.uid{
                     let updatedViews : Int = self.selectedViews! + 1
                     
-                    let selectedPostRef = DataService.dataService.POST_REF.childByAppendingPath(self.postKey)
+                    let selectedPostRef = DataService.dataService.POST_REF.child(self.postKey)
                     let nickname = ["views": updatedViews]
                     
                     selectedPostRef.updateChildValues(nickname)
@@ -557,9 +566,19 @@ class PostDetails: UIViewController {
     
     //Removes post using post key
     func deletePostCallBack(){
-        let selectedPostRef = DataService.dataService.POST_REF.childByAppendingPath(key)
+        let selectedPostRef = DataService.dataService.POST_REF.child(postKey)
         selectedPostRef.removeValue()
-        performSegueWithIdentifier("FinishedSegue", sender: self)
+        unwind()
+    }
+    
+    //Displays that the user is not signed into an account
+    func listingRemoved(title: String, message: String) {
+        let alertView = JSSAlertView().show(self, title: title, text: message)
+        alertView.addAction(goBack)
+    }
+
+    func goBack(){
+        unwind()
     }
     
     //Shows rate user alert view
@@ -573,11 +592,11 @@ class PostDetails: UIViewController {
     }
     
     func rateLater(){
-        let selectedPostRef = DataService.dataService.POST_REF.childByAppendingPath(self.key)
+        let selectedPostRef = DataService.dataService.POST_REF.child(self.key)
         selectedPostRef.updateChildValues([
             "postComplete": true,
             ])
-        performSegueWithIdentifier("FinishedSegue", sender: self)
+        unwind()
     }
     
     
@@ -604,27 +623,23 @@ class PostDetails: UIViewController {
     func renewListing(){
         let currentDate = NSDate()
         let experationDate = dateFormatter().stringFromDate(currentDate.dateByAddingTimeInterval(60*60*24*11))
-        let selectedPostRef = DataService.dataService.POST_REF.childByAppendingPath(key)
+        let selectedPostRef = DataService.dataService.POST_REF.child(postKey)
         selectedPostRef.updateChildValues([
             "postExpireDate": experationDate,
             ])
         
        
-        _ = JSSAlertView().show(
-            self,
-            title: "Listing Extended",
-            text: "Your listing has been extened and will expire in 10 days",
-            buttonText: "Dismiss"
-        )
+        extended()
     }
     
     
     func updatePosts(){
-        DataService.dataService.POST_REF.childByAppendingPath(key).observeEventType(.Value, withBlock: { snapshot in
+        self.view.endEditing(true)
+        DataService.dataService.POST_REF.child(key).observeSingleEventOfType(.Value, withBlock: { snapshot in
             self.selectedPost = []
             
             
-            if snapshot.children.allObjects is [FDataSnapshot] {
+            if snapshot.children.allObjects is [FIRDataSnapshot] {
                 
                 
                 if let postDictionary = snapshot.value as? Dictionary<String, AnyObject> {
@@ -650,10 +665,9 @@ class PostDetails: UIViewController {
         
         if (segue.identifier == "EditCurrentListing"){
             let camera : Camera = segue.destinationViewController as! Camera
-            camera.editKey = key
+            camera.editKey = postKey
             camera.previousScreen = "EditView"
             camera.orignalView = previousVC
-            
         }
         
         if segue.identifier == "showUsersProfileSegue"{
@@ -671,11 +685,11 @@ class PostDetails: UIViewController {
         if segue.identifier == "NewMessage"{
             
             let chatVc : ChatViewController = segue.destinationViewController as! ChatViewController
-            chatVc.senderId = DataService.dataService.USER_REF.authData.uid
+            chatVc.senderId = FIRAuth.auth()?.currentUser?.uid
             chatVc.recieverUsername = postUser.text!
             chatVc.senderDisplayName = ""
             chatVc.recieverUID = key
-            chatVc.ref = ref
+            chatVc.ref4 = ref
             chatVc.selectedTitle = selectedTitle!
             chatVc.selectedImage = selectedProfileImg!
             chatVc.selectedUser = selectedUser!
@@ -689,38 +703,116 @@ class PostDetails: UIViewController {
             
             let offersVC : Feedback = segue.destinationViewController as! Feedback
             offersVC.selectedTitle = selectedTitle!
+            offersVC.uid = senderUID
         }
 
     }
     
-    func sendOffer(){
+    func sendOfferText(offerTextString : String!){
         
-            let itemRef = DataService.dataService.USER_REF.childByAppendingPath(key).childByAppendingPath("offers").childByAutoId() // 1
+            let itemRef = DataService.dataService.USER_REF.child(key).child("offers").childByAutoId() // 1
         
             sendOfferRef = itemRef
       
             let offerItem = [ // 2
-                "senderUsername": currentUser,
+                "senderUsername": currentUserNameString,
+                "recieverUsername" : selectedUser,
+                "recieverImage" : selectedProfileImg,
                 "listingTitle": selectedTitle,
-                "offerText" : offerString.text,
+                "offerText" : offerTextString,
                 "offerChecked" : "false",
-                "currentProfileImage" : currentProfileImg
-                ]
+                "offerAccepted" : "false",
+                "offerDeclined" : "false",
+                "currentProfileImage" : currentProfileImg,
+                "senderUID" : senderUID,
+                "senderRating" : String(ratingView.rating),
+                "offerDate" : dateFormatter().stringFromDate(NSDate()),
+                "offerStatus" : "Delivered"
+        ]
         
         DataService.dataService.createNewOffer(offerItem)
         
-        blurView.hidden = true
-        makeOfferView.hidden = true
+        let itemRef2 = DataService.dataService.USER_REF.child(senderUID).child("offers").child(itemRef.key) // 1
+        sendOfferRef = itemRef2
+        
+        DataService.dataService.createNewOffer(offerItem)
+        
         self.view.endEditing(true)
         
-        _ = JSSAlertView().show(
-            self,
-            title: "Offer Sent",
-            text: "Your offer has been sent to \(selectedUser!)",
-            buttonText: "Dismiss"
-        )
+       success()
+    }
+    
+    func success(){
+        let alertView = SCLAlertView()
+        alertView.showSuccess("Offer Sent", subTitle: "Your offer has been sent to \(selectedUser!)")
+    }
+    
+    func extended(){
+        let alertView = SCLAlertView()
+        alertView.showSuccess("Listing Extended", subTitle: "You listing will be available for the next 10 days")
+    }
+    
+    var testing : String = "false"
+    var hasOffers : Bool = false
+    func getNewOffers(){
+        
+            hasOffers = false
+            DataService.dataService.CURRENT_USER_REF.child("offers").observeSingleEventOfType(.Value, withBlock: { snapshot in
+                // 3
+                self.allOffers = []
+                self.selectedOffers = []
+                self.newOffers = 0
+                print("new")
+                
+                if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
+                    for snap in snapshots{
+                        
+                        if let offersDictionary = snap.value as? Dictionary<String, AnyObject> {
+                            let key = snap.key
+                            let offer = Offers(key: key, dictionary: offersDictionary)
+                            self.allOffers.insert(offer, atIndex: 0)
+                        }
+                    }
+                    
+                    for offers in self.allOffers{
+                        if (offers.offerTitle == self.selectedTitle!){
+                            self.hasOffers = true
+                        }
+                        if (offers.offerTitle == self.selectedTitle!) && (offers.offerChecked == "false") {
+                            self.newOffers = self.newOffers + 1
+                            print("new")
+                            
+                        }
+                    }
+                    self.sold.setTitle("\(String(self.newOffers)) New Offers", forState: .Normal)
+                    self.mainView.hidden = false
+                    
+                }
+                
+                
+                if (!self.hasOffers) {
+                    self.sold.setTitle("No Offers", forState: .Normal)
+                    self.mainView.hidden = false
+                }
+                
+
+            })
+        
+
     }
     
     
+    func unwind(){
+       
+        if previousVC == "Profile"{
+            performSegueWithIdentifier("FinishedSegue", sender: self)
+        } else if previousVC == "UsersFeed"{
+            self.navigationController?.popViewControllerAnimated(true)
+        } else if previousVC == "Search"{
+            performSegueWithIdentifier("BackToSearchSegue", sender: self)
+        } else {
+            performSegueWithIdentifier("MainFeedUnwind", sender: self)
+        }
+    }
         
 }

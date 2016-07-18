@@ -9,12 +9,16 @@
 import UIKit
 import JSQMessagesViewController
 import Firebase
+import SCLAlertView
 
 
 class ChatViewController: JSQMessagesViewController {
-    var ref : Firebase!
-   
-    let ref2 = Firebase(url: "\(BASE_URL)/messages")
+    var ref4 : FIRDatabaseReference!
+    
+    var userIsTypingRef = ref.child("recent")
+    
+    let ref2 = ref.child("messages")
+    
     
     var messageDictionary: NSMutableDictionary = [:]
     
@@ -25,8 +29,8 @@ class ChatViewController: JSQMessagesViewController {
     
     var currentAvatar : String = String()
     var currentAvatarImage : UIImage?
+    var accepted = false
     
-    var usersTypingQuery: FQuery!
     
     var croppingEnabled: Bool = true
     var libraryEnabled: Bool = true
@@ -39,9 +43,10 @@ class ChatViewController: JSQMessagesViewController {
     var selectedImage : String = ""
     var selectedUser : String = ""
     var currentUser : String = ""
+    var previousScreen: String?
     
     
-    let rootRef = Firebase(url: BASE_URL)
+    let rootRef = ref
 
 
     var objects : [NSDictionary] = []
@@ -63,7 +68,17 @@ class ChatViewController: JSQMessagesViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        if previousScreen == "accepted"{
+            navigationController!.setNavigationBarHidden(false, animated:true)
+            let myBackButton:UIButton =
+                UIButton(type: UIButtonType.Custom) as UIButton
+            myBackButton.addTarget(self, action: #selector(acceptedMessageSent), forControlEvents: UIControlEvents.TouchUpInside)
+            myBackButton.setTitle("Back", forState: UIControlState.Normal)
+            myBackButton.setTitleColor(hexStringToUIColor("#2b3146"), forState: UIControlState.Normal)
+            myBackButton.sizeToFit()
+            let myCustomBackButtonItem:UIBarButtonItem = UIBarButtonItem(customView: myBackButton)
+            self.navigationItem.leftBarButtonItem  = myCustomBackButtonItem
+        }
  
         self.navigationController?.navigationBarHidden = false
         UIApplication.sharedApplication().statusBarStyle = .Default
@@ -82,25 +97,19 @@ class ChatViewController: JSQMessagesViewController {
 
         
         observeMessages()
+        //observeTyping()
       
     }
     
-    func openCamera()
-    {
-        let cameraViewController = CameraViewController(croppingEnabled: croppingEnabled, allowsLibraryAccess: libraryEnabled) { [weak self] image, asset in
-            self!.capturedImage = image!
-            self?.dismissViewControllerAnimated(true, completion: nil)
+    func acceptedMessageSent(){
+        if accepted {
+            performSegueWithIdentifier("BackToPost", sender: self)
+        } else {
+            navigationController?.popViewControllerAnimated(true)
         }
-        presentViewController(cameraViewController, animated: true, completion: nil)
+
     }
-    
-    func openLibrary(){
-        let libraryViewController = CameraViewController.imagePickerViewController(croppingEnabled) { image, asset in
-            self.capturedImage = image!
-            self.dismissViewControllerAnimated(true, completion: nil)
-        }
-        presentViewController(libraryViewController, animated: true, completion: nil)
-    }
+
 
     
     override func viewWillAppear(animated: Bool) {
@@ -151,11 +160,19 @@ class ChatViewController: JSQMessagesViewController {
         
         let message = messages[indexPath.item]
         if message.senderId == senderId {
-            return JSQMessagesAvatarImageFactory.avatarImageWithImage(UIImage(named: "Image2"), diameter: UInt(kJSQMessagesCollectionViewAvatarSizeDefault));
+            return JSQMessagesAvatarImageFactory.avatarImageWithImage(decodeString(currentProfileImg), diameter: UInt(kJSQMessagesCollectionViewAvatarSizeDefault));
         } else { //
-            return JSQMessagesAvatarImageFactory.avatarImageWithImage(UIImage(named: "Image1"), diameter: UInt(kJSQMessagesCollectionViewAvatarSizeDefault));
+            return JSQMessagesAvatarImageFactory.avatarImageWithImage(decodeString(avatar), diameter: UInt(kJSQMessagesCollectionViewAvatarSizeDefault));
         }
         
+    }
+    
+    func decodeString(img : String) -> UIImage{
+        let decodedData = NSData(base64EncodedString: img, options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters)
+        
+        let decodedimage = UIImage(data: decodedData!)
+        
+        return decodedimage! as UIImage
     }
     
     
@@ -168,14 +185,14 @@ class ChatViewController: JSQMessagesViewController {
     
         
     override func didPressAccessoryButton(sender: UIButton!) {
-        openCamera()
+    
     }
     
     
     override func didPressSendButton(button: UIButton!, withMessageText text: String!, senderId: String!,
                senderDisplayName: String!, date: NSDate!) {
         
-        let itemRef = ref2.childByAppendingPath(chatRoomID).childByAutoId() // 1
+        let itemRef = ref2.child(chatRoomID).childByAutoId() // 1
         let messageItem = [ // 2
             "text": text,
             "senderId": senderId,
@@ -188,16 +205,17 @@ class ChatViewController: JSQMessagesViewController {
         // 5
         finishSendingMessage()
         
-    
+        
+        
         
     }
     
     func observeMessages() {
-        ref2.childByAppendingPath(chatRoomID).observeEventType(.ChildAdded) { (snapshot: FDataSnapshot!) in
+        ref2.child(chatRoomID).observeEventType(.ChildAdded) { (snapshot: FIRDataSnapshot!) in
             // 3
             if snapshot.exists() {
-                let id = snapshot.value["senderId"] as! String
-                let text = snapshot.value["text"] as! String
+                let id = snapshot.value!["senderId"] as! String
+                let text = snapshot.value!["text"] as! String
                 
                 // 4
                 self.addMessage(id, text: text)
@@ -214,43 +232,6 @@ class ChatViewController: JSQMessagesViewController {
         super.textViewDidChange(textView)
         // If the text is not empty, the user is typing
         //isTyping = textView.text != ""
-    }
-    
-    
-    var userIsTypingRef: Firebase! // 1
-    private var localTyping = false // 2
-    var isTyping: Bool {
-        get {
-            return localTyping
-        }
-        set {
-            // 3
-            localTyping = newValue
-            userIsTypingRef.setValue(newValue)
-        }
-    }
-    
-    private func observeTyping() {
-        let typingIndicatorRef = rootRef.childByAppendingPath("typingIndicator")
-        userIsTypingRef = typingIndicatorRef.childByAppendingPath(senderId)
-        userIsTypingRef.onDisconnectRemoveValue()
-        
-        // 1
-        usersTypingQuery = typingIndicatorRef.queryOrderedByValue().queryEqualToValue(true)
-        
-        // 2
-        usersTypingQuery.observeEventType(.Value) { (data: FDataSnapshot!) in
-            
-            // 3 You're the only typing, don't show the indicator
-            if data.childrenCount == 1 && self.isTyping {
-                return
-            }
-            
-            // 4 Are there others typing?
-            self.showTypingIndicator = data.childrenCount > 0
-            self.scrollToBottomAnimated(true)
-        }
-
     }
     
         

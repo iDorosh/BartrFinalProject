@@ -2,6 +2,15 @@
 # platform :ios, '9.0'
 
 pod 'JSQMessagesViewController'
+pod 'ALCameraViewController' 
+pod 'SCLAlertView'
+pod 'Firebase'
+pod 'Firebase/Messaging’
+pod 'Firebase/Database'
+pod 'Firebase/DynamicLinks'
+pod 'Firebase/Auth'
+pod 'M13Checkbox'
+
 
 target 'Bartr' do
   # Comment this line if you're not using Swift and don't want to use dynamic frameworks

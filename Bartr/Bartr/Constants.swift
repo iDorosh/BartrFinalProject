@@ -9,11 +9,12 @@
 import Foundation
 import Firebase
 import UIKit
+import FirebaseDatabase
 
 //Data Base reference
 let BASE_URL = "https://vulkanbartr.firebaseio.com"
 
-var sendOfferRef = Firebase()
+var sendOfferRef = FIRDatabase.database().reference()
 
 var currentUserUID : String = ""
 var senderUserUID : String = ""
@@ -21,7 +22,7 @@ var currentUser : String = ""
 var currentProfileImg : String = ""
 
 private let dateFormat = "yyyyMMddHHmmss"
-var ref = Firebase(url: BASE_URL)
+var ref = FIRDatabase.database().reference()
 
 func dateFormatter() -> NSDateFormatter {
     let dateFormatter = NSDateFormatter()
@@ -31,9 +32,9 @@ func dateFormatter() -> NSDateFormatter {
 }
 
 func getUserInfo(){
-    DataService.dataService.CURRENT_USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
-        currentUser = snapshot.value.objectForKey("username") as! String
-        currentProfileImg = snapshot.value.objectForKey("profileImage") as! String
+    DataService.dataService.CURRENT_USER_REF.observeEventType(.Value, withBlock: { snapshot in
+        currentUser = snapshot.value!.objectForKey("username") as! String
+        currentProfileImg = snapshot.value!.objectForKey("profileImage") as! String
         
     })
 }
@@ -71,7 +72,7 @@ func elapsedTime(seconds: NSTimeInterval) -> String {
 }
 
 func DeleteRecentItem(recent : NSDictionary){
-    ref.childByAppendingPath("Recent").childByAppendingPath(recent["recentId"] as? String).removeValueWithCompletionBlock { (error, ref) in
+    ref.child("Recent").child((recent["recentId"] as? String)!).removeValueWithCompletionBlock { (error, ref) in
         if error != nil {
             print("Error deleting recent item: \(error)")
         }
@@ -91,16 +92,15 @@ func RestartRecentChat(recent : NSDictionary){
 
 func createRecent(userId : String, chatRoomId : String, members : [String], withUserUsername : String, withUseruserId : String, withTitle : String, withPImage : String){
     
-    ref.childByAppendingPath("Recent").queryOrderedByChild("chatRoomId").queryEqualToValue(chatRoomId).observeSingleEventOfType(.Value, withBlock: {
+    ref.child("Recent").queryOrderedByChild("chatRoomId").queryEqualToValue(chatRoomId).observeSingleEventOfType(.Value, withBlock: {
         snapshot in
         
         var createRecent = true
         
         if snapshot.exists() {
             
-            for recent in snapshot.value.allValues {
+            for recent in snapshot.value!.allValues {
                 if recent["userId"] as! String == NSUserDefaults.standardUserDefaults().valueForKey("uid") as! String {
-                    print("haskhdfkashfkjashdfjksadhfkashdfkjashdkfashdfkashdfsajdhfkjasdnvaskdnvasvb")
                     createRecent = false
                 }
                 
@@ -116,7 +116,7 @@ func createRecent(userId : String, chatRoomId : String, members : [String], with
 
 func createRecentItem(userId : String, chatRoomId : String, members : [String], withUserUsername : String, withUserId : String, withTitle : String, withPImage : String){
     
-    let recentRef = ref.childByAppendingPath("Recent").childByAutoId()
+    let recentRef = ref.child("Recent").childByAutoId()
     let recentId = recentRef.key
     let date = dateFormatter().stringFromDate(NSDate())
     
@@ -144,11 +144,11 @@ func createRecentItem(userId : String, chatRoomId : String, members : [String], 
 }
 
 func UpdateRecents(chatRoomID : String, lastMessage: String){
-    ref.childByAppendingPath("Recent").queryOrderedByChild("chatRoomID").queryEqualToValue(chatRoomID).observeSingleEventOfType(.Value, withBlock: {
+    ref.child("Recent").queryOrderedByChild("chatRoomID").queryEqualToValue(chatRoomID).observeSingleEventOfType(.Value, withBlock: {
         snapshot in
         
         if snapshot.exists() {
-            for recent in snapshot.value.allValues{
+            for recent in snapshot.value!.allValues{
                 UpdateRecentItem(recent as! NSDictionary, lastMessage: lastMessage)
             }
         }
@@ -166,7 +166,7 @@ func UpdateRecentItem(recent: NSDictionary, lastMessage: String) {
     
     let values = ["date" : date]
     
-    ref.childByAppendingPath("Recent").childByAppendingPath(recent["recentId"] as? String).updateChildValues(values as [NSObject : AnyObject])
+    ref.child("Recent").child((recent["recentId"] as? String)!).updateChildValues(values as [NSObject : AnyObject])
 }
 
 func getExperationDate(eDateString : String) -> String {
@@ -274,6 +274,14 @@ func hexStringToUIColor (hex:String) -> UIColor {
         blue: CGFloat(rgbValue & 0x0000FF) / 255.0,
         alpha: CGFloat(1.0)
     )
+}
+
+func decodeString(img : String) -> UIImage{
+    let decodedData = NSData(base64EncodedString: img, options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters)
+    
+    let decodedimage = UIImage(data: decodedData!)
+    
+    return decodedimage! as UIImage
 }
 
 

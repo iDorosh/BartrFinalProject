@@ -9,6 +9,8 @@
 import UIKit
 import Firebase
 import MapKit
+import SCLAlertView
+import Social
 
 class Summary: UIViewController {
     
@@ -41,13 +43,6 @@ class Summary: UIViewController {
     @IBOutlet weak var previewPrice: UILabel!
     @IBOutlet weak var postLabel: UIButton!
     
-    @IBOutlet weak var blurView: UIView!
-    
-    @IBOutlet weak var shareToSocialMedia: UIView!
-    
-    
-    
-    
     //Actions
     @IBAction func cancelButtonClicked(sender: UIButton) {
         self.performSegueWithIdentifier("MainFeedUnwind", sender: self)
@@ -69,8 +64,8 @@ class Summary: UIViewController {
     
     //Get Current User
     func getCurrentUser(){
-        DataService.dataService.CURRENT_USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
-            self.currentUser.text = snapshot.value.objectForKey("username") as? String
+        DataService.dataService.CURRENT_USER_REF.observeEventType(FIRDataEventType.Value, withBlock: { snapshot in
+            self.currentUser.text = snapshot.value!.objectForKey("username") as? String
             currentUserUID = snapshot.key
         })
     }
@@ -81,6 +76,7 @@ class Summary: UIViewController {
         previewTitle.text = pickedTitle
         previewLocation.text = pickedLocation
         previewDescription.text = pickedDescription
+        previewDescription.font = UIFont(name: "Avenir", size: 15)
         previewType.text = "\(pickedTypes)"
         previewPrice.text = pickedPrice
         if previousVC == "EditView"{
@@ -113,11 +109,6 @@ class Summary: UIViewController {
         getCurrentUser()
         loadLabels()
         loadLocation()
-        
-        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.Light)
-        let blurEffectView = UIVisualEffectView(effect: blurEffect)
-        blurEffectView.frame = self.view.bounds
-        self.blurView.addSubview(blurEffectView)
     }
 
     override func didReceiveMemoryWarning() {
@@ -134,11 +125,11 @@ class Summary: UIViewController {
             let postTitle = pickedTitle
             let postType = pickedTypes
             getCurrentDate()
-            DataService.dataService.CURRENT_USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
-                self.currentProfileImg = snapshot.value.objectForKey("profileImage") as! String
+            DataService.dataService.CURRENT_USER_REF.observeEventType(FIRDataEventType.Value, withBlock: { snapshot in
+                self.currentProfileImg = snapshot.value!.objectForKey("profileImage") as! String
                 self.getCurrentUser()
             
-            let selectedPostRef = DataService.dataService.POST_REF.childByAppendingPath(self.editKey)
+            let selectedPostRef = DataService.dataService.POST_REF.child(self.editKey)
             selectedPostRef.updateChildValues([
                 "postText": postText,
                 "postTitle": postTitle,
@@ -161,7 +152,7 @@ class Summary: UIViewController {
     //Encode listing image to send as a string to Firebase
     func encodePhoto(image: UIImage){
         var data: NSData = NSData()
-        data = UIImageJPEGRepresentation(image,0.5)!
+        data = UIImageJPEGRepresentation(image,0.0)!
         base64String = data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions.Encoding64CharacterLineLength)
     }
     
@@ -203,8 +194,8 @@ class Summary: UIViewController {
         let experationDate = dateFormatter().stringFromDate(currentDate.dateByAddingTimeInterval(60*60*24*11))
         getCurrentDate()
         
-        DataService.dataService.CURRENT_USER_REF.observeSingleEventOfType(FEventType.Value, withBlock: { snapshot in
-            self.currentProfileImg = snapshot.value.objectForKey("profileImage") as! String
+        DataService.dataService.CURRENT_USER_REF.observeSingleEventOfType(FIRDataEventType.Value, withBlock: { snapshot in
+            self.currentProfileImg = snapshot.value!.objectForKey("profileImage") as! String
             self.getCurrentUser()
             
     
@@ -229,10 +220,86 @@ class Summary: UIViewController {
                 ]
         
                 DataService.dataService.createNewPost(newpost)
-                self.blurView.hidden = false
-                self.shareToSocialMedia.hidden = false
+                self.success()
                 self.tabBarController?.tabBar.hidden = false
             }
         })
+    }
+    
+    
+    func success(){
+        let alertView = SCLAlertView()
+        alertView.addButton("Twitter") {self.postToTwitter()}
+        alertView.addButton("Facebook", target: self, selector: #selector (postToFacebook))
+        alertView.addButton("Instagram", target: self, selector: #selector (postToInstagram))
+        alertView.addButton("Done") { self.performSegueWithIdentifier("MainFeedUnwind", sender: self) }
+        alertView.showCloseButton = false
+        alertView.showSuccess("Listed", subTitle: "Would you like to share your new post on social media?")
+    }
+    
+    func noAccount(){
+        let alertView = SCLAlertView()
+        alertView.addButton("Sign In", target: self, selector: #selector (openSettings))
+        alertView.showError("No Account", subTitle: "Please sign into your account")
+    }
+    
+    func openSettings(){
+        let settingsURL = NSURL(string: UIApplicationOpenSettingsURLString)
+        if let url = settingsURL{
+            UIApplication.sharedApplication().openURL(url)
+        }
+    }
+    
+    func postToTwitter(){
+        if SLComposeViewController.isAvailableForServiceType(SLServiceTypeTwitter){
+            let tweetController = SLComposeViewController(forServiceType : SLServiceTypeTwitter)
+            
+            tweetController.setInitialText("Check out my new listing on Bartr!")
+            
+            tweetController.completionHandler = { (result:SLComposeViewControllerResult) -> Void in
+                switch result {
+                case SLComposeViewControllerResult.Cancelled:
+                    self.performSegueWithIdentifier("MainFeedUnwind", sender: self)
+                    break
+                    
+                case SLComposeViewControllerResult.Done:
+                    self.performSegueWithIdentifier("MainFeedUnwind", sender: self)
+                    break
+                }
+            }
+
+            
+            self.presentViewController(tweetController, animated: true, completion: nil)
+        } else {
+            noAccount()
+        }
+    }
+    
+    func postToFacebook(){
+        if SLComposeViewController.isAvailableForServiceType(SLServiceTypeFacebook){
+            let postController = SLComposeViewController(forServiceType : SLServiceTypeFacebook)
+            
+            postController.setInitialText("Check out my new listing on Bartr!")
+            
+            postController.completionHandler = { (result:SLComposeViewControllerResult) -> Void in
+                switch result {
+                case SLComposeViewControllerResult.Cancelled:
+                    self.performSegueWithIdentifier("MainFeedUnwind", sender: self)
+                    break
+                    
+                case SLComposeViewControllerResult.Done:
+                    self.performSegueWithIdentifier("MainFeedUnwind", sender: self)
+                    break
+                }
+            }
+            
+            self.presentViewController(postController, animated: true, completion: nil)
+        } else {
+            noAccount()
+        }
+    }
+    
+    func postToInstagram(){
+        print("Instagram")
     }
 }

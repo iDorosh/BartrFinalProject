@@ -8,6 +8,7 @@
 
 import UIKit
 import Firebase
+import FirebaseDatabase
 
 class Chat: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
@@ -19,6 +20,7 @@ class Chat: UIViewController, UITableViewDataSource, UITableViewDelegate {
     var chatRoomID : String = ""
     
     var selectedUsename : String = ""
+    var profileImage = String()
     
     
     //Back to Chat Action
@@ -31,8 +33,8 @@ class Chat: UIViewController, UITableViewDataSource, UITableViewDelegate {
         super.viewDidLoad()
         senderUID = NSUserDefaults.standardUserDefaults().valueForKey("uid") as! String
         
-            DataService.dataService.CURRENT_USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
-                self.currentUser = snapshot.value.objectForKey("username") as! String
+            DataService.dataService.CURRENT_USER_REF.observeEventType(FIRDataEventType.Value, withBlock: { snapshot in
+                self.currentUser = snapshot.value!.objectForKey("username") as! String
                 
             })
     
@@ -53,11 +55,11 @@ class Chat: UIViewController, UITableViewDataSource, UITableViewDelegate {
     }
     
     func getUID(){
-        DataService.dataService.USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
-            if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
+        DataService.dataService.USER_REF.observeEventType(FIRDataEventType.Value, withBlock: { snapshot in
+            if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
                 
                 for snap in snapshots {
-                    let test = snap.value.objectForKey("username") as! String
+                    let test = snap.value!.objectForKey("username") as! String
                     if (test == self.currentUser){
                         self.senderUID = snap.key
                     }
@@ -82,6 +84,7 @@ class Chat: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath){
         let recent = recents[indexPath.row]
+        profileImage = (recent.objectForKey("usersProfileImage") as? String)!
         for userId in recent["members"] as! [String] {
             
             if userId != NSUserDefaults.standardUserDefaults().valueForKey("uid") as! String {
@@ -115,28 +118,31 @@ class Chat: UIViewController, UITableViewDataSource, UITableViewDelegate {
       
         super.prepareForSegue(segue, sender: sender)
         let chatVc : ChatViewController = segue.destinationViewController as! ChatViewController
-        chatVc.senderId = DataService.dataService.USER_REF.authData.uid
+        chatVc.senderId = FIRAuth.auth()?.currentUser?.uid
         chatVc.senderDisplayName = ""
         chatVc.recieverUsername = selectedUsename
         chatVc.chatRoomID = chatRoomID
         chatVc.previous = "TBLV"
+        chatVc.avatar = profileImage
        
     }
     
     func updateTableView(){
-        let ref = Firebase(url: BASE_URL)
-        
-   
-        ref.childByAppendingPath("Recent").queryOrderedByChild("userId").queryEqualToValue(senderUID).observeEventType(.Value, withBlock: {
+        ref.child("Recent").queryOrderedByChild("userId").queryEqualToValue(senderUID).observeEventType(.Value, withBlock: {
             snapshot in
                 self.recents.removeAll()
             
             if snapshot.exists() {
-                let sorted = (snapshot.value.allValues as NSArray).sortedArrayUsingDescriptors([NSSortDescriptor(key : "date", ascending: false)])
+                let sorted = (snapshot.value!.allValues as NSArray).sortedArrayUsingDescriptors([NSSortDescriptor(key : "date", ascending: false)])
                 
                 for recent in sorted {
                     self.recents.append(recent as! NSDictionary)
                 }
+            }
+            if self.recents.isEmpty {
+                self.tabletView.hidden = true
+            } else {
+               self.tabletView.hidden = false
             }
             self.tabletView.reloadData()
         })

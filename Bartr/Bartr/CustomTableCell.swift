@@ -8,12 +8,13 @@
 
 import UIKit
 import Firebase
+import FirebaseDatabase
 
 class CustomTableCell: UITableViewCell {
 
     //Data
     var post: Post!
-    var voteRef: Firebase!
+    var voteRef: FIRDatabaseReference!
     
     
     @IBOutlet weak var ratingView: FloatRatingView!
@@ -28,7 +29,9 @@ class CustomTableCell: UITableViewCell {
     @IBOutlet weak var profileImg: UIImageView!
     @IBOutlet weak var timeStamp: UILabel!
     @IBOutlet weak var price: UILabel!
-    @IBOutlet weak var bartrCompleteImg: UIImageView!
+    
+    @IBOutlet weak var bartrCompleteImg: UILabel!
+    
     
    @IBOutlet weak var expirationDate: UILabel!
     
@@ -84,13 +87,13 @@ class CustomTableCell: UITableViewCell {
     }
     
     func updateFeedback(userName : String){
-        DataService.dataService.USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
-            if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
+        DataService.dataService.USER_REF.observeEventType(FIRDataEventType.Value, withBlock: { snapshot in
+            if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
                 
                 for snap in snapshots {
-                    let test = snap.value.objectForKey("username") as! String
+                    let test = snap.value!.objectForKey("username") as! String
                     if (test == userName){
-                        self.ratingView.rating = Float(snap.value.objectForKey("rating") as! String)!
+                        self.ratingView.rating = Float(snap.value!.objectForKey("rating") as! String)!
                     }
                 }
             }

@@ -8,9 +8,18 @@
 
 import UIKit
 import Firebase
+import ALCameraViewController
+import SCLAlertView
+import FirebaseDatabase
 
-class EditProfile: UIViewController {
+class EditProfile: UIViewController, UITextFieldDelegate {
     @IBAction func backToEditProfile(segue: UIStoryboardSegue){}
+    
+    var usernameExists = false
+    
+    var users : [String] = []
+    
+    var alertController = UIAlertController()
     
     var croppingEnabled: Bool = true
     var libraryEnabled: Bool = true
@@ -19,6 +28,17 @@ class EditProfile: UIViewController {
     var imagePicked : Bool = false
     var currentEmail : String = ""
     var currentPasswordString : String = ""
+    
+    var defaultColor = UIColor()
+    var textColor = UIColor()
+    
+    @IBOutlet weak var usernameError: UILabel!
+    @IBOutlet weak var emailError: UILabel!
+    @IBOutlet weak var currentPasswordError: UILabel!
+    @IBOutlet weak var newPasswordError: UILabel!
+    
+    @IBOutlet weak var cofirmPasswordError: UILabel!
+    
     
     //Variables
     var currentUser : String = String()
@@ -47,9 +67,210 @@ class EditProfile: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        currentEmail = email.placeholder!
+        alertController = showLoading("Saving Changes...")
+        getUsers()
+        userName.delegate = self
+        email.delegate = self
+        currentPassword.delegate = self
+        newPassword.delegate = self
+        confirmPassword.delegate = self
+        defaultColor = userName.backgroundColor!
+        textColor = userName.textColor!
+        
+        userName.addTarget(self, action: #selector(self.textViewDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
+        email.addTarget(self, action: #selector(self.textViewDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
+
+        currentPassword.addTarget(self, action: #selector(self.textViewDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
+
+        newPassword.addTarget(self, action: #selector(self.textViewDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
+
+        confirmPassword.addTarget(self, action: #selector(self.textViewDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
+
+        
         getUserData()
     }
+    
+    func textFieldDidBeginEditing(textField: UITextField) {
+        print("clicked")
+        if textField === userName {
+            print("email")
+            usernameError.text = ""
+            textField.layer.borderColor = defaultColor.CGColor
+        }
+        
+    }
+    
+    func textFieldDidEndEditing(textField: UITextField) {
+        if textField === email{
+            if isValidEmail(email.text!){
+                setGoodToGo(email)
+            } else if textField === email && textField.text != "" {
+                setError(email)
+            }
+        
+        }
+        if textField === userName {
+            var uExists : Bool = false
+            var length : Bool = false
+            var space : Bool = false
+            
+            let trimmedString = textField.text?.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+            
+            if textField === userName && trimmedString == ""  {
+                textField.text = ""
+            }
+            
+            if users.contains(userName.text!.lowercaseString){
+                uExists = true
+                usernameError.text = "username taken"
+            } else {
+                if userName.text != "" {
+                usernameError.text = "ok!"
+                }
+            }
+            
+            if userName.text?.characters.count > 18 {
+                length = true
+                usernameError.text = "username long"
+            }
+            
+            
+            if userName.text?.characters.count < 6 && userName.text != ""{
+                usernameError.text = "username short"
+                //userNameRequirements.textColor = hexStringToUIColor("#f27163")
+                //userNameRequirements.text = "Username to short"
+            }
+            
+            for c in userName.text!.characters {
+                if c == " "{
+                    space = true
+                    usernameError.text = "no spaces"
+                }
+            }
+            
+            //userNameRequirements.textColor = textColor
+            //userNameRequirements.text = "6-18 Characters, No Spaces"
+            
+            if userName.text?.characters.count < 6 && userName.text != ""{
+                usernameError.text = "username short"
+                //userNameRequirements.textColor = hexStringToUIColor("#f27163")
+                //userNameRequirements.text = "Username to short"
+            }
+            
+            
+            if uExists {
+                //userNameRequirements.textColor = hexStringToUIColor("#f27163")
+                //userNameRequirements.text = "Username already exists"
+            }
+            
+            if space {
+                //userNameRequirements.textColor = hexStringToUIColor("#f27163")
+                //userNameRequirements.text = "Contains spaces"
+            }
+            
+            if length {
+                //userNameRequirements.textColor = hexStringToUIColor("#f27163")
+                //userNameRequirements.text = "Over 18 characters"
+                
+            }
+            
+            if userName.text == "" {
+                //userNameRequirements.textColor = hexStringToUIColor("#f27163")
+                //userNameRequirements.text = "Username empty"
+            }
+
+        }
+        
+    }
+    
+    func textViewDidChange(textView: UITextView) {
+        
+    
+        
+        if textView === newPassword{
+            var length : Bool = false
+            var space : Bool = false
+            
+            if newPassword.text?.characters.count > 6 {
+                setGoodToGo(newPassword)
+            }
+            if newPassword.text?.characters.count > 18 {
+                length = true
+                setError(newPassword)
+            }
+            
+            
+            if newPassword.text?.characters.count < 6 {
+                textView.layer.borderColor = defaultColor.CGColor
+            }
+            
+            
+            
+            for c in newPassword.text!.characters {
+                if c == " "{
+                    space = true
+                    setError(newPassword)
+                }
+            }
+            
+            if newPassword.text?.characters.count < 6 {
+                textView.layer.borderColor = defaultColor.CGColor
+            }
+            
+            //newPassword.textColor = textColor
+            //newPassword.text = "6-18 Characters, No Spaces"
+            
+            if space {
+                //newPassword.textColor = hexStringToUIColor("#f27163")
+                //newPassword.text = "Contains space"
+            }
+            
+            if length {
+                //passwordRequirements.textColor = hexStringToUIColor("#f27163")
+                //passwordRequirements.text = "Over 18 characters"
+                
+            }
+
+        }
+        
+        if textView === confirmPassword{
+            if confirmPassword.text != newPassword.text{
+                setError(confirmPassword)
+                //confirmPasswordLabel.textColor = hexStringToUIColor("#f27163")
+                //confirmPasswordLabel.text = "Passwords don't match"
+            } else {
+                setGoodToGo(confirmPassword)
+                //confirmPasswordLabel.text = ""
+            }
+
+        }
+    
+    }
+    
+    func setError(textField : UITextField){
+        textField.layer.borderColor = hexStringToUIColor("#f27163").CGColor
+        textField.layer.cornerRadius = 2
+        textField.layer.masksToBounds = true
+        textField.layer.borderWidth = 1
+    }
+    
+    func setGoodToGo(textField : UITextField){
+        textField.layer.borderColor = defaultColor.CGColor
+        textField.layer.cornerRadius = 2.0
+        textField.layer.masksToBounds = true
+        textField.layer.borderWidth = 1
+    }
+
+
+    func isValidEmail(testStr:String) -> Bool {
+        // print("validate calendar: \(testStr)")
+        let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
+        
+        let emailTest = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
+        return emailTest.evaluateWithObject(testStr)
+    }
+
+    
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -57,15 +278,15 @@ class EditProfile: UIViewController {
     
     //Fill in current users info
     func getUserData() -> Void {
-        DataService.dataService.CURRENT_USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
+        DataService.dataService.CURRENT_USER_REF.observeEventType(FIRDataEventType.Value, withBlock: { snapshot in
             
             currentUserUID = snapshot.key
-            self.currentUser = snapshot.value.objectForKey("username") as! String
+            self.currentUser = snapshot.value!.objectForKey("username") as! String
             //let currentEmail = snapshot.value.objectForKey("email") as! String
-            let currentProfileImg = snapshot.value.objectForKey("profileImage") as! String
+            let currentProfileImg = snapshot.value!.objectForKey("profileImage") as! String
             
-            let userEmail : String = snapshot.value.objectForKey("email") as! String
-            
+            let userEmail : String = snapshot.value!.objectForKey("email") as! String
+            self.currentEmail = userEmail
             let decodedData = NSData(base64EncodedString: currentProfileImg, options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters)
             
             let decodedimage = UIImage(data: decodedData!)
@@ -100,9 +321,11 @@ class EditProfile: UIViewController {
     }
     
     func updateFirebase(){
+        self.view.endEditing(true)
+        self.presentViewController(alertController, animated: true, completion: nil)
         var updatePost : Bool = false
         encodePhoto(userProfileImg.image!)
-        let selectedPostRef = DataService.dataService.USER_REF.childByAppendingPath(currentUserUID)
+        let selectedPostRef = DataService.dataService.USER_REF.child(currentUserUID)
         if self.userName.text != "" {
             selectedPostRef.updateChildValues([
                 "username" : self.userName.text!,
@@ -118,25 +341,30 @@ class EditProfile: UIViewController {
         }
         
         if self.currentPassword.text != "" && self.newPassword.text != "" && self.confirmPassword.text != "" {
+            changePassword()
         }
         
+        
+        
         if self.email.text != "" {
-            updateEmail(self.email.text!, currentPassword: "password")
+            enterPassword()
         }
+ 
         
         if updatePost{
             updatePosts()
         }
     }
     
+    
     func updatePosts(){
-        DataService.dataService.POST_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
-            if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
+        DataService.dataService.POST_REF.observeSingleEventOfType(FIRDataEventType.Value, withBlock: { snapshot in
+            if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
                 
                 for snap in snapshots {
-                    let test = snap.value.objectForKey("postUID") as! String
+                    let test = snap.value!.objectForKey("postUID") as! String
                     if (test == currentUserUID){
-                        let selectedPostRef = DataService.dataService.POST_REF.childByAppendingPath(snap.key)
+                        let selectedPostRef = DataService.dataService.POST_REF.child(snap.key)
                         
                         if self.userName.text != "" {
                             selectedPostRef.updateChildValues([
@@ -161,13 +389,13 @@ class EditProfile: UIViewController {
     }
     
     func updateRecent(){
-        DataService.dataService.BASE_REF.childByAppendingPath("Recent").observeEventType(FEventType.Value, withBlock: { snapshot in
-            if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
+        DataService.dataService.BASE_REF.child("Recent").observeSingleEventOfType(FIRDataEventType.Value, withBlock: { snapshot in
+            if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
                 
                 for snap in snapshots {
-                    let test = snap.value.objectForKey("withUserUserId") as! String
+                    let test = snap.value!.objectForKey("withUserUserId") as! String
                     if (test == currentUserUID){
-                        let selectedPostRef = DataService.dataService.BASE_REF.childByAppendingPath("Recent/\(snap.key)")
+                        let selectedPostRef = DataService.dataService.BASE_REF.child("Recent/\(snap.key)")
                         
                         if self.userName.text != "" {
                             selectedPostRef.updateChildValues([
@@ -184,10 +412,39 @@ class EditProfile: UIViewController {
                     }
                 }
             }
-            self.emptyFields()
-            
+            self.alertController.dismissViewControllerAnimated(true, completion: nil)
+            self.success()
         })
     }
+    
+   
+    func setFirstResponder(){
+        performSegueWithIdentifier("backtoProfileSegue", sender: self)
+    }
+    
+
+    func success(){
+        let alertView = SCLAlertView()
+        alertView.addButton("Done", target:self, selector:#selector(EditProfile.setFirstResponder))
+
+        alertView.showCloseButton = false
+        
+        alertView.showSuccess("Success", subTitle: "Your profile has been updated")
+    }
+    
+    func enterPassword(){
+        self.alertController.dismissViewControllerAnimated(true, completion: nil)
+        let alert = SCLAlertView()
+        alert.showCloseButton = false
+        let txt = alert.addTextField("Enter Password")
+        alert.addButton("Change Email") {
+            self.presentViewController(self.alertController, animated: true, completion: nil)
+            self.updateEmail(self.email.text! , currentPassword: txt.text!)
+        }
+        alert.showEdit("Change Email", subTitle: "Please enter current password to change email")
+    }
+
+    
     
     
     func emptyFields(){
@@ -196,36 +453,50 @@ class EditProfile: UIViewController {
         currentPassword.text = ""
         newPassword.text = ""
         confirmPassword.text = ""
-        view.endEditing(true)
+        
         
     }
     
     func updateEmail(newEmail : String, currentPassword: String) -> String {
-        let ref = Firebase(url: BASE_URL);
         var confirmationString : String = ""
         
-        ref.changeEmailForUser(currentEmail, password: currentPassword, toNewEmail: newEmail) { error in
+        FIRAuth.auth()?.currentUser?.updateEmail(newEmail, completion: { (error) in
             if error != nil {
-                confirmationString = "\(error.code.description)"
+                confirmationString = "\(error)"
+                self.alertController.dismissViewControllerAnimated(true, completion: nil)
+                self.fail()
+                print(confirmationString)
             } else {
-                confirmationString = "Success"
+                let selectedPostRef = DataService.dataService.USER_REF.child(currentUserUID)
+                if self.email.text != "" {
+                    selectedPostRef.updateChildValues([
+                        "email" : self.email.text!,
+                        ], withCompletionBlock: { (error, Firebase) in
+                            self.alertController.dismissViewControllerAnimated(true, completion: nil)
+                            self.success()
+                    })
+                }
             }
 
-        }
+        })
+        
+       
         return confirmationString
     }
     
     func changePassword() -> String{
         var confirmationString : String = ""
-            let ref = Firebase(url: BASE_URL)
-            ref.changePasswordForUser(email.placeholder, fromOld: currentPassword.text, toNew: newPassword.text , withCompletionBlock: { error in
-                    if error != nil {
-                        confirmationString = "\(error.code.description)"
-                    } else {
-                        confirmationString = "Success"
-                    }
-                self.emptyFields()
-        })
+            FIRAuth.auth()?.currentUser?.updatePassword(newPassword.text!, completion: { (error) in
+                if error != nil {
+                    confirmationString = "\(error!.code.description)"
+                    self.alertController.dismissViewControllerAnimated(true, completion: nil)
+                    self.fail()
+                } else {
+                    self.alertController.dismissViewControllerAnimated(true, completion: nil)
+                    self.success()
+                }
+
+                })
         
         return confirmationString
     }
@@ -237,18 +508,25 @@ class EditProfile: UIViewController {
         base64String = data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions.Encoding64CharacterLineLength)
     }
     
-    
-    
-
-    /*
-    let ref = Firebase(url: "https://<YOUR-FIREBASE-APP>.firebaseio.com")
-    ref.changePasswordForUser("bobtony@example.com", fromOld: "correcthorsebatterystaple",
-    toNew: "batteryhorsestaplecorrect", withCompletionBlock: { error in
-    if error != nil {
-    // There was an error processing the request
-    } else {
-    // Password changed successfully
+    func getUsers(){
+        DataService.dataService.USER_REF.observeSingleEventOfType(FIRDataEventType.Value, withBlock: { snapshot in
+            if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
+                self.usernameExists = false
+                for snap in snapshots {
+                    let test = snap.value!.objectForKey("username") as! String
+                    self.users.append(test.lowercaseString)
+                }
+            }
+        })
     }
-    })
- */
+
+    
+    func fail(){
+        let alertView = SCLAlertView()
+        alertView.addButton("Done", target:self, selector:#selector(EditProfile.setFirstResponder))
+        
+        alertView.showCloseButton = false
+        
+        alertView.showWarning("Error", subTitle: "Something went wrong")
+    }
 }

@@ -89,7 +89,7 @@ class UsersProfile: UIViewController, UITableViewDataSource {
             self.allPosts = []
             self.userPosts = []
             
-            if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
+            if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
                 for snap in snapshots {
                     if let postDictionary = snap.value as? Dictionary<String, AnyObject> {
                         let key = snap.key
@@ -118,14 +118,14 @@ class UsersProfile: UIViewController, UITableViewDataSource {
     
 
     func updateFeedback(){
-        DataService.dataService.USER_REF.observeEventType(FEventType.Value, withBlock: { snapshot in
-            if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
+        DataService.dataService.USER_REF.observeEventType(FIRDataEventType.Value, withBlock: { snapshot in
+            if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
                 
                 for snap in snapshots {
-                    let test = snap.value.objectForKey("username") as! String
+                    let test = snap.value!.objectForKey("username") as! String
                     if (test == self.usersName){
-                        self.floatRating.rating = Float(snap.value.objectForKey("rating") as! String)!
-                        self.ratingLabel.text = "\(snap.value.objectForKey("rating") as! String) Star Rating"
+                        self.floatRating.rating = Float(snap.value!.objectForKey("rating") as! String)!
+                        self.ratingLabel.text = "\(snap.value!.objectForKey("rating") as! String) Star Rating"
                     }
                 }
             }

@@ -7,6 +7,11 @@
 //
 
 import UIKit
+import SCLAlertView
+import Firebase
+import FirebaseDatabase
+import FirebaseMessaging
+
 
 @UIApplicationMain
 
@@ -19,7 +24,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
        
         NSThread.sleepForTimeInterval(2.0);
-        
+      
         /*
         let bounds: CGRect = UIScreen.mainScreen().bounds
         let screenHeight: NSNumber = bounds.size.height
@@ -65,13 +70,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }*/
 
         // Override point for customization after application launch.
+        FIRApp.configure()
+        
+
+        
+        
         UIApplication.sharedApplication().statusBarHidden = false
         UIApplication.sharedApplication().statusBarStyle = .LightContent
         
         var mainView: UIStoryboard!
         mainView = UIStoryboard(name: "Main", bundle: nil)
         
-        if NSUserDefaults.standardUserDefaults().valueForKey("uid") != nil && DataService.dataService.CURRENT_USER_REF.authData != nil {
+        if NSUserDefaults.standardUserDefaults().valueForKey("uid") != nil && FIRAuth.auth()?.currentUser != nil {
             let viewcontroller : UIViewController = mainView.instantiateViewControllerWithIdentifier("MainTabController") as UIViewController
             self.window!.rootViewController = viewcontroller
         } else {
@@ -79,8 +89,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             self.window!.rootViewController = viewcontroller
         }
         
+        let settings: UIUserNotificationSettings =
+        UIUserNotificationSettings(forTypes: [.Alert, .Badge, .Sound], categories: nil)
+        application.registerUserNotificationSettings(settings)
+        application.registerForRemoteNotifications()
+        
         return true
     }
+    
 
     func applicationWillResignActive(application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
@@ -102,6 +118,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationWillTerminate(application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+    }
+    
+  
+    
+    // NOTE: Need to use this when swizzling is disabled
+    func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData) {
+        
+        FIRInstanceID.instanceID().setAPNSToken(deviceToken, type: FIRInstanceIDAPNSTokenType.Sandbox)
+    }
+    
+    func tokenRefreshNotification(notification: NSNotification) {
+        // NOTE: It can be nil here
+        let refreshedToken = FIRInstanceID.instanceID().token()
+        print("InstanceID token: \(refreshedToken)")
+        
+        connectToFcm()
+    }
+    
+    func connectToFcm() {
+        FIRMessaging.messaging().connectWithCompletion { (error) in
+            if (error != nil) {
+                print("Unable to connect with FCM. \(error)")
+            } else {
+                print("Connected to FCM.")
+            }
+        }
+    }
+    
+   func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject]) {
+        print(userInfo)
     }
 
 

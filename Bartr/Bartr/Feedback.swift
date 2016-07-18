@@ -18,6 +18,8 @@ class Feedback: UIViewController {
     var postKey : String = String()
     var previousSegue : String = String()
     var selectedTitle : String = String()
+    var selectedImage : String = String()
+    var uid : String = String()
     
    
     @IBAction func backButton(sender: UIButton) {
@@ -29,7 +31,7 @@ class Feedback: UIViewController {
     }
     
     @IBAction func sendFeedBack(sender: UIButton) {
-        let selectedPostRef = DataService.dataService.POST_REF.childByAppendingPath(postKey)
+        let selectedPostRef = DataService.dataService.POST_REF.child(postKey)
         selectedPostRef.removeValue()
         performSegueWithIdentifier("BackToProfile", sender: self)
     }
@@ -78,12 +80,12 @@ class Feedback: UIViewController {
     }
     
     func observeOffers() {
-        DataService.dataService.CURRENT_USER_REF.childByAppendingPath("offers").observeEventType(.Value, withBlock: { snapshot in
+        DataService.dataService.CURRENT_USER_REF.child("offers").observeEventType(.Value, withBlock: { snapshot in
             // 3
             self.allOffers = []
             self.selectedOffers = []
             
-        if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
+        if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
                 for snap in snapshots{
                     
                     if let offersDictionary = snap.value as? Dictionary<String, AnyObject> {
@@ -108,6 +110,8 @@ class Feedback: UIViewController {
         if (segue.identifier == "ViewOfferSegue"){
             let offer : ViewOffers = segue.destinationViewController as! ViewOffers
             offer.offer = viewOffer
+            offer.uid = uid
+            offer.postKey = postKey
         }
 
     }
