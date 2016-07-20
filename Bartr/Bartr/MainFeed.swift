@@ -153,7 +153,7 @@ class MainFeed: UIViewController, UITableViewDataSource {
     
     //Update Firebase and Table View
     func updatePosts(){
-        DataService.dataService.POST_REF.observeEventType(.Value, withBlock: { snapshot in
+        DataService.dataService.POST_REF.observeSingleEventOfType(.Value, withBlock: { snapshot in
             self.posts = []
             self.hideCompleteSales = []
             

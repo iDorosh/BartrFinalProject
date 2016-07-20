@@ -54,7 +54,6 @@ PODS:
   - JSQMessagesViewController (7.2.0):
     - JSQSystemSoundPlayer (~> 2.0.1)
   - JSQSystemSoundPlayer (2.0.1)
-  - LNRSimpleNotifications (0.4.1)
   - M13Checkbox (2.1.2)
   - SCLAlertView (0.5.4)
 
@@ -66,7 +65,6 @@ DEPENDENCIES:
   - Firebase/DynamicLinks
   - Firebase/Messaging
   - JSQMessagesViewController
-  - LNRSimpleNotifications
   - M13Checkbox
   - SCLAlertView
 
@@ -87,10 +85,9 @@ SPEC CHECKSUMS:
   GoogleUtilities: 56c5ac05b7aa5dc417a1bb85221a9516e04d7032
   JSQMessagesViewController: 73cab48aa92fc2d512f3b6724f3425cc47a19eb5
   JSQSystemSoundPlayer: c5850e77a4363ffd374cd851154b9af93264ed8d
-  LNRSimpleNotifications: a4916ab314c21f75876ffc1168d91a7580a20166
   M13Checkbox: fbc53145e3ca8ecd1c444a76439bdc0ddb17b008
   SCLAlertView: 081f824b17b7cf41057159535591f4d6fc8acde3
 
-PODFILE CHECKSUM: 3e706b8f340caa9d34dae26b34c9bb66561b07dc
+PODFILE CHECKSUM: 0b22153bdedd310a7fa28e26ed1639f2c79e0677
 
 COCOAPODS: 1.0.1

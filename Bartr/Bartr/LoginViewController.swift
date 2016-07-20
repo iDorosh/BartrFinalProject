@@ -259,7 +259,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         alertView.addButton("Done", target:self, selector:#selector(setFirstResponder))
         alertView.showCloseButton = false
         
-        alertView.showWarning(title, subTitle: subTitle)
+        alertView.showError(title, subTitle: subTitle)
     }
     
     //Register Button has been clicked

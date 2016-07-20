@@ -19,11 +19,6 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>LNRSimpleNotifications.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
 		<key>M13Checkbox.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -52,11 +47,6 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>1018BC41239317A785C01378A16BBEA5</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
 		<key>120BF898FCCAF08F6DA8EE8AD2E85078</key>
 		<dict>
 			<key>primary</key>
@@ -67,7 +57,12 @@
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>5483D4E2CF663437A04D26321D345621</key>
+		<key>3EAAEA0137D102BF30F2FD084223797D</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>584EF24E1E8344B497B70A1D7355D930</key>
 		<dict>
 			<key>primary</key>
 			<true/>
@@ -78,11 +73,6 @@
 			<true/>
 		</dict>
 		<key>95DB89A8BFC5FF0BF98458651D0163CD</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>CD5EDD9CC4350F18829A3C854B30E416</key>
 		<dict>
 			<key>primary</key>
 			<true/>

@@ -26,10 +26,8 @@ class Offers {
     private var _offerRating: String!
     private var _offerDate: String!
     private var _offerStatus: String!
-    private var _listingKey: String!
     
     private var _recieverUsername: String!
-    private var _recieverUID: String!
     private var _recieverImage: String!
   
     
@@ -89,12 +87,6 @@ class Offers {
     var recieverImage: String {
         return _recieverImage
     }
-    var listingKey: String {
-        return _listingKey
-    }
-    var recieverUID: String {
-        return _recieverUID
-    }
     
     // Initialize the new offer
     init(key: String, dictionary: Dictionary<String, AnyObject>) {
@@ -152,14 +144,6 @@ class Offers {
         
         if let recieverUN = dictionary["recieverUsername"] as? String {
             self._recieverUsername = recieverUN
-        }
-        
-        if let listingK = dictionary["listingKey"] as? String {
-            self._listingKey = listingK
-        }
-        
-        if let recieverK = dictionary["recieverUID"] as? String {
-            self._recieverUID = recieverK
         }
         
         // The above properties are assigned to their key.

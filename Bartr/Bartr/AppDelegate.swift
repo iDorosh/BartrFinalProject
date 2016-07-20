@@ -11,8 +11,6 @@ import SCLAlertView
 import Firebase
 import FirebaseDatabase
 import FirebaseMessaging
-import LNRSimpleNotifications
-
 
 
 @UIApplicationMain
@@ -20,21 +18,13 @@ import LNRSimpleNotifications
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-    let notificationManager = LNRNotificationManager()
-    
     var window: UIWindow?
-    var offers = [Offers]()
-    var getNotifications = NSTimer()
    
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
        
         NSThread.sleepForTimeInterval(2.0);
-    
       
-        UIApplication.sharedApplication().setMinimumBackgroundFetchInterval(
-            UIApplicationBackgroundFetchIntervalMinimum)
-        
         /*
         let bounds: CGRect = UIScreen.mainScreen().bounds
         let screenHeight: NSNumber = bounds.size.height
@@ -82,6 +72,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         FIRApp.configure()
         
+
+        
         
         UIApplication.sharedApplication().statusBarHidden = false
         UIApplication.sharedApplication().statusBarStyle = .LightContent
@@ -112,13 +104,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationDidEnterBackground(application: UIApplication) {
-        
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
     }
 
     func applicationWillEnterForeground(application: UIApplication) {
-      
         // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
     }
 
@@ -130,9 +120,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
     
+  
     
+    // NOTE: Need to use this when swizzling is disabled
+    func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData) {
+        
+        FIRInstanceID.instanceID().setAPNSToken(deviceToken, type: FIRInstanceIDAPNSTokenType.Sandbox)
+    }
     
+    func tokenRefreshNotification(notification: NSNotification) {
+        // NOTE: It can be nil here
+        let refreshedToken = FIRInstanceID.instanceID().token()
+        print("InstanceID token: \(refreshedToken)")
+        
+        connectToFcm()
+    }
     
+    func connectToFcm() {
+        FIRMessaging.messaging().connectWithCompletion { (error) in
+            if (error != nil) {
+                print("Unable to connect with FCM. \(error)")
+            } else {
+                print("Connected to FCM.")
+            }
+        }
+    }
+    
+   func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject]) {
+        print(userInfo)
+    }
 
 
 }

@@ -15,7 +15,7 @@ import FirebaseDatabase
 
 
 
-class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
+class PostDetails: UIViewController {
     
     //Back to Post Details View Controller
     @IBAction func backToPostDetails(segue: UIStoryboardSegue){}
@@ -25,9 +25,7 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
     var selectedOffers = [Offers]()
     var selectedPost = [Post]()
     
-    var customRatingView : CustomIOS8AlertView! = nil
     
-    @IBOutlet weak var offerAcceptedView: UILabel!
     
     //Variables
     //Data passed from the previous screen
@@ -78,7 +76,6 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
     @IBOutlet var mainView: UIView!
     @IBOutlet weak var ratingView: FloatRatingView!
     @IBOutlet weak var extendOrRenew: UIButton!
-    @IBOutlet weak var feedbackView: UIView!
   
     
     
@@ -193,7 +190,7 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
     
     //Delete post
     @IBAction func deletePost(sender: UIButton) {
-        deleteListing()
+        showAlertView("Delete Listing", text: "Are you sure that you want to remove this listing?", confirmButton: "Remove", cancelButton: "Cancel", callBack: "Delete")
     }
     
     @IBAction func editPost(sender: UIButton) {
@@ -202,14 +199,7 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
     
     //Mark as sold/traded or given away
     @IBAction func viewOffersAction(sender: UIButton) {
-        if selectedPost[0].postComplete {
-            leaveFeedback("Leave Feedback", subTitle: "Would you like to rate this user and mark the Bartr as complete")
-        } else if hasOffers {
-            performSegueWithIdentifier("LeaveFeedbackSegue", sender: self)
-        } else {
-            noOffers()
-        }
-        
+        performSegueWithIdentifier("LeaveFeedbackSegue", sender: self)
     }
     
     //Share on Twitter
@@ -284,8 +274,10 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
         
         if amazonView.hidden == false{
         detailScrollView.contentSize.height = amazonView.frame.origin.y + 1140
+        mainView.hidden = false
         } else {
             detailScrollView.contentSize.height = newSize.height + 1010
+            self.getNewOffers()
         }
         
         
@@ -327,13 +319,9 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
             self.getSelectedUID()
             self.hideItems()
             self.updateViews()
-            self.getNewOffers()
             if self.key != FIRAuth.auth()?.currentUser?.uid{
                 self.setMapLocation()
                 self.loadWebView()
-            }
-            if self.selectedPost[0].postComplete == true {
-                self.sold.setTitle("Leave Feedback", forState: .Normal)
             }
         })
         
@@ -345,6 +333,9 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
         
         postDetails.scrollEnabled = false
         addView()
+       
+        
+       
 
     }
     
@@ -418,12 +409,6 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
             checkExperation()
             detailScrollView.contentSize.height = 1110
         }
-        
-        if selectedPost[0].postComplete == true {
-            delete.hidden = true
-            editButton.hidden = true
-            offerAcceptedView.hidden = false
-        }
     }
     
     //Will open a larger view for the image
@@ -445,7 +430,6 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
         let url = NSURL (string: "https://www.amazon.com/gp/aw/s/ref=is_s_ss_i_4_18?k=\(titleEdit)");
         let requestObj = NSURLRequest(URL: url!);
         webView.loadRequest(requestObj);
-        mainView.hidden = false
     }
     
     //Loads all information into the labels
@@ -457,11 +441,7 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
         var viewsOrView : String = "View"
         var totalViews : String = ""
         
-        if selectedPost[0].postComplete {
-            experationLabel.text = "Offer Accepted"
-        } else {
-            experationLabel.text = getExperationDate(selectedExperation!)
-        }
+        experationLabel.text = getExperationDate(selectedExperation!)
 
         totalViews = "\(selectedViews!)"
         
@@ -668,13 +648,13 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
                     self.selectedPost.insert(post, atIndex: 0)
                     self.setVariables()
                 } else {
-                    
+                    //self.navigationController?.popViewControllerAnimated(true)
                 }
             }
             
         })
     }
-    
+
     
     //Will show a larger view of the clicked image
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
@@ -747,9 +727,7 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
                 "senderUID" : senderUID,
                 "senderRating" : String(ratingView.rating),
                 "offerDate" : dateFormatter().stringFromDate(NSDate()),
-                "offerStatus" : "Delivered",
-                "listingKey" : postKey,
-                "recieverUID" : recieverUID
+                "offerStatus" : "Delivered"
         ]
         
         DataService.dataService.createNewOffer(offerItem)
@@ -769,20 +747,6 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
         alertView.showSuccess("Offer Sent", subTitle: "Your offer has been sent to \(selectedUser!)")
     }
     
-    
-    func noOffers(){
-        let alertView = SCLAlertView()
-        alertView.showWarning("Offers", subTitle: "There are no offers for this listing")
-    }
-    
-    func deleteListing(){
-        let alertView = SCLAlertView()
-        alertView.showCloseButton = false
-        alertView.addButton("Delete Listing") { self.deletePostCallBack() }
-        alertView.addButton("Cancel") {alertView.dismissViewControllerAnimated(true, completion: nil)}
-        alertView.showWarning("Delete", subTitle: "Are you sure that you want to delete this listing?")
-    }
-    
     func extended(){
         let alertView = SCLAlertView()
         alertView.showSuccess("Listing Extended", subTitle: "You listing will be available for the next 10 days")
@@ -793,12 +757,13 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
     func getNewOffers(){
         
             hasOffers = false
-            DataService.dataService.CURRENT_USER_REF.child("offers").observeEventType(.Value, withBlock: { snapshot in
+            DataService.dataService.CURRENT_USER_REF.child("offers").observeSingleEventOfType(.Value, withBlock: { snapshot in
                 // 3
                 self.allOffers = []
                 self.selectedOffers = []
                 self.newOffers = 0
-               
+                print("new")
+                
                 if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
                     for snap in snapshots{
                         
@@ -830,41 +795,11 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
                     self.mainView.hidden = false
                 }
                 
-                if (self.newOffers == 0) {
-                    self.sold.setTitle("No New Offers", forState: .Normal)
-                    self.mainView.hidden = false
-                }
+
             })
         
 
     }
-    
-    func leaveFeedback(title : String, subTitle : String){
-        let alertView = SCLAlertView()
-        alertView.addButton("Rate User"){
-            self.leaveFeedback()
-        }
-        alertView.addButton("Later"){
-            alertView.dismissViewControllerAnimated(true, completion: nil)
-        }
-        alertView.showCloseButton = false
-        alertView.showSuccess(title, subTitle: subTitle)
-    }
-    
-    var userRated : Bool = false
-    func leaveFeedback(){
-        customRatingView = CustomIOS8AlertView()
-        customRatingView.delegate = self
-        customRatingView.containerView = feedbackView
-        customRatingView.buttonColor = hexStringToUIColor("#2b3146")
-        customRatingView.buttonColorHighlighted = hexStringToUIColor("#a6a6a6")
-        customRatingView.buttonTitles = ["Send Feedback"]
-        customRatingView.tintColor = hexStringToUIColor("#f27163")
-        customRatingView.containerView.frame = CGRectMake(customRatingView.containerView.frame.minX , customRatingView.containerView.frame.minY, customRatingView.containerView.frame.width , customRatingView.containerView.frame.height - 120)
-        customRatingView.show()
-    }
-
-
     
     
     func unwind(){
@@ -879,21 +814,5 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
             performSegueWithIdentifier("MainFeedUnwind", sender: self)
         }
     }
-    
-    func customIOS8AlertViewButtonTouchUpInside(alertView: CustomIOS8AlertView, buttonIndex: Int) {
-        feedbackSent("Feedback Left", subTitle: "Your feedback has been sent to the user")
-        customRatingView.close()
-        userRated = true
-        if selectedPost[0].postUID == FIRAuth.auth()?.currentUser?.uid {
-            delete.hidden = false
-            sold.hidden = true
-        }
-    }
-    
-    func feedbackSent(title : String, subTitle : String){
-        let alertView = SCLAlertView()
-        alertView.showSuccess(title, subTitle: subTitle)
-    }
-    
         
 }

@@ -144,17 +144,17 @@ class ViewOffers: UIViewController {
     
     //OfferAccepted
     func success(){
-        let selectedPostRef = DataService.dataService.CURRENT_USER_REF.child("offers").child(offerKey)
+        let selectedPostRef = DataService.dataService.USER_REF.child(offer.offerUID).child("offers").child(offerKey)
         selectedPostRef.updateChildValues([
             "offerAccepted": "true",
-            "offerDeclined": "false",
+            "offerDeclined": false,
             "offerStatus" : "Accepted",
             ])
         
         let selectedPostRef2 = DataService.dataService.USER_REF.child(uid).child("offers").child(offerKey)
         selectedPostRef2.updateChildValues([
             "offerAccepted": "true",
-            "offerDeclined": "false",
+            "offerDeclined": false,
             "offerStatus" : "Accepted",
             ])
         
@@ -203,17 +203,15 @@ class ViewOffers: UIViewController {
     }
     
     func removeOffer(){
-        let updateRef = DataService.dataService.USER_REF.child("\(offer.offerUID)").child("offers").child("\(offer.offerKey)")
-        
-        updateRef.updateChildValues([
+        let selectedPostRef = DataService.dataService.USER_REF.child(offer.offerUID).child("offers").child(offerKey)
+        selectedPostRef.updateChildValues([
+            "offerAccepted": "false",
+            "offerDeclined": true,
             "offerStatus" : "Declined",
-            "offerDeclined" : "true"
             ])
         
-        let deleteRef = DataService.dataService.CURRENT_USER_REF.child("offers").child("\(offer.offerKey)")
-        deleteRef.removeValue()
-
-
+        itemRef = DataService.dataService.USER_REF.child(uid).child("offers").child(offerKey)
+        itemRef.removeValue()
         if previousProfile {
             performSegueWithIdentifier("BackToProfile", sender: self)
         } else {
@@ -223,11 +221,7 @@ class ViewOffers: UIViewController {
     
     func backToListing(){
         backToOfferListing()
-        if previousProfile {
-            performSegueWithIdentifier("BackToProfile", sender: self)
-        } else {
         performSegueWithIdentifier("OfferAccepted", sender: self)
-        }
     }
     func messageUser(){
         let alertView = SCLAlertView()

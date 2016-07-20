@@ -87,7 +87,6 @@ if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_framework "$BUILT_PRODUCTS_DIR/ALCameraViewController/ALCameraViewController.framework"
   install_framework "$BUILT_PRODUCTS_DIR/JSQMessagesViewController/JSQMessagesViewController.framework"
   install_framework "$BUILT_PRODUCTS_DIR/JSQSystemSoundPlayer/JSQSystemSoundPlayer.framework"
-  install_framework "$BUILT_PRODUCTS_DIR/LNRSimpleNotifications/LNRSimpleNotifications.framework"
   install_framework "$BUILT_PRODUCTS_DIR/M13Checkbox/M13Checkbox.framework"
   install_framework "$BUILT_PRODUCTS_DIR/SCLAlertView/SCLAlertView.framework"
 fi
@@ -95,7 +94,6 @@ if [[ "$CONFIGURATION" == "Release" ]]; then
   install_framework "$BUILT_PRODUCTS_DIR/ALCameraViewController/ALCameraViewController.framework"
   install_framework "$BUILT_PRODUCTS_DIR/JSQMessagesViewController/JSQMessagesViewController.framework"
   install_framework "$BUILT_PRODUCTS_DIR/JSQSystemSoundPlayer/JSQSystemSoundPlayer.framework"
-  install_framework "$BUILT_PRODUCTS_DIR/LNRSimpleNotifications/LNRSimpleNotifications.framework"
   install_framework "$BUILT_PRODUCTS_DIR/M13Checkbox/M13Checkbox.framework"
   install_framework "$BUILT_PRODUCTS_DIR/SCLAlertView/SCLAlertView.framework"
 fi

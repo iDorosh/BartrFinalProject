@@ -11,10 +11,10 @@ import Firebase
 import FirebaseDatabase
 import SCLAlertView
 
-class Profile: UIViewController, UITableViewDataSource, FloatRatingViewDelegate{
+class Profile: UIViewController, UITableViewDataSource, FloatRatingViewDelegate, CustomIOS8AlertViewDelegate {
     
     var segment = 0
-
+    var customFilterView : CustomIOS8AlertView! = nil
     
     //Back to Profile View Controller
     @IBAction func backToProfile(segue: UIStoryboardSegue){}
@@ -25,14 +25,10 @@ class Profile: UIViewController, UITableViewDataSource, FloatRatingViewDelegate{
     var userPosts = [Post]()
     var offers = [Offers]()
     var viewOffer : Offers!
-    var selectedOffer : Offers!
     
     var recieverOffers = [Offers]()
     var sendOffers = [Offers]()
     var selectedPost : Int = Int()
-    
-    @IBOutlet weak var noOffersYet: UILabel!
-    
     
     @IBOutlet weak var ratings: UIView!
     @IBOutlet weak var setFeedback: FloatRatingView!
@@ -131,28 +127,10 @@ class Profile: UIViewController, UITableViewDataSource, FloatRatingViewDelegate{
     //Set up Table View
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if segment == 0 {
-            if userPosts.count == 0 {
-                noOffersYet.text = "No Posts Yet"
-                noOffersYet.hidden = false
-            } else {
-                noOffersYet.hidden = true
-            }
             return userPosts.count
         } else if segment == 1{
-            if recieverOffers.count == 0 {
-                noOffersYet.text = "No Offers Yet"
-                noOffersYet.hidden = false
-            } else {
-                noOffersYet.hidden = true
-            }
             return recieverOffers.count
         } else {
-            if sendOffers.count == 0 {
-                noOffersYet.text = "No Offers Yet"
-                noOffersYet.hidden = false
-            } else {
-                noOffersYet.hidden = true
-            }
             return sendOffers.count
         }
     }
@@ -186,82 +164,49 @@ class Profile: UIViewController, UITableViewDataSource, FloatRatingViewDelegate{
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath){
         if segment == 0 {
-            performSegueWithIdentifier("detailSegue2", sender: self)
+            if userPosts[indexPath.row].postComplete {
+                success("Rate User", subTitle: "Would you like to rate this user and mark the Bartr as complete?")
+            } else {
+                selectedPost = indexPath.row
+                performSegueWithIdentifier("detailSegue2", sender: self)
+            }
         } else if segment == 1 {
             viewOffer = recieverOffers[indexPath.row]
-            if (viewOffer.offerDeclined == "true") {
-                offerDeclined("Offer Canceled", subtitle: "The user has canceled their offer. Would you like to delete this offer now?")
+            if viewOffer.offerAccepted == "true" {
+                success("Rate User", subTitle: "Would you like to rate this user and mark the Bartr as complete?")
             } else {
-                performSegueWithIdentifier("ViewOfferSegue", sender: self)
+                performSegueWithIdentifier("ViewOffer", sender: self)
             }
         } else {
-            viewOffer = sendOffers[indexPath.row]
-            if (viewOffer.offerDeclined == "true") {
-                offerDeclined("Offer Declined", subtitle: "The user has declined your offer. Would you like to delete this offer now?")
-            } else {
-                performSegueWithIdentifier("ViewOfferSegue", sender: self)
-            }
+            
         }
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
     }
 
-    func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        if segment == 0 {
-            return false
-        } else if segment == 1 {
-            return true
-        } else {
-            return true
-        }
-        
-    }
+    //Functions
     
-    func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        
-            selectedOffer = offers[indexPath.row]
-            offers.removeAtIndex(indexPath.row)
-            deleteOffer(selectedOffer)
-    }
-    
-    func deleteOffer(offer : Offers){
-        if segment == 1 {
-            if (offer.offerDeclined == "false") {
-                let updateRef = DataService.dataService.USER_REF.child("\(selectedOffer.offerUID)").child("offers").child("\(selectedOffer.offerKey)")
-                updateRef.updateChildValues([
-                    "offerStatus" : "Declined",
-                    "offerDeclined" : "true"
-                ])
-            }
-            
-            let deleteRef = DataService.dataService.CURRENT_USER_REF.child("offers").child("\(selectedOffer.offerKey)")
-
-            deleteRef.removeValue()
-        } else if segment == 2 {
-            if (offer.offerDeclined == "false") {
-                let updateRef = DataService.dataService.USER_REF.child("\(selectedOffer.recieverUID)").child("offers").child("\(selectedOffer.offerKey)")
-                updateRef.updateChildValues([
-                    "offerStatus" : "Canceled",
-                    "offerDeclined" : "true"
-                    ])
-            }
-            
-            let deleteRef = DataService.dataService.CURRENT_USER_REF.child("offers").child("\(selectedOffer.offerKey)")
-            
-            deleteRef.removeValue()
-        }
-        
-        tableView.reloadData()
-    }
-    
-    func offerDeclined(title : String, subtitle : String){
+    func success(title : String, subTitle : String){
         let alertView = SCLAlertView()
+        alertView.addButton("Rate User"){
+            self.leaveFeedback()
+        }
+        alertView.addButton("Later"){
+            alertView.dismissViewControllerAnimated(true, completion: nil)
+        }
         alertView.showCloseButton = false
-        alertView.addButton("Delete Offer") {
-            let deleteRef = DataService.dataService.CURRENT_USER_REF.child("offers").child("\(self.viewOffer.offerKey)")
-            deleteRef.removeValue()
-            self.tableView.reloadData()}
-        alertView.addButton("Cancel"){ alertView.dismissViewControllerAnimated(true, completion: nil) }
-        alertView.showWarning(title, subTitle: subtitle)
+        alertView.showSuccess(title, subTitle: subTitle)
+    }
+    
+    func leaveFeedback(){
+        customFilterView = CustomIOS8AlertView()
+        customFilterView.delegate = self
+        customFilterView.containerView = ratings
+        customFilterView.buttonColor = hexStringToUIColor("#2b3146")
+        customFilterView.buttonColorHighlighted = hexStringToUIColor("#a6a6a6")
+        customFilterView.buttonTitles = ["Send Feedback"]
+        customFilterView.tintColor = hexStringToUIColor("#f27163")
+        customFilterView.containerView.frame = CGRectMake(customFilterView.containerView.frame.minX , customFilterView.containerView.frame.minY, customFilterView.containerView.frame.width , customFilterView.containerView.frame.height - 120)
+        customFilterView.show()
     }
     
     //Adds pull to refresh to the main table view
@@ -367,12 +312,11 @@ class Profile: UIViewController, UITableViewDataSource, FloatRatingViewDelegate{
     }
     
     func observeOffers() {
-        DataService.dataService.CURRENT_USER_REF.child("offers").observeEventType(.Value, withBlock: { snapshot in
+        DataService.dataService.CURRENT_USER_REF.child("offers").observeSingleEventOfType(.Value, withBlock: { snapshot in
             // 3
             self.offers = []
             self.sendOffers = []
             self.recieverOffers = []
-            
             
             if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
                 for snap in snapshots{
@@ -389,9 +333,6 @@ class Profile: UIViewController, UITableViewDataSource, FloatRatingViewDelegate{
                 if i.offerUID == FIRAuth.auth()?.currentUser?.uid{
                     self.sendOffers.append(i)
                 } else {
-                    if i.offerStatus == "Delivered"{
-                        self.tabBarController?.tabBar.items?[4].badgeValue = "1"
-                    }
                     self.recieverOffers.append(i)
                     
                 }
@@ -410,16 +351,13 @@ class Profile: UIViewController, UITableViewDataSource, FloatRatingViewDelegate{
             details.previousVC = "Profile"
         }
         
-       
         
-        if (segue.identifier == "ViewOfferSegue"){
-            let offer : ViewOffers = segue.destinationViewController as! ViewOffers
-            offer.offer = viewOffer
-            offer.uid = viewOffer.offerUID
-            offer.postKey = viewOffer.listingKey
-            offer.previousProfile = true
+        if segue.identifier == "LeaveFeedbackFromProfile"{
+            let feedback : Feedback = segue.destinationViewController as! Feedback
+            feedback.postKey = userPosts[selectedPost].postKey
+            feedback.previousSegue = "Profile"
         }
-
+        
         
         
         if segue.identifier == "ShowRecentUserFeedback"{
@@ -437,6 +375,7 @@ class Profile: UIViewController, UITableViewDataSource, FloatRatingViewDelegate{
         }
     }
     
-    
-    
+    func customIOS8AlertViewButtonTouchUpInside(alertView: CustomIOS8AlertView, buttonIndex: Int) {
+        customFilterView.close()
+    }
 }
