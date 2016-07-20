@@ -10,7 +10,7 @@ pod 'Firebase/Database'
 pod 'Firebase/DynamicLinks'
 pod 'Firebase/Auth'
 pod 'M13Checkbox'
-
+pod 'LNRSimpleNotifications'
 
 target 'Bartr' do
   # Comment this line if you're not using Swift and don't want to use dynamic frameworks

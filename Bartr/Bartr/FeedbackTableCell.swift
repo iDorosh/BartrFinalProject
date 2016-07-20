@@ -55,8 +55,10 @@ class FeedbackTableCell: UITableViewCell {
                 status.text = offer.offerStatus
             } else if offer.offerStatus == "Delivered" {
                 status.text = "New Offer"
+            } else if offer.offerStatus == "Canceled"{
+                status.text = "Offer Canceled"
             } else {
-                status.text = "Read"
+                 status.text = "Read"
             }
         }
         
