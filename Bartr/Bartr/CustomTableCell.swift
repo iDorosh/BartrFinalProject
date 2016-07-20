@@ -65,7 +65,11 @@ class CustomTableCell: UITableViewCell {
             self.views.text = "\(totalViews) \(viewsOrView)"
         }
         
-        expirationDate.text = getExperationDate(post.expireDate)
+        if post.postComplete {
+            expirationDate.text = "Offer Accepted"
+        } else {
+            expirationDate.text = getExperationDate(post.expireDate)
+        }
         
         let dateString : String = post.postDate
         

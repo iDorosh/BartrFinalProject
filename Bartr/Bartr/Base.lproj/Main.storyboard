@@ -1071,52 +1071,11 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" id="Sib-TA-4Xj">
-                                <rect key="frame" x="0.0" y="0.0" width="275" height="254"/>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="white" id="Mci-ug-9wZ">
+                                <rect key="frame" x="197" y="358" width="20" height="20"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Leave Rating" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="pK8-NZ-pBd">
-                                        <rect key="frame" x="83" y="16" width="109" height="35"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                        <fontDescription key="fontDescription" name="Avenir-Medium" family="Avenir" pointSize="15"/>
-                                        <color key="textColor" red="0.1647058824" green="0.1647058824" blue="0.1647058824" alpha="1" colorSpace="calibratedRGB"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Please select a rating out of 5 stars" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="4jX-zb-czi">
-                                        <rect key="frame" x="18" y="85" width="238" height="35"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                        <fontDescription key="fontDescription" name="Avenir-Medium" family="Avenir" pointSize="13"/>
-                                        <color key="textColor" red="0.56378844900000002" green="0.56378844900000002" blue="0.56378844900000002" alpha="1" colorSpace="calibratedRGB"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
-                                    <view contentMode="scaleToFill" id="S1z-2r-c12" customClass="FloatRatingView" customModule="Bartr" customModuleProvider="target">
-                                        <rect key="frame" x="31" y="51" width="212" height="32"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="image" keyPath="emptyImage" value="blankStar"/>
-                                            <userDefinedRuntimeAttribute type="image" keyPath="fullImage" value="clickedStar"/>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="minRating">
-                                                <integer key="value" value="1"/>
-                                            </userDefinedRuntimeAttribute>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="maxRating">
-                                                <integer key="value" value="5"/>
-                                            </userDefinedRuntimeAttribute>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="rating">
-                                                <real key="value" value="5"/>
-                                            </userDefinedRuntimeAttribute>
-                                            <userDefinedRuntimeAttribute type="boolean" keyPath="halfRatings" value="NO"/>
-                                        </userDefinedRuntimeAttributes>
-                                    </view>
-                                </subviews>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                        <integer key="value" value="5"/>
-                                    </userDefinedRuntimeAttribute>
-                                    <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
-                                </userDefinedRuntimeAttributes>
-                            </view>
+                                <color key="color" red="0.92156862750000001" green="0.34901960780000002" blue="0.31372549020000001" alpha="1" colorSpace="calibratedRGB"/>
+                            </activityIndicatorView>
                             <view contentMode="scaleToFill" id="Gby-yP-KGy">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="64"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -1389,12 +1348,18 @@
                                                                     <nil key="highlightedColor"/>
                                                                 </label>
                                                                 <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Offer Accepted" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="b20-Yn-SHc">
-                                                                    <rect key="frame" x="8" y="65" width="378" height="222"/>
+                                                                    <rect key="frame" x="0.0" y="0.0" width="394" height="339"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                                     <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.40000000000000002" colorSpace="calibratedRGB"/>
                                                                     <fontDescription key="fontDescription" name="Avenir-Black" family="Avenir" pointSize="34"/>
                                                                     <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                                     <nil key="highlightedColor"/>
+                                                                    <userDefinedRuntimeAttributes>
+                                                                        <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                                            <integer key="value" value="10"/>
+                                                                        </userDefinedRuntimeAttribute>
+                                                                        <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                                                    </userDefinedRuntimeAttributes>
                                                                 </label>
                                                             </subviews>
                                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -1512,14 +1477,16 @@
                                             <outlet property="delegate" destination="fuP-vt-PtZ" id="1Fi-s6-Pxh"/>
                                         </connections>
                                     </tableView>
+                                    <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="No Offers Yet" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="wYk-Nh-YtS">
+                                        <rect key="frame" x="0.0" y="298" width="414" height="27"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" name="Avenir-Black" family="Avenir" pointSize="18"/>
+                                        <color key="textColor" red="0.49451897905759157" green="0.49451897905759157" blue="0.49451897905759157" alpha="1" colorSpace="calibratedRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
                                 </subviews>
                                 <color key="backgroundColor" red="0.92461335659999999" green="0.92463499309999997" blue="0.92462331060000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </view>
-                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="whiteLarge" id="xWL-M1-DAc">
-                                <rect key="frame" x="0.0" y="350" width="414" height="37"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <color key="color" red="0.95866554979999996" green="0.44119873640000001" blue="0.37255877259999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                            </activityIndicatorView>
                         </subviews>
                         <color key="backgroundColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="calibratedRGB"/>
                     </view>
@@ -1528,19 +1495,18 @@
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina55"/>
                     <connections>
                         <outlet property="floatRatingView" destination="jBx-jb-NOw" id="6Vc-bd-RDj"/>
+                        <outlet property="noOffersYet" destination="wYk-Nh-YtS" id="PoM-mA-6Dp"/>
                         <outlet property="posts" destination="lpU-UA-iRz" id="NpR-fs-wKg"/>
                         <outlet property="profileImage" destination="Eb4-6Z-fH1" id="7Dv-S1-mQz"/>
                         <outlet property="ratingLabel" destination="feV-nD-fcs" id="oAH-lI-ncf"/>
-                        <outlet property="ratings" destination="Sib-TA-4Xj" id="1Ao-Us-Jey"/>
-                        <outlet property="setFeedback" destination="S1z-2r-c12" id="inj-Yp-5W5"/>
-                        <outlet property="spin" destination="xWL-M1-DAc" id="ic0-GV-s3l"/>
+                        <outlet property="spin" destination="Mci-ug-9wZ" id="ERo-Cw-5Wl"/>
                         <outlet property="tableView" destination="ZYj-p3-gG8" id="aVm-sB-Q3v"/>
                         <outlet property="typeofView" destination="aVL-dt-8A3" id="iVh-vZ-tfT"/>
                         <outlet property="userName" destination="W2r-sr-QAN" id="SQn-48-wGG"/>
                         <segue destination="0Cu-XV-5AH" kind="push" identifier="detailSegue2" id="jvM-PK-faZ"/>
                         <segue destination="dey-8S-89b" kind="push" identifier="LeaveFeedbackFromProfile" id="Tu4-vi-dge"/>
                         <segue destination="mEt-Kx-0bj" kind="modal" identifier="ShowRecentUserFeedback" id="qbU-I8-E4g"/>
-                        <segue destination="vHn-lo-ff2" kind="push" identifier="ViewOffer" id="hBZ-4C-qRn"/>
+                        <segue destination="vHn-lo-ff2" kind="push" identifier="ViewOfferSegue" id="hBZ-4C-qRn"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="V2d-ha-nij" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -3054,6 +3020,57 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="1537"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <view contentMode="scaleToFill" id="fzC-xb-uAS">
+                                <rect key="frame" x="0.0" y="0.0" width="275" height="254"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Leave Rating" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="4Ig-zK-4hO">
+                                        <rect key="frame" x="83" y="16" width="109" height="35"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" name="Avenir-Medium" family="Avenir" pointSize="15"/>
+                                        <color key="textColor" red="0.1647058824" green="0.1647058824" blue="0.1647058824" alpha="1" colorSpace="calibratedRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Please select a rating out of 5 stars" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="J8a-FV-0fd">
+                                        <rect key="frame" x="18" y="85" width="238" height="35"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" name="Avenir-Medium" family="Avenir" pointSize="13"/>
+                                        <color key="textColor" red="0.56378844900000002" green="0.56378844900000002" blue="0.56378844900000002" alpha="1" colorSpace="calibratedRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <view contentMode="scaleToFill" id="Sht-Wb-fop" customClass="FloatRatingView" customModule="Bartr" customModuleProvider="target">
+                                        <rect key="frame" x="31" y="51" width="212" height="32"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="image" keyPath="emptyImage" value="blankStar"/>
+                                            <userDefinedRuntimeAttribute type="image" keyPath="fullImage" value="clickedStar"/>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="minRating">
+                                                <integer key="value" value="1"/>
+                                            </userDefinedRuntimeAttribute>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="maxRating">
+                                                <integer key="value" value="5"/>
+                                            </userDefinedRuntimeAttribute>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="rating">
+                                                <real key="value" value="5"/>
+                                            </userDefinedRuntimeAttribute>
+                                            <userDefinedRuntimeAttribute type="boolean" keyPath="halfRatings" value="NO"/>
+                                        </userDefinedRuntimeAttributes>
+                                    </view>
+                                </subviews>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="5"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                </userDefinedRuntimeAttributes>
+                            </view>
+                            <view contentMode="scaleToFill" id="Ngt-O7-Shq">
+                                <rect key="frame" x="0.0" y="57" width="414" height="1439"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" red="0.90588235289999997" green="0.90588235289999997" blue="0.90588235289999997" alpha="1" colorSpace="calibratedRGB"/>
+                            </view>
                             <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="white" id="fq8-R9-zqO">
                                 <rect key="frame" x="197" y="375" width="20" height="20"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -3327,13 +3344,6 @@
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                         <color key="backgroundColor" red="0.84365085659898476" green="0.84365085659898476" blue="0.84365085659898476" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     </view>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Location" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="wEj-Uh-6Ch">
-                                                        <rect key="frame" x="17" y="294" width="222" height="21"/>
-                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="13"/>
-                                                        <color key="textColor" red="0.35433906316757202" green="0.33033657073974609" blue="0.38321912288665771" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                        <nil key="highlightedColor"/>
-                                                    </label>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Location" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="gCy-37-oKP">
                                                         <rect key="frame" x="17" y="310" width="138" height="21"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -3396,6 +3406,27 @@
                                                             <action selector="showProfile:" destination="0Cu-XV-5AH" eventType="touchUpInside" id="ACQ-Eb-BU4"/>
                                                         </connections>
                                                     </button>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Location" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="wEj-Uh-6Ch">
+                                                        <rect key="frame" x="17" y="294" width="222" height="21"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="13"/>
+                                                        <color key="textColor" red="0.35433906316757202" green="0.33033657073974609" blue="0.38321912288665771" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Offer Accepted" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="a2p-Iv-2L1">
+                                                        <rect key="frame" x="0.0" y="0.0" width="391" height="339"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.40000000000000002" colorSpace="calibratedRGB"/>
+                                                        <fontDescription key="fontDescription" name="Avenir-Black" family="Avenir" pointSize="34"/>
+                                                        <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                                        <nil key="highlightedColor"/>
+                                                        <userDefinedRuntimeAttributes>
+                                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                                <integer key="value" value="10"/>
+                                                            </userDefinedRuntimeAttribute>
+                                                            <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                                        </userDefinedRuntimeAttributes>
+                                                    </label>
                                                 </subviews>
                                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                 <userDefinedRuntimeAttributes>
@@ -3541,12 +3572,14 @@
                         <outlet property="experationLabel" destination="MJC-Mz-g7q" id="DMt-vs-VDm"/>
                         <outlet property="extendOrRenew" destination="lBO-X0-S4H" id="4SU-ZR-c9y"/>
                         <outlet property="fbbutton" destination="BM0-sh-0CN" id="OtV-1d-8QI"/>
+                        <outlet property="feedbackView" destination="fzC-xb-uAS" id="2Td-2p-z4n"/>
                         <outlet property="firstView" destination="Mgh-bz-5fC" id="4PI-vO-iuC"/>
                         <outlet property="instagrambutton" destination="7wg-Yz-7Am" id="cIM-RD-lVD"/>
                         <outlet property="locationView" destination="0tN-Pe-wc2" id="25z-cs-wyj"/>
                         <outlet property="mainView" destination="4UJ-gJ-L4V" id="27U-vQ-CWr"/>
                         <outlet property="mapView" destination="8Sg-EB-uFL" id="hG5-eI-b25"/>
                         <outlet property="message" destination="mcq-uJ-eTm" id="G6d-bU-qCy"/>
+                        <outlet property="offerAcceptedView" destination="a2p-Iv-2L1" id="bvI-gA-9eM"/>
                         <outlet property="offerButton" destination="fQL-79-g2l" id="DfK-rv-dbB"/>
                         <outlet property="postDetails" destination="I4W-mi-ogR" id="Oat-4h-7Dn"/>
                         <outlet property="postImage" destination="osO-uZ-TXr" id="aFV-6Y-bHg"/>
@@ -4754,7 +4787,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="E6E2594F-046A-4F54-8BBA-7FC38B79D6D6" id="wUx-Sy-Vaj">
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="C0AF4E89-73EE-44DB-8804-4992B67E5504" id="wUx-Sy-Vaj">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             </imageView>
@@ -4951,9 +4984,7 @@
         <image name="Background" width="360" height="640"/>
         <image name="Bartr Logo" width="379" height="92"/>
         <image name="BartrComplete" width="790" height="484"/>
-        <image name="Camera" width="32" height="32"/>
-        <image name="Convesration" width="32" height="32"/>
-        <image name="E6E2594F-046A-4F54-8BBA-7FC38B79D6D6" width="360" height="640">
+        <image name="C0AF4E89-73EE-44DB-8804-4992B67E5504" width="360" height="640">
             <mutableData key="keyedArchiveRepresentation">
 YnBsaXN0MDDUAQIDBAUGPT5YJHZlcnNpb25YJG9iamVjdHNZJGFyY2hpdmVyVCR0b3ASAAGGoK4HCBMU
 GR4fIyQrLjE3OlUkbnVsbNUJCgsMDQ4PEBESVk5TU2l6ZVYkY2xhc3NcTlNJbWFnZUZsYWdzVk5TUmVw
@@ -20367,6 +20398,8 @@ AA4aDAAOGhQADhoXAA4aHAAOGisADhovAA4aNgAOGj4ADhpLAA4aUAAOGlIADhpUAA4aWQAOGmEADhpk
 AA4aaQAOGnEADhp0AA4ahgAOGokADhqOAAAAAAAABAEAAAAAAAAAQQAAAAAAAAAAAAAAAAAOGpA
 </mutableData>
         </image>
+        <image name="Camera" width="32" height="32"/>
+        <image name="Convesration" width="32" height="32"/>
         <image name="House" width="32" height="32"/>
         <image name="Icon" width="589" height="796"/>
         <image name="LoginImg" width="250" height="250"/>
@@ -20387,13 +20420,13 @@ AA4aaQAOGnEADhp0AA4ahgAOGokADhqOAAAAAAAABAEAAAAAAAAAQQAAAAAAAAAAAAAAAAAOGpA
         <image name="twitterButton" width="172" height="180"/>
     </resources>
     <inferredMetricsTieBreakers>
+        <segue reference="YFk-DO-bg1"/>
+        <segue reference="jvM-PK-faZ"/>
         <segue reference="geg-Ej-unx"/>
-        <segue reference="hBZ-4C-qRn"/>
         <segue reference="qbU-I8-E4g"/>
         <segue reference="Tu4-vi-dge"/>
-        <segue reference="jvM-PK-faZ"/>
-        <segue reference="qyX-bX-lP1"/>
-        <segue reference="YFk-DO-bg1"/>
+        <segue reference="hBZ-4C-qRn"/>
+        <segue reference="3cg-BM-pqL"/>
     </inferredMetricsTieBreakers>
     <color key="tintColor" red="0.12549019610000001" green="0.14117647059999999" blue="0.2156862745" alpha="1" colorSpace="calibratedRGB"/>
 </document>
