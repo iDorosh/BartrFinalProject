@@ -82,6 +82,11 @@ class CustomTableCell: UITableViewCell {
         decodeImages()
         
         if post.postComplete{
+            if post.postFL {
+                bartrCompleteImg.text = "Bartr Complete"
+            } else {
+                bartrCompleteImg.text = "Offer Accepted"
+            }
             bartrCompleteImg.hidden = false
         } else {
             bartrCompleteImg.hidden = true
@@ -91,7 +96,7 @@ class CustomTableCell: UITableViewCell {
     }
     
     func updateFeedback(userName : String){
-        DataService.dataService.USER_REF.observeEventType(FIRDataEventType.Value, withBlock: { snapshot in
+        DataService.dataService.USER_REF.observeSingleEventOfType(FIRDataEventType.Value, withBlock: { snapshot in
             if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
                 
                 for snap in snapshots {

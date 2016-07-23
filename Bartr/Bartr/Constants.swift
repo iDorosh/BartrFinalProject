@@ -10,16 +10,20 @@ import Foundation
 import Firebase
 import UIKit
 import FirebaseDatabase
+import SCLAlertView
 
 //Data Base reference
 let BASE_URL = "https://vulkanbartr.firebaseio.com"
 
 var sendOfferRef = FIRDatabase.database().reference()
+var sendFeedbackRef = FIRDatabase.database().reference().child("users")
 
 var currentUserUID : String = ""
 var senderUserUID : String = ""
 var currentUser : String = ""
 var currentProfileImg : String = ""
+var ratings = [FeedbackObject]()
+var signUpSkipped : Bool = false
 
 private let dateFormat = "yyyyMMddHHmmss"
 var ref = FIRDatabase.database().reference()
@@ -283,6 +287,107 @@ func decodeString(img : String) -> UIImage{
     
     return decodedimage! as UIImage
 }
+
+func encodePhoto(image: UIImage) -> String{
+    var base64String : String = String()
+    var data: NSData = NSData()
+    data = UIImageJPEGRepresentation(image,0.0)!
+    base64String = data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions.Encoding64CharacterLineLength)
+    return base64String
+}
+
+
+func sendFeedback(newFloat : Float , currentUsername : String, title : String, img: String, id : String, postUID : String){
+    
+    DataService.dataService.USER_REF.child(id).child("feedback").observeSingleEventOfType(.Value, withBlock: { snapshot in
+        // 3
+        ratings = []
+        var allRating : [Float] = []
+        var totalRating : Float = Float()
+        
+        if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
+            for snap in snapshots{
+                
+                if let offersDictionary = snap.value as? Dictionary<String, AnyObject> {
+                    let key = snap.key
+                    let rating = FeedbackObject(key: key, dictionary: offersDictionary)
+                    ratings.insert(rating, atIndex: 0)
+                }
+            }
+            
+            for rating in ratings{
+                allRating.append(Float(rating.feedbackRating)!)
+            }
+            
+        }
+        
+        if allRating.isEmpty {
+            allRating.append(5.0)
+        }
+        
+        allRating.append(newFloat)
+        
+        print(allRating.count)
+        for floatRating in allRating {
+            totalRating = totalRating + floatRating
+        }
+        
+        totalRating = totalRating / Float(allRating.count)
+        print ("1 \(allRating.count)")
+        print("2 \(totalRating)")
+        pushNewFeedback(newFloat, updatedFloat: totalRating, currentUsername: currentUsername, title:  title, img: img, id : id, postUID: postUID)
+    })
+}
+
+func pushNewFeedback(newFloat : Float, updatedFloat : Float, currentUsername : String, title : String, img: String, id : String, postUID : String){
+   
+    let date = dateFormatter().stringFromDate(NSDate())
+    
+    let itemRef = DataService.dataService.USER_REF.child(id).child("feedback").childByAutoId() // 1
+    
+    sendFeedbackRef = itemRef
+    
+    let feedbackItem = [ // 2
+        "feedbackUser" : currentUsername,
+        "feedbackTitle" : title,
+        "feedbackImage" : img,
+        "feedbackRating" : String(newFloat),
+        "feedbackDate" : date
+    ]
+    
+    
+    DataService.dataService.createNewFeedback(feedbackItem, id : id)
+    
+    let ratingRef2 = DataService.dataService.USER_REF.child(id)
+    ratingRef2.updateChildValues([
+        "rating" : String(updatedFloat)
+        ], withCompletionBlock: {_,_ in
+            if id != FIRAuth.auth()?.currentUser?.uid {
+                let feedbackleftRef = DataService.dataService.POST_REF.child(postUID)
+                feedbackleftRef.updateChildValues([
+                    "postFeedbackLeft" : true
+                    ], withCompletionBlock: {_,_ in
+                        
+                        let alertView = SCLAlertView()
+                        alertView.showSuccess("Feedback Left", subTitle: "Your feedback has been sent to the user")
+                })
+            } else {
+            let alertView = SCLAlertView()
+                alertView.showSuccess("Feedback Left", subTitle: "Your feedback has been sent to the user")
+            }
+            
+            
+    })
+    
+    
+ 
+    
+    
+}
+
+
+
+
 
 
 

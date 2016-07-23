@@ -9,16 +9,19 @@
 import UIKit
 class UsersRecentFeedBackCell: UITableViewCell {
     
-    //Place holder information for chat threads
-    var userNames : [String] = ["Mac>Windows", "Sell24/7", "Mac4Lyfe"]
-    var listing : [String] = ["MacBook Pro 15in (Late 2013)", "MacBook Pro 15in (Late 2013)", "MacBook Pro 15in (Late 2013)"]
-    var images : [String] = ["Image1", "Image2", "Image3"]
+    var feedback : FeedbackObject!
     
     @IBOutlet weak var profileImage: UIImageView!
     
     @IBOutlet weak var userName: UILabel!
     
     @IBOutlet weak var post: UILabel!
+    
+    @IBOutlet weak var timeStamp: UILabel!
+    
+    @IBOutlet weak var rating: FloatRatingView!
+    
+    @IBOutlet weak var ratinglabel: UILabel!
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -29,9 +32,27 @@ class UsersRecentFeedBackCell: UITableViewCell {
     }
     
     //Creating table view cells
-    func tableConfig(index : Int){
-        profileImage.image = UIImage(named: images[index])
-        userName.text = userNames[index]
+    func tableConfig(selectedFeedback : FeedbackObject){
+        feedback = selectedFeedback
+        
+        profileImage.image = decodeString(feedback.feedbackImage)
+        userName.text = feedback.feedbackUser
+        post.text = feedback.feedbackTitle
+        
+        let dateString : String = feedback.feedbackDate
+        
+        let date = dateFormatter().dateFromString(dateString)
+        let seconds = NSDate().timeIntervalSinceDate(date!)
+        
+        timeStamp.text = elapsedTime(seconds)
+        
+        if Float(feedback.feedbackRating) > 1 {
+            ratinglabel.text = "\(feedback.feedbackRating) stars"
+        } else {
+            ratinglabel.text = "\(feedback.feedbackRating) star"
+        }
+        
+        rating.rating = Float(feedback.feedbackRating)!
     }
     
 }

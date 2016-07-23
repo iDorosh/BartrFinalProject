@@ -106,6 +106,7 @@ class Camera: UIViewController, UITextFieldDelegate {
     }
     
     @IBAction func nextClicked(sender: UIButton) {
+        view.endEditing(true)
         checkFields()
     }
     
@@ -113,6 +114,7 @@ class Camera: UIViewController, UITextFieldDelegate {
     
     //Load UI
     override func viewWillAppear(animated: Bool) {
+        navigationController?.navigationBarHidden = true
         self.tabBarController?.tabBar.hidden = true
         scrollView.setContentOffset(CGPointMake(0,0), animated: true)
         if NSUserDefaults.standardUserDefaults().stringForKey("posted") == "true"{
@@ -126,7 +128,6 @@ class Camera: UIViewController, UITextFieldDelegate {
     
     override func viewDidLoad() {
         self.navigationController?.setNavigationBarHidden(true, animated: true)
-        print(previousScreen)
         super.viewDidLoad()
         defaultLabelColor = requiredCharacterFields.textColor
         defaultColor = titleField.textColor!
@@ -325,7 +326,7 @@ class Camera: UIViewController, UITextFieldDelegate {
     
     //Check Fields
     func checkFields(){
-        if priceField.text == "" || titleField.text == "" || self.titleField.text?.characters.count < 7 {
+        if titleField.text == "" || self.titleField.text?.characters.count < 6 {
             errorInvalid("Missing Fields", subTitle: "Please fill in both fields")
         } else {
         performSegueWithIdentifier("locationSegue", sender: self)
@@ -338,7 +339,7 @@ class Camera: UIViewController, UITextFieldDelegate {
             if ((priceField.text?.characters.contains("$")) != nil && priceField.text != ""){
                 let wholeString = priceField.text!
                 let newString = wholeString.stringByReplacingOccurrencesOfString("$", withString: "")
-                print(newString)
+               
                 if Int(newString) == nil{
                     setError(priceField)
                     priceField.becomeFirstResponder()

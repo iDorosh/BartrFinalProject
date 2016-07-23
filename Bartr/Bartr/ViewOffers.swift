@@ -17,6 +17,14 @@ class ViewOffers: UIViewController {
     var itemRef : FIRDatabaseReference!
     var postKey : String?
     var previousProfile : Bool = false
+    var sentOffer : Bool = false
+    var offerComplete : Bool = false
+    
+    @IBOutlet weak var deleteOffer: UIButton!
+    
+    @IBAction func deleteOfferAction(sender: UIButton) {
+        deleteCompletedOffer()
+    }
     
     @IBOutlet weak var offerRatingView: FloatRatingView!
     
@@ -24,6 +32,7 @@ class ViewOffers: UIViewController {
     @IBOutlet weak var offerUser: UILabel!
     @IBOutlet weak var offerText: UITextView!
     @IBOutlet weak var offerView: UIView!
+    @IBOutlet weak var offerTitle: UILabel!
     
     var offerImageString : String = String()
     var offerUserString : String = String()
@@ -35,46 +44,14 @@ class ViewOffers: UIViewController {
     
     @IBOutlet weak var acceptBttn: UIButton!
     @IBOutlet weak var declineBttn: UIButton!
-    
+    @IBOutlet weak var cancelBttn: UIButton!
+    @IBOutlet weak var messageBttn: UIButton!
     
     
 
     @IBOutlet weak var rating: FloatRatingView!
     override func viewDidLoad() {
         super.viewDidLoad()
-        rating.rating = 5.0
-        offerImageString = offer.offerProfileImage
-        offerUserString = offer.offerUser
-        offerTextString = offer.offerText
-        offerKey = offer.offerKey
-        offerRating = Float(offer.offerRating)!
-        
-        
-        offerImage.image = decodeString(offerImageString)
-        offerUser.text = offerUserString
-        offerText.text = offerTextString
-        offerText.font = UIFont(name: "Avenir", size: 15)
-        print (offerRating)
-        offerRatingView.rating = offerRating
-        
-        let fixedWidth = offerText.frame.size.width
-        offerText.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.max))
-        let newSize = offerText.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.max))
-        var newFrame = offerText.frame
-        newFrame.size = CGSize(width: max(newSize.width, fixedWidth), height: newSize.height+10)
-        offerText.frame = newFrame;
-        
-        let fixedWidth2 = offerView.frame.size.width
-        offerView.sizeThatFits(CGSize(width: fixedWidth2, height: CGFloat.max))
-        let newSize2 = offerView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.max))
-        var newFrame2 = offerView.frame
-        newFrame2.size = CGSize(width: max(newSize2.width, fixedWidth2), height: newSize.height + 30)
-        offerView.frame = newFrame2;
-        
-        acceptBttn.frame.origin = CGPointMake(acceptBttn.frame.origin.x, newSize.height + 200)
-        
-        declineBttn.frame.origin = CGPointMake(declineBttn.frame.origin.x, newSize.height + 200)
-        offerViewed()
         
     }
     
@@ -90,7 +67,7 @@ class ViewOffers: UIViewController {
             "offerStatus" : "Read",
             ])
         
-        let selectedPostRef2 = DataService.dataService.USER_REF.child(offer.offerUID).child("offers").child(offerKey)
+        let selectedPostRef2 = DataService.dataService.CURRENT_USER_REF.child("offers").child(offerKey)
         selectedPostRef2.updateChildValues([
             "offerChecked": "true",
             "offerStatus" : "Read",
@@ -103,6 +80,59 @@ class ViewOffers: UIViewController {
     }
     
     override func viewWillAppear(animated: Bool) {
+        if (sentOffer) {
+            acceptBttn.hidden = true
+            declineBttn.hidden = true
+            messageBttn.hidden = true
+            cancelBttn.hidden = false
+        }
+        
+        if offerComplete {
+            acceptBttn.hidden = true
+            declineBttn.hidden = true
+            messageBttn.hidden = true
+            cancelBttn.hidden = true
+            deleteOffer.hidden = false
+        }
+        rating.rating = 5.0
+        offerImageString = offer.offerProfileImage
+        offerUserString = offer.offerUser
+        offerTextString = offer.offerText
+        offerKey = offer.offerKey
+        offerRating = Float(offer.offerRating)!
+        
+        
+        offerImage.image = decodeString(offerImageString)
+        offerUser.text = offerUserString
+        offerText.text = offerTextString
+        offerTitle.text = offer.offerTitle
+        offerText.font = UIFont(name: "Avenir", size: 15)
+        offerRatingView.rating = offerRating
+        
+        if !sentOffer {
+            offerViewed()
+        }
+        
+        
+        let fixedWidth = offerText.frame.size.width
+        offerText.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.max))
+        let newSize = offerText.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.max))
+        var newFrame = offerText.frame
+        newFrame.size = CGSize(width: max(newSize.width, fixedWidth), height: newSize.height+10)
+        offerText.frame = newFrame;
+        
+        let fixedWidth2 = offerView.frame.size.width
+        offerView.sizeThatFits(CGSize(width: fixedWidth2, height: CGFloat.max))
+        let newSize2 = offerView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.max))
+        var newFrame2 = offerView.frame
+        newFrame2.size = CGSize(width: max(newSize2.width, fixedWidth2), height: newSize.height + 30)
+        offerView.frame = newFrame2;
+        
+        acceptBttn.frame.origin = CGPointMake(acceptBttn.frame.origin.x, newSize.height + 260)
+        
+        declineBttn.frame.origin = CGPointMake(declineBttn.frame.origin.x, newSize.height + 260)
+        
+        cancelBttn.frame.origin = CGPointMake(cancelBttn.frame.origin.x, newSize.height + 260)
     }
     
     @IBAction func newMessage(sender: UIButton) {
@@ -117,6 +147,12 @@ class ViewOffers: UIViewController {
 
         self.backToOffer()
     }
+    
+    @IBAction func cancelOffer(sender: UIButton) {
+        
+    }
+
+    
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "NewMessage"{
@@ -234,6 +270,12 @@ class ViewOffers: UIViewController {
         alertView.showSuccess("Offer Accepted", subTitle: "Once the transaction is complete please come back to your post to leave the user feedback")
         accepted = true
         performSegueWithIdentifier("NewMessage", sender: self)
+    }
+    
+    func deleteCompletedOffer(){
+        let deleteRef = DataService.dataService.CURRENT_USER_REF.child("offers").child("\(offer.offerKey)")
+        deleteRef.removeValue()
+        performSegueWithIdentifier("BackToProfile", sender: self)
     }
     
 }

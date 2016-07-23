@@ -21,15 +21,6 @@ class TabBarController: UITabBarController, UITabBarControllerDelegate {
         // Dispose of any resources that can be recreated.
     }
     
-    override func tabBar(tabBar: UITabBar, didSelectItem item: UITabBarItem) {
-        print("Selected item")
-    }
-    
-    // UITabBarControllerDelegate
-    func tabBarController(tabBarController: UITabBarController, didSelectViewController viewController: UIViewController) {
-        print("Selected view controller")
-    }
-    
 
     /*
     // MARK: - Navigation

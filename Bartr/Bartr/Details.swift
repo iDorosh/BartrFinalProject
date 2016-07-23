@@ -33,6 +33,9 @@ class Details: UIViewController, UITextViewDelegate {
     var editDetails : String = String()
     var editKey : String = String()
     
+    var longitude : Double = Double()
+    var latitude : Double = Double()
+    
     
     //Outlets
     @IBOutlet weak var Image1: UIImageView!
@@ -66,12 +69,18 @@ class Details: UIViewController, UITextViewDelegate {
         navigationController?.popViewControllerAnimated(true)
     }
     
+    @IBAction func backTolocation(sender: UIButton) {
+        performSegueWithIdentifier("backToLocation", sender: self)
+    }
+    
+    
     @IBAction func discardListing(sender: UIButton) {
         showAlertView("Discard Listing", text: "Listing will be discarded", confirmButton: "Discard", cancelButton: "Cancel")
     }
     
     
     override func viewDidLoad() {
+        navigationController?.navigationBarHidden = true
         super.viewDidLoad()
         applyBlurrEffect()
         addTapRecognizer()
@@ -138,6 +147,7 @@ class Details: UIViewController, UITextViewDelegate {
     }
     
     func textViewDidBeginEditing(textView: UITextView) {
+        textView.text = ""
         UIApplication.sharedApplication().statusBarHidden = true
         detailsScrollView.setContentOffset(CGPointMake(0,210), animated: true)
     }
@@ -189,6 +199,8 @@ class Details: UIViewController, UITextViewDelegate {
             summary.pickedDescription = pickedDescription.text
             summary.pickedPrice = pickedPrice
             summary.editKey = editKey
+            summary.longitude = longitude
+            summary.latitude = latitude
             if (previousScreen == "EditView"){
                 summary.previousVC = "EditView"
             }

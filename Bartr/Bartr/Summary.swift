@@ -29,6 +29,8 @@ class Summary: UIViewController {
     var day : Int = Int()
     var year : Int = Int()
     var editKey : String = String()
+    var longitude : Double = Double()
+    var latitude : Double = Double()
     
     //Outlets
     @IBOutlet weak var currentUser: UILabel!
@@ -86,20 +88,20 @@ class Summary: UIViewController {
     
     //Get listing location on map preview
     func loadLocation(){
-        let location: String = pickedLocation
-        let geocoder: CLGeocoder = CLGeocoder()
-        geocoder.geocodeAddressString(location,completionHandler: {(placemarks: [CLPlacemark]?, error: NSError?) -> Void in
-            if (placemarks?.count > 0) {
-                let topResult: CLPlacemark = (placemarks?[0])!
-                let placemark: MKPlacemark = MKPlacemark(placemark: topResult)
-                var region: MKCoordinateRegion = self.mapView.region
-                region.center = placemark.coordinate
-                region.span.longitudeDelta /= 50.0
-                region.span.latitudeDelta /= 50.0
-                self.mapView.setRegion(region, animated: true)
-                self.mapView.addAnnotation(placemark)
-            }
-        })
+     
+            mapView.removeAnnotations(mapView.annotations)
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+            annotation.title = pickedLocation
+        
+            annotation.subtitle = "\(pickedLocation)"
+        
+            mapView.addAnnotation(annotation)
+            let span = MKCoordinateSpanMake(0.05, 0.05)
+            let region = MKCoordinateRegionMake(CLLocationCoordinate2D(latitude: latitude, longitude: longitude), span)
+            mapView.setRegion(region, animated: true)
+
+        
     }
     
     //Load UI
@@ -216,7 +218,9 @@ class Summary: UIViewController {
                     "postUID" : currentUserUID,
                     "postComplete" : false,
                     "postExpireDate" : experationDate,
-                    "postExpired" : false 
+                    "postExpired" : false,
+                    "lon" : String(self.longitude) as String,
+                    "lat" : String(self.latitude) as String
                 ]
         
                 DataService.dataService.createNewPost(newpost)
@@ -300,6 +304,6 @@ class Summary: UIViewController {
     }
     
     func postToInstagram(){
-        print("Instagram")
+        
     }
 }

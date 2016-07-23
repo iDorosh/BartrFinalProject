@@ -11,9 +11,12 @@ import Firebase
 import FirebaseDatabase
 import SCLAlertView
 
-class Profile: UIViewController, UITableViewDataSource, FloatRatingViewDelegate{
+
+class Profile: UIViewController, UITableViewDataSource, CustomIOS8AlertViewDelegate{
     
     var segment = 0
+    
+     var customRatingView : CustomIOS8AlertView! = nil
 
     
     //Back to Profile View Controller
@@ -30,30 +33,23 @@ class Profile: UIViewController, UITableViewDataSource, FloatRatingViewDelegate{
     var recieverOffers = [Offers]()
     var sendOffers = [Offers]()
     var selectedPost : Int = Int()
+    var badgeCount : Int = 0
+    
+    var loaded : Bool = false
     
     @IBOutlet weak var noOffersYet: UILabel!
-    
-    
     @IBOutlet weak var ratings: UIView!
     @IBOutlet weak var setFeedback: FloatRatingView!
-    
     @IBOutlet var typeofView: UISegmentedControl!
-    
-    
-    
     @IBOutlet weak var spin: UIActivityIndicatorView!
-    
-    
     @IBOutlet weak var floatRatingView: FloatRatingView!
     
-  
-    func floatRatingView(ratingView: FloatRatingView, isUpdating rating:Float) {
+    @IBAction func closeRating(sender: UIButton) {
         
     }
     
-    func floatRatingView(ratingView: FloatRatingView, didUpdate rating: Float) {
-        
-    }
+    @IBOutlet weak var selectRating: FloatRatingView!
+    @IBOutlet weak var feedbackView: UIView!
     
     
     @IBAction func typeofViewActions(sender: UISegmentedControl) {
@@ -96,23 +92,21 @@ class Profile: UIViewController, UITableViewDataSource, FloatRatingViewDelegate{
     
     
     @IBAction func showRatings(sender: UIButton) {
+        print("clicked")
         performSegueWithIdentifier("ShowRecentUserFeedback", sender: self)
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.floatRatingView.delegate = self
         self.spin.startAnimating()
         self.spin.hidden = false
         UIApplication.sharedApplication().statusBarStyle = .Default
         self.navigationController?.setNavigationBarHidden(true, animated: true)
         
-
+        
  
             
        // let timer = NSTimer.scheduledTimerWithTimeInterval(30, target: self, selector: #selector(manualUpdate), userInfo: nil, repeats: true)
-        
-        floatRatingView.rating = 4.50
         setUpRefreshControl()
     }
     
@@ -140,7 +134,7 @@ class Profile: UIViewController, UITableViewDataSource, FloatRatingViewDelegate{
             return userPosts.count
         } else if segment == 1{
             if recieverOffers.count == 0 {
-                noOffersYet.text = "No Offers Yet"
+                noOffersYet.text = "No Recieved Offers Yet"
                 noOffersYet.hidden = false
             } else {
                 noOffersYet.hidden = true
@@ -148,7 +142,7 @@ class Profile: UIViewController, UITableViewDataSource, FloatRatingViewDelegate{
             return recieverOffers.count
         } else {
             if sendOffers.count == 0 {
-                noOffersYet.text = "No Offers Yet"
+                noOffersYet.text = "No Sent Offers Yet"
                 noOffersYet.hidden = false
             } else {
                 noOffersYet.hidden = true
@@ -189,29 +183,45 @@ class Profile: UIViewController, UITableViewDataSource, FloatRatingViewDelegate{
             performSegueWithIdentifier("detailSegue2", sender: self)
         } else if segment == 1 {
             viewOffer = recieverOffers[indexPath.row]
-            if (viewOffer.offerDeclined == "true") {
-                offerDeclined("Offer Canceled", subtitle: "The user has canceled their offer. Would you like to delete this offer now?")
+            if viewOffer.offerStatus != "Accepted" {
+                if (viewOffer.offerDeclined == "true") {
+                    offerDeclined("Offer Canceled", subtitle: "The user has canceled their offer. Would you like to delete this offer now?")
+                } else {
+                    performSegueWithIdentifier("ViewOfferSegue", sender: self)
+                }
             } else {
-                performSegueWithIdentifier("ViewOfferSegue", sender: self)
+                leaveFeedback()
             }
         } else {
             viewOffer = sendOffers[indexPath.row]
-            if (viewOffer.offerDeclined == "true") {
-                offerDeclined("Offer Declined", subtitle: "The user has declined your offer. Would you like to delete this offer now?")
-            } else {
-                performSegueWithIdentifier("ViewOfferSegue", sender: self)
+                if viewOffer.offerStatus != "Accepted" {
+                    if (viewOffer.offerDeclined == "true") {
+                        offerDeclined("Offer Declined", subtitle: "The user has declined your offer. Would you like to delete this offer now?")
+                    } else {
+                        performSegueWithIdentifier("ViewOfferSegue", sender: self)
+                    }
+                } else {
+                    leaveFeedback()
+                }
             }
-        }
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+            tableView.deselectRowAtIndexPath(indexPath, animated: true)
     }
 
     func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         if segment == 0 {
             return false
         } else if segment == 1 {
+            if recieverOffers[indexPath.row].offerStatus == "Accepted" {
+                return false
+            } else {
             return true
+            }
         } else {
-            return true
+            if sendOffers[indexPath.row].offerStatus == "Accepted" {
+                return false
+            } else {
+                return true
+            }
         }
         
     }
@@ -385,16 +395,28 @@ class Profile: UIViewController, UITableViewDataSource, FloatRatingViewDelegate{
                 }
             }
             
+            self.badgeCount = 0
+
             for i in self.offers {
                 if i.offerUID == FIRAuth.auth()?.currentUser?.uid{
                     self.sendOffers.append(i)
                 } else {
                     if i.offerStatus == "Delivered"{
-                        self.tabBarController?.tabBar.items?[4].badgeValue = "1"
+                        self.badgeCount += 1
+                    } else {
+                        if self.badgeCount != 0 {
+                            self.badgeCount - 1
+                        }
                     }
                     self.recieverOffers.append(i)
                     
                 }
+            }
+            
+            if self.badgeCount != 0 {
+            self.tabBarController?.tabBar.items?[4].badgeValue = String(self.badgeCount)
+            } else {
+                self.tabBarController?.tabBar.items?[4].badgeValue = nil
             }
             self.tableView.reloadData()
             self.tableView.hidden = false
@@ -418,25 +440,77 @@ class Profile: UIViewController, UITableViewDataSource, FloatRatingViewDelegate{
             offer.uid = viewOffer.offerUID
             offer.postKey = viewOffer.listingKey
             offer.previousProfile = true
+            if viewOffer.feedbackLeft == "true" {
+                offer.sentOffer = true
+                offer.offerComplete = true
+            }
+            if segment == 2 {
+                offer.sentOffer = true
+            }
         }
 
-        
         
         if segue.identifier == "ShowRecentUserFeedback"{
             let userFeedback : RecentFeedback = segue.destinationViewController as! RecentFeedback
             userFeedback.previousSegue = "Profile"
             userFeedback.username = currentUser
+            userFeedback.profileImage = profileImage.image!
         }
         
-        if segue.identifier == "ViewOffer"{
-            let offer : ViewOffers = segue.destinationViewController as! ViewOffers
-            offer.offer = viewOffer
-            offer.uid = (FIRAuth.auth()?.currentUser?.uid)!
-            offer.postKey = viewOffer.offerKey
-            offer.previousProfile = true
-        }
     }
     
     
+    func leaveFeedback(){
+        let alertView = SCLAlertView()
+        alertView.addButton("Leave Feedback", target: self, selector: #selector(showFeedbackView))
+        alertView.addButton("Later") { alertView.dismissViewControllerAnimated(true, completion: nil)}
+        alertView.showCloseButton = false
+        alertView.showWarning("Feedback", subTitle: "Only leave feedback once the transaction is complete. Are you sure that you want to continue?")
+    }
     
+    var userRated : Bool = false
+    
+    func showFeedbackView(){
+        feedbackView.hidden = false
+        if !loaded {
+            customRatingView = CustomIOS8AlertView()
+            customRatingView.delegate = self
+            customRatingView.containerView = feedbackView
+            customRatingView.buttonColor = hexStringToUIColor("#2b3146")
+            customRatingView.buttonColorHighlighted = hexStringToUIColor("#a6a6a6")
+            customRatingView.buttonTitles = ["Send Feedback"]
+            customRatingView.tintColor = hexStringToUIColor("#f27163")
+            customRatingView.containerView.frame = CGRectMake(customRatingView.containerView.frame.minX , customRatingView.containerView.frame.minY, customRatingView.containerView.frame.width , customRatingView.containerView.frame.height - 120)
+            customRatingView.show()
+            loaded = true
+        } else {
+            selectRating.rating = 5.0
+            customRatingView.show()
+        }
+    }
+    
+    func customIOS8AlertViewButtonTouchUpInside(alertView: CustomIOS8AlertView, buttonIndex: Int) {
+        var feedbackUID : String = String()
+        if segment == 1 {
+            feedbackUID = viewOffer.offerUID
+        } else {
+            feedbackUID = viewOffer.recieverUID
+        }
+        sendFeedback(selectRating.rating, currentUsername: currentUser, title: viewOffer.offerTitle, img: encodePhoto(profileImage.image!), id: feedbackUID, postUID: viewOffer.listingKey)
+        
+        feedbackLeft()
+        feedbackView.hidden = true
+        customRatingView.close()
+        userRated = true
+    }
+    
+    func feedbackLeft(){
+        let selectedPostRef2 = DataService.dataService.CURRENT_USER_REF.child("offers").child(viewOffer.offerKey)
+        selectedPostRef2.updateChildValues([
+            "offerStatus" : "Feedback Left",
+            "feedbackLeft" : "true"
+            ])
+
+    }
+
 }

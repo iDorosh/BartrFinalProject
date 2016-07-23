@@ -22,6 +22,7 @@ class Chat: UIViewController, UITableViewDataSource, UITableViewDelegate {
     var selectedUsename : String = ""
     var profileImage = String()
     
+    @IBOutlet weak var noMessages: UILabel!
     
     //Back to Chat Action
     @IBAction func backToChat(segue: UIStoryboardSegue){}
@@ -72,6 +73,11 @@ class Chat: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
     //Set Up Table View
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if recents.count > 0 {
+            noMessages.hidden = true
+        } else {
+            noMessages.hidden = false
+        }
         return recents.count
     }
     

@@ -91,9 +91,7 @@ class EditProfile: UIViewController, UITextFieldDelegate {
     }
     
     func textFieldDidBeginEditing(textField: UITextField) {
-        print("clicked")
         if textField === userName {
-            print("email")
             usernameError.text = ""
             textField.layer.borderColor = defaultColor.CGColor
         }
@@ -263,7 +261,7 @@ class EditProfile: UIViewController, UITextFieldDelegate {
 
 
     func isValidEmail(testStr:String) -> Bool {
-        // print("validate calendar: \(testStr)")
+    
         let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
         
         let emailTest = NSPredicate(format:"SELF MATCHES %@", emailRegEx)

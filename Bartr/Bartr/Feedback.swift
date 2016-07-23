@@ -112,6 +112,7 @@ class Feedback: UIViewController {
             offer.offer = viewOffer
             offer.uid = uid
             offer.postKey = postKey
+          
         }
 
     }

@@ -15,7 +15,7 @@ import FirebaseDatabase
 
 
 
-class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
+class PostDetails: UIViewController, CustomIOS8AlertViewDelegate, MKMapViewDelegate{
     
     //Back to Post Details View Controller
     @IBAction func backToPostDetails(segue: UIStoryboardSegue){}
@@ -24,6 +24,7 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
     var allOffers = [Offers]()
     var selectedOffers = [Offers]()
     var selectedPost = [Post]()
+    
     
     var customRatingView : CustomIOS8AlertView! = nil
     
@@ -43,16 +44,23 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
     var selectedViews : Int?
     var selectedExperation : String?
     var expireString : String = String()
-    var currentRating : String = String()
+    var currentRating : Float = Float()
     var offertextFieldText = String()
     var currentUserNameString = String()
+    var longitude : Double = Double()
+    var latitude : Double = Double()
     //Listing key is passed from the previous screen to
     //add a view to the listing
     var key : String = String()
     var postKey : String = String()
+    var acceptedUID : String = String()
+    var postComplete : Bool = false
+    var didLeaveFeedback : Bool = false
     
     
+    @IBOutlet weak var stars: FloatRatingView!
     var rating : Float = Float()
+  
     
     //Name of the previous view controller to show and
     //hide UI items
@@ -173,7 +181,7 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
     }
     
     @IBAction func showProfile(sender: UIButton) {
-        print("clicked")
+        
         if key == FIRAuth.auth()?.currentUser?.uid{
             self.tabBarController?.tabBar.hidden = false
             self.tabBarController?.selectedIndex = 4
@@ -202,8 +210,8 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
     
     //Mark as sold/traded or given away
     @IBAction func viewOffersAction(sender: UIButton) {
-        if selectedPost[0].postComplete {
-            leaveFeedback("Leave Feedback", subTitle: "Would you like to rate this user and mark the Bartr as complete")
+        if postComplete {
+            leaveFeedback("Feedback", subTitle: "Only leave feedback once the transaction is complete. Are you sure that you want to continue?")
         } else if hasOffers {
             performSegueWithIdentifier("LeaveFeedbackSegue", sender: self)
         } else {
@@ -255,6 +263,7 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        mapView.delegate = self
         updatePosts()
         
         
@@ -311,6 +320,9 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
         selectedPrice = post.postPrice
         selectedTime = post.postDate
         selectedExperation = post.expireDate
+        longitude = Double(post.lon)!
+        latitude = Double(post.lat)!
+        
         addTapRecognizer()
         loadUI()
     }
@@ -320,31 +332,36 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
         loadLabels()
         decodeImages()
         
-        DataService.dataService.CURRENT_USER_REF.observeSingleEventOfType(FIRDataEventType.Value, withBlock: { snapshot in
-            self.currentUserNameString = snapshot.value!.objectForKey("username") as! String
-            currentProfileImg = snapshot.value!.objectForKey("profileImage") as! String
-            self.ratingView.rating = Float(snapshot.value!.objectForKey("rating") as! String)!
-            self.getSelectedUID()
+        if (!signUpSkipped){
+            DataService.dataService.CURRENT_USER_REF.observeSingleEventOfType(FIRDataEventType.Value, withBlock: { snapshot in
+                self.currentUserNameString = snapshot.value!.objectForKey("username") as! String
+                currentProfileImg = snapshot.value!.objectForKey("profileImage") as! String
+                self.currentRating = Float(snapshot.value!.objectForKey("rating") as! String)!
+                self.hideItems()
+                self.updateViews()
+                
+                if self.key != FIRAuth.auth()?.currentUser?.uid{
+                    self.setMapLocation()
+                    self.loadWebView()
+                } else {
+                    self.getNewOffers()
+                }
+            })
+        } else {
+            self.setMapLocation()
+            self.loadWebView()
             self.hideItems()
-            self.updateViews()
-            self.getNewOffers()
-            if self.key != FIRAuth.auth()?.currentUser?.uid{
-                self.setMapLocation()
-                self.loadWebView()
-            }
-            if self.selectedPost[0].postComplete == true {
-                self.sold.setTitle("Leave Feedback", forState: .Normal)
-            }
-        })
-        
-        
+        }
         
         var test : CGRect = postDetails.frame;
         test.size.height = postDetails.contentSize.height;
         postDetails.frame = test
         
         postDetails.scrollEnabled = false
-        addView()
+        if !signUpSkipped{
+            addView()
+        }
+        updateFeedback()
 
     }
     
@@ -353,76 +370,91 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
         
     }
     
-    func getSelectedUID(){
-        self.recieverUID = self.selectedPost[0].postUID
-        self.senderUID = (FIRAuth.auth()?.currentUser?.uid)!
-    }
+   
     
     
     //Functions
     
     //Will hide UI elements depending on what the previous screen was
     func hideItems(){
-       
-        if (previousVC == "Profile"){
-            delete.hidden = false
-            message.hidden = true
-            sold.hidden = false
-            amazonView.hidden = true
-            socialView.hidden = false
-            locationView.hidden = false
-            editButton.hidden = false
-            mapView.hidden = true
-            offerButton.hidden = true
-            
-            
-            checkExperation()
+        if !signUpSkipped {
+            if (previousVC == "Profile"){
+                delete.hidden = false
+                message.hidden = true
+                sold.hidden = false
+                amazonView.hidden = true
+                socialView.hidden = false
+                locationView.hidden = false
+                editButton.hidden = false
+                mapView.hidden = true
+                offerButton.hidden = true
+                
+                
+                checkExperation()
 
+                
+                
+                detailScrollView.contentSize.height = 1110
+            } else if previousVC == "UsersFeed"{
+                offerButton.hidden = false
+                delete.hidden = true
+                message.hidden = false
+                sold.hidden = true
+                amazonView.hidden = false
+                socialView.hidden = false
+                locationView.hidden = false
+                editButton.hidden = true
+                 extendOrRenew.hidden = true
+                detailScrollView.contentSize.height = 1950
+            } else {
+                offerButton.hidden = false
+                delete.hidden = true
+                message.hidden = false
+                sold.hidden = true
+                amazonView.hidden = false
+                socialView.hidden = false
+                locationView.hidden = false
+                editButton.hidden = true
+                 extendOrRenew.hidden = true
+                detailScrollView.contentSize.height = 1950
+            }
+            
+       
+            if (selectedPost[0].postUID == FIRAuth.auth()?.currentUser!.uid){
+                delete.hidden = false
+                message.hidden = true
+                sold.hidden = false
+                socialView.hidden = true
+                editButton.hidden = false
+                locationView.hidden = true
+                amazonView.hidden = true
+                offerButton.hidden = true
+                checkExperation()
+                detailScrollView.contentSize.height = 1110
+            }
+            
+            if selectedPost[0].postComplete == true {
+                delete.hidden = true
+                editButton.hidden = true
+                offerAcceptedView.hidden = false
+            }
             
             
-            detailScrollView.contentSize.height = 1110
-        } else if previousVC == "UsersFeed"{
-            offerButton.hidden = false
-            delete.hidden = true
-            message.hidden = false
-            sold.hidden = true
-            amazonView.hidden = false
-            socialView.hidden = false
-            locationView.hidden = false
-            editButton.hidden = true
-             extendOrRenew.hidden = true
-            detailScrollView.contentSize.height = 1950
+            if selectedPost[0].postFL {
+                print("false")
+                offerAcceptedView.text = "Bartr Complete"
+            }
         } else {
-            offerButton.hidden = false
+            offerButton.hidden = true
             delete.hidden = true
-            message.hidden = false
+            message.hidden = true
             sold.hidden = true
             amazonView.hidden = false
             socialView.hidden = false
             locationView.hidden = false
             editButton.hidden = true
-             extendOrRenew.hidden = true
+            extendOrRenew.hidden = true
             detailScrollView.contentSize.height = 1950
-        }
-        
-   
-        if (selectedPost[0].postUID == FIRAuth.auth()?.currentUser!.uid){
-            delete.hidden = false
-            message.hidden = true
-            sold.hidden = false
-            socialView.hidden = true
-            editButton.hidden = false
-            locationView.hidden = true
-            amazonView.hidden = true
-            offerButton.hidden = true
-            checkExperation()
-            detailScrollView.contentSize.height = 1110
-        }
-        
-        if selectedPost[0].postComplete == true {
-            delete.hidden = true
-            editButton.hidden = true
-            offerAcceptedView.hidden = false
         }
     }
     
@@ -487,6 +519,7 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
         postPrice.text = selectedPrice
         postDetails.text = selectedDetails
         postDetails.font = UIFont(name: "Avenir", size: 15)
+    
         
     }
     
@@ -507,22 +540,25 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
     
     //Sets map to the location listed under the post.
     func setMapLocation(){
-        let location: String = selectedLocation!
-        let geocoder: CLGeocoder = CLGeocoder()
-        geocoder.geocodeAddressString(location,completionHandler: {(placemarks: [CLPlacemark]?, error: NSError?) -> Void in
-            if (placemarks?.count > 0) {
-                let topResult: CLPlacemark = (placemarks?[0])!
-                let placemark: MKPlacemark = MKPlacemark(placemark: topResult)
-                var region: MKCoordinateRegion = self.mapView.region
-                region.center = placemark.coordinate
-                region.span.longitudeDelta /= 50.0
-                region.span.latitudeDelta /= 50.0
-                self.mapView.setRegion(region, animated: true)
-                self.mapView.addAnnotation(placemark)
-            }
-        })
+            mapView.removeAnnotations(mapView.annotations)
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+            annotation.title = selectedLocation
+            
+            mapView.addAnnotation(annotation)
+            let span = MKCoordinateSpanMake(0.05, 0.05)
+        
+            let region = MKCoordinateRegionMake(CLLocationCoordinate2D(latitude: latitude, longitude: longitude), span)
+        
+            mapView.setRegion(region, animated: true)
     }
     
+    func mapView(mapView: MKMapView, rendererForOverlay overlay: MKOverlay) -> MKOverlayRenderer {
+        let pr = MKPolylineRenderer(overlay: overlay)
+        pr.strokeColor = UIColor.redColor()
+        pr.lineWidth = 14
+        return pr
+    }
     
     
 
@@ -619,6 +655,20 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
         unwind()
     }
     
+    func updateFeedback(){
+        DataService.dataService.USER_REF.observeSingleEventOfType(FIRDataEventType.Value, withBlock: { snapshot in
+            if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
+                
+                for snap in snapshots {
+                    let test = snap.key
+                    if (test == self.key){
+                        self.ratingView.rating = Float(snap.value!.objectForKey("rating") as! String)!
+                    }
+                }
+            }
+            
+        })
+    }
     
     func checkExperation(){
         extendOrRenew.hidden = true
@@ -707,15 +757,16 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
             let chatVc : ChatViewController = segue.destinationViewController as! ChatViewController
             chatVc.senderId = FIRAuth.auth()?.currentUser?.uid
             chatVc.recieverUsername = postUser.text!
-            chatVc.senderDisplayName = ""
+            chatVc.senderDisplayName = currentUser
             chatVc.recieverUID = key
             chatVc.ref4 = ref
             chatVc.selectedTitle = selectedTitle!
             chatVc.selectedImage = selectedProfileImg!
             chatVc.selectedUser = selectedUser!
-            chatVc.currentUser = currentUser
-            chatVc.senderUID = senderUID
+            chatVc.currentUser = currentUserNameString
+            chatVc.senderUID = (FIRAuth.auth()?.currentUser?.uid)!
             chatVc.title = selectedUser
+            print(currentProfileImg)
           
         }
         
@@ -723,9 +774,8 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
             
             let offersVC : Feedback = segue.destinationViewController as! Feedback
             offersVC.selectedTitle = selectedTitle!
-            offersVC.uid = senderUID
+            offersVC.uid = (FIRAuth.auth()?.currentUser?.uid)!
         }
-
     }
     
     func sendOfferText(offerTextString : String!){
@@ -744,17 +794,18 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
                 "offerAccepted" : "false",
                 "offerDeclined" : "false",
                 "currentProfileImage" : currentProfileImg,
-                "senderUID" : senderUID,
-                "senderRating" : String(ratingView.rating),
+                "senderUID" : (FIRAuth.auth()?.currentUser?.uid)!,
+                "senderRating" : String(currentRating) as String,
                 "offerDate" : dateFormatter().stringFromDate(NSDate()),
                 "offerStatus" : "Delivered",
                 "listingKey" : postKey,
-                "recieverUID" : recieverUID
+                "recieverUID" : key,
+                "feedbackLeft" : "false"
         ]
         
         DataService.dataService.createNewOffer(offerItem)
         
-        let itemRef2 = DataService.dataService.USER_REF.child(senderUID).child("offers").child(itemRef.key) // 1
+        let itemRef2 = DataService.dataService.USER_REF.child((FIRAuth.auth()?.currentUser?.uid)!).child("offers").child(itemRef.key) // 1
         sendOfferRef = itemRef2
         
         DataService.dataService.createNewOffer(offerItem)
@@ -810,12 +861,22 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
                     }
                     
                     for offers in self.allOffers{
-                        if (offers.offerTitle == self.selectedTitle!){
+                        if (offers.listingKey == self.postKey){
                             self.hasOffers = true
+                            if offers.offerAccepted == "true" {
+                                self.postComplete = true
+                                self.acceptedUID = offers.offerUID
+                            }
+                            if offers.feedbackLeft == "true" {
+                                self.didLeaveFeedback = true
+                                self.acceptedUID = offers.offerUID
+                            }
+                            
+                            
                         }
-                        if (offers.offerTitle == self.selectedTitle!) && (offers.offerChecked == "false") {
+                        if (offers.listingKey == self.postKey) && (offers.offerChecked == "false") {
                             self.newOffers = self.newOffers + 1
-                            print("new")
+                            
                             
                         }
                     }
@@ -834,6 +895,25 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
                     self.sold.setTitle("No New Offers", forState: .Normal)
                     self.mainView.hidden = false
                 }
+                
+                if self.postComplete {
+                    self.delete.hidden = true
+                    self.editButton.hidden = true
+                    self.sold.setTitle("Leave Feedback", forState: .Normal)
+                    self.offerAcceptedView.text = "Offer Accepted"
+                    self.offerAcceptedView.hidden = false
+                    
+                }
+                
+                if self.didLeaveFeedback {
+                    print("hello")
+                    self.sold.hidden = true
+                    self.offerAcceptedView.text = "Bartr Complete"
+                    self.delete.hidden = false
+                    self.offerAcceptedView.hidden = false
+                }
+                
+                
             })
         
 
@@ -841,14 +921,14 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
     
     func leaveFeedback(title : String, subTitle : String){
         let alertView = SCLAlertView()
-        alertView.addButton("Rate User"){
+        alertView.addButton("Leave Feedback"){
             self.leaveFeedback()
         }
         alertView.addButton("Later"){
             alertView.dismissViewControllerAnimated(true, completion: nil)
         }
         alertView.showCloseButton = false
-        alertView.showSuccess(title, subTitle: subTitle)
+        alertView.showWarning(title, subTitle: subTitle)
     }
     
     var userRated : Bool = false
@@ -864,6 +944,9 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
         customRatingView.show()
     }
 
+    @IBAction func dismissFeedback(sender: UIButton) {
+        customRatingView.close()
+    }
 
     
     
@@ -881,13 +964,19 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
     }
     
     func customIOS8AlertViewButtonTouchUpInside(alertView: CustomIOS8AlertView, buttonIndex: Int) {
-        feedbackSent("Feedback Left", subTitle: "Your feedback has been sent to the user")
+        
+        sendFeedback(stars.rating, currentUsername: currentUserNameString, title: postTitle.text!, img: currentProfileImg, id: acceptedUID, postUID: postKey )
+        
         customRatingView.close()
+        feedbackLeft()
         userRated = true
-        if selectedPost[0].postUID == FIRAuth.auth()?.currentUser?.uid {
-            delete.hidden = false
-            sold.hidden = true
-        }
+        
+        delete.hidden = false
+        sold.hidden = true
+        self.offerAcceptedView.text = "Bartr Complete"
+        self.offerAcceptedView.hidden = false
+
+        
     }
     
     func feedbackSent(title : String, subTitle : String){
@@ -895,5 +984,16 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate {
         alertView.showSuccess(title, subTitle: subTitle)
     }
     
-        
+    func feedbackLeft(){
+        func feedbackLeft(){
+            let selectedPostRef2 = DataService.dataService.CURRENT_USER_REF.child("offers").child(acceptedUID)
+            selectedPostRef2.updateChildValues([
+                "offerStatus" : "Feedback Left",
+                "feedbackLeft" : "true"
+                ])
+        }
+
+    }
+    
+    
 }

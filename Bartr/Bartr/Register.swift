@@ -224,7 +224,7 @@ class Register: UIViewController, UITextFieldDelegate {
     }
     
     func isValidEmail(testStr:String) -> Bool {
-        // print("validate calendar: \(testStr)")
+        
         let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
         
         let emailTest = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
@@ -344,7 +344,7 @@ class Register: UIViewController, UITextFieldDelegate {
     }
     
     func getUsers(){
-        print("testing")
+        
         
         DataService.dataService.USER_REF.observeEventType(.Value, withBlock: { snapshot in
             if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
@@ -354,7 +354,7 @@ class Register: UIViewController, UITextFieldDelegate {
                     self.users.append(test.lowercaseString)
                 }
             }
-            print(self.users.count)
+            
         })
     }
     
@@ -376,7 +376,7 @@ class Register: UIViewController, UITextFieldDelegate {
         let base64String = data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions.Encoding64CharacterLineLength)
  
         //Checks if passwords are the same
-            if username != "" && email != "" && password != "" && confirmPassword != "" {
+            if username != "" && email != "" && password != "" && confirmPassword != "" && password?.characters.count > 6 && username?.characters.count > 6 && confirmPassword?.characters.count > 6{
                 if (confirmPassword == password){
                 self.presentViewController(alertController, animated: true, completion: nil)
                 
@@ -386,7 +386,7 @@ class Register: UIViewController, UITextFieldDelegate {
                                 FIRAuth.auth()?.createUserWithEmail(email!, password: password!) { (user, error) in
                                     
                                     if error != nil {
-                                        print(FIRAuthErrorCode(rawValue: error!.code))
+                            
                                         if let errorCode = FIRAuthErrorCode(rawValue: error!.code) {
                                             
                                             switch (errorCode) {
@@ -450,7 +450,7 @@ class Register: UIViewController, UITextFieldDelegate {
         } else {
             //Shows Alert
             self.errorMessage = "missing"
-            signupErrorAlert("Oops!", message: "Please fill in all fields")
+            signupErrorAlert("Oops!", message: "Please enter the valid information")
         }
         
     }

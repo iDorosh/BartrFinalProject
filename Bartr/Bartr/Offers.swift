@@ -30,6 +30,7 @@ class Offers {
     
     private var _recieverUsername: String!
     private var _recieverUID: String!
+    private var _feedbackLeft: String!
     private var _recieverImage: String!
   
     
@@ -96,6 +97,10 @@ class Offers {
         return _recieverUID
     }
     
+    var feedbackLeft: String {
+        return _feedbackLeft
+    }
+    
     // Initialize the new offer
     init(key: String, dictionary: Dictionary<String, AnyObject>) {
         self._offerKey = key
@@ -160,6 +165,10 @@ class Offers {
         
         if let recieverK = dictionary["recieverUID"] as? String {
             self._recieverUID = recieverK
+        }
+        
+        if let feedbackL = dictionary["feedbackLeft"] as? String {
+            self._feedbackLeft = feedbackL
         }
         
         // The above properties are assigned to their key.

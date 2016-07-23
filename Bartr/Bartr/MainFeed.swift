@@ -52,13 +52,12 @@ class MainFeed: UIViewController, UITableViewDataSource {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         spin.startAnimating()
         spin.hidden = false
-        
         self.navigationController?.navigationBarHidden = true
         UIApplication.sharedApplication().statusBarStyle = .Default
-        updatePosts()
+        
+        
         setUserDefaults()
         setUpRefreshControl()
        
@@ -75,6 +74,11 @@ class MainFeed: UIViewController, UITableViewDataSource {
     //Tableview Setup
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if hideCompleteSales.count > 0 {
+            tableView.hidden = false
+        } else {
+            tableView.hidden  = true
+        }
         return hideCompleteSales.count
     }
     
@@ -107,8 +111,10 @@ class MainFeed: UIViewController, UITableViewDataSource {
         print(NSUserDefaults.standardUserDefaults().valueForKey("uid"))
         if NSUserDefaults.standardUserDefaults().valueForKey("uid") != nil && FIRAuth.auth()?.currentUser?.uid != nil {
             LogInLogOut.setTitle("Sign Out", forState: UIControlState.Normal)
+            signUpSkipped = false
         } else {
             LogInLogOut.setTitle("Sign In", forState: UIControlState.Normal)
+            signUpSkipped = true
         }
     }
     
@@ -138,8 +144,8 @@ class MainFeed: UIViewController, UITableViewDataSource {
             
                 let alertView = SCLAlertView()
                 alertView.addButton("Sign Out", target:self, selector:#selector(MainFeed.signOutCallBack))
-                
-                alertView.showCloseButton = true
+            alertView.addButton("Cancel"){alertView.dismissViewControllerAnimated(true, completion: nil)}
+                alertView.showCloseButton = false
                 
                 alertView.showWarning("Sign out", subTitle: "Sign out current user?")
         
@@ -178,7 +184,7 @@ class MainFeed: UIViewController, UITableViewDataSource {
                     
                     if !i.postComplete && !i.postFL && eseconds > 0{
                         self.hideCompleteSales.append(i)
-                        print(i.postTitle)
+    
                     }
                 }
             

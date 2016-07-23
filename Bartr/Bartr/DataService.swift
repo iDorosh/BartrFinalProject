@@ -56,4 +56,9 @@ class DataService {
         firebaseNewPost.setValue(offer)
     }
     
+    func createNewFeedback(feedback: Dictionary<String, AnyObject>, id : String) {
+        let firebaseNewPost = sendFeedbackRef
+        firebaseNewPost.setValue(feedback)
+    }
+    
 }

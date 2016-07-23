@@ -10,6 +10,10 @@
 		3C6D28028F71F0DC4FF69D59 /* Pods_BartrTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C179B8F2B45D83B0A71DE43 /* Pods_BartrTests.framework */; };
 		97C18C37924060B103276E90 /* Pods_BartrUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 02DD6E3EE3C777BA65BC5E31 /* Pods_BartrUITests.framework */; };
 		CD0D991FE2C14C8443F54156 /* Pods_Bartr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 620BCB50C8DDF013127818D0 /* Pods_Bartr.framework */; };
+		DD10DFA41D3FF1660082982D /* FeedbackObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD10DFA31D3FF1660082982D /* FeedbackObject.swift */; };
+		DD10DFA51D3FF4E80082982D /* FeedbackObject.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD10DFA31D3FF1660082982D /* FeedbackObject.swift */; };
+		DD10DFA71D428BBA0082982D /* LocationSearchTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD10DFA61D428BBA0082982D /* LocationSearchTable.swift */; };
+		DD10DFA81D428CB10082982D /* LocationSearchTable.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD10DFA61D428BBA0082982D /* LocationSearchTable.swift */; };
 		DD162B5B1D285A5A00D234DA /* Offers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD162B5A1D285A5A00D234DA /* Offers.swift */; };
 		DD162B5C1D285E7C00D234DA /* Offers.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD162B5A1D285A5A00D234DA /* Offers.swift */; };
 		DD162B5E1D2869C900D234DA /* ViewOffers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD162B5D1D2869C900D234DA /* ViewOffers.swift */; };
@@ -119,6 +123,8 @@
 		3050136592EA3E5E07A96A16 /* Pods-Bartr.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Bartr.release.xcconfig"; path = "Pods/Target Support Files/Pods-Bartr/Pods-Bartr.release.xcconfig"; sourceTree = "<group>"; };
 		56D8EF63FA476B4A55304D1E /* Pods-BartrTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BartrTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-BartrTests/Pods-BartrTests.debug.xcconfig"; sourceTree = "<group>"; };
 		620BCB50C8DDF013127818D0 /* Pods_Bartr.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Bartr.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		DD10DFA31D3FF1660082982D /* FeedbackObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FeedbackObject.swift; sourceTree = "<group>"; };
+		DD10DFA61D428BBA0082982D /* LocationSearchTable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationSearchTable.swift; sourceTree = "<group>"; };
 		DD162B5A1D285A5A00D234DA /* Offers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Offers.swift; sourceTree = "<group>"; };
 		DD162B5D1D2869C900D234DA /* ViewOffers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewOffers.swift; sourceTree = "<group>"; };
 		DD1762D11D0DADD200B49B97 /* Register.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Register.swift; sourceTree = "<group>"; };
@@ -373,6 +379,7 @@
 				DD62BBB81D0CBEBF006DBD64 /* DataService.swift */,
 				DD62BBBC1D0CBECE006DBD64 /* Constants.swift */,
 				DD162B5A1D285A5A00D234DA /* Offers.swift */,
+				DD10DFA31D3FF1660082982D /* FeedbackObject.swift */,
 			);
 			name = FireBaseData;
 			sourceTree = "<group>";
@@ -411,6 +418,7 @@
 		DDF679E01D0D211B0006DF37 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				DD10DFA61D428BBA0082982D /* LocationSearchTable.swift */,
 				DDCB56D51D3B286800E85765 /* CustomIOS8AlertView.swift */,
 				DDEB327C1D38391E005373D8 /* AutoCompleteTextField.swift */,
 				DD62BB851D0CAFAB006DBD64 /* Assets.xcassets */,
@@ -548,6 +556,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DD10DFA81D428CB10082982D /* LocationSearchTable.swift in Resources */,
+				DD10DFA51D3FF4E80082982D /* FeedbackObject.swift in Resources */,
 				DDCB56D71D3B287400E85765 /* CustomIOS8AlertView.swift in Resources */,
 				DDEB327E1D383926005373D8 /* AutoCompleteTextField.swift in Resources */,
 				DDEB32771D3815B4005373D8 /* PushNotification.swift in Resources */,
@@ -738,6 +748,7 @@
 				DD6B46151D2F4E750011DF5D /* TabBarController.swift in Sources */,
 				DDF679E61D0D21A70006DF37 /* Profile.swift in Sources */,
 				DD62BB7D1D0CAFAB006DBD64 /* AppDelegate.swift in Sources */,
+				DD10DFA41D3FF1660082982D /* FeedbackObject.swift in Sources */,
 				DD3E32371D1C662B00F66E0F /* FeedbackTableCell.swift in Sources */,
 				DD1DF8861D0F8D8E00511810 /* CustomChatTableCell.swift in Sources */,
 				DDCA74D91D35CD7F004D363B /* CameraController.swift in Sources */,
@@ -746,6 +757,7 @@
 				DD162B5E1D2869C900D234DA /* ViewOffers.swift in Sources */,
 				DDF679DA1D0D1B610006DF37 /* Chat.swift in Sources */,
 				DDBB74CB1D174D96001341E7 /* EditProfile.swift in Sources */,
+				DD10DFA71D428BBA0082982D /* LocationSearchTable.swift in Sources */,
 				DD22EB2C1D14BD3D00AB4017 /* ChatViewController.swift in Sources */,
 				DD1762D21D0DADD200B49B97 /* Register.swift in Sources */,
 				DDEB32761D381140005373D8 /* PushNotification.swift in Sources */,

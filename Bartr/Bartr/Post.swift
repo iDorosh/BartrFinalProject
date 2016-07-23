@@ -31,6 +31,9 @@ class Post {
     private var _postExpireDate : String!
     private var _postExpired : Bool!
     
+    private var _lon: String!
+    private var _lat : String!
+    
     //Information Getters
     var postKey: String {
         return _postKey
@@ -82,6 +85,14 @@ class Post {
     
     var expireDate : String {
         return _postExpireDate
+    }
+    
+    var lon : String {
+        return _lon
+    }
+    
+    var lat : String {
+        return _lat
     }
     
     var postComplete : Bool {
@@ -144,6 +155,14 @@ class Post {
         
         if let postED = dictionary["postExpireDate"] as? String {
             self._postExpireDate = postED
+        }
+        
+        if let LON = dictionary["lon"] as? String {
+            self._lon = LON
+        }
+        
+        if let LAT = dictionary["lat"] as? String {
+            self._lat = LAT
         }
         
         if let postC = dictionary["postComplete"] as? Bool {
