@@ -23,6 +23,11 @@ class Camera: UIViewController, UITextFieldDelegate {
     
     var alertController = UIAlertController()
     
+    var longitude : Double = Double()
+    var latitude : Double = Double()
+    
+    @IBOutlet weak var priceErrorLabel: UILabel!
+    
     var errorMessage : String = ""
     
     var defaultColor = UIColor()
@@ -43,6 +48,7 @@ class Camera: UIViewController, UITextFieldDelegate {
     var capturedImage : UIImage = UIImage()
     var currentUsername = ""
     var orignalView : String = ""
+    var city : String = ""
     
     var previousScreen : String?
     var editedTitle : String?
@@ -152,6 +158,9 @@ class Camera: UIViewController, UITextFieldDelegate {
         editedUser = post.username
         editedDetails = post.postText
         editedType = post.postType
+        longitude = Double(post.lon)!
+        latitude = Double(post.lat)!
+        city = post.postLocation
         
         decodeImages()
         addTapRecognizer()
@@ -329,7 +338,11 @@ class Camera: UIViewController, UITextFieldDelegate {
         if titleField.text == "" || self.titleField.text?.characters.count < 6 {
             errorInvalid("Missing Fields", subTitle: "Please fill in both fields")
         } else {
-        performSegueWithIdentifier("locationSegue", sender: self)
+            if previousScreen == "EditView"{
+                performSegueWithIdentifier("editingSegue", sender: self)
+            } else {
+                performSegueWithIdentifier("locationSegue", sender: self)
+            }
         }
     }
     
@@ -357,25 +370,51 @@ class Camera: UIViewController, UITextFieldDelegate {
         textView.textColor = defaultColor
     }
     
+    func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
+        // Find out what the text field will be after adding the current edit
+        if (textField == priceField){
+            let text = (priceField.text! as NSString).stringByReplacingCharactersInRange(range, withString: string)
+            
+            if let intVal = Int(text) {
+                priceErrorLabel.textColor = defaultLabelColor
+                priceErrorLabel.text = "Only Numbers, Default is Negotiable"
+                
+            } else {
+                    priceErrorLabel.textColor = hexStringToUIColor("#f27163")
+                    priceErrorLabel.text = "Please enter numbers only"
+            }
+
+        }
+        
+        // Return true so the text field will be changed
+        return true
+    }
+    
     //Sends data to next view controller
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         UIApplication.sharedApplication().statusBarHidden = false
         
-        if segue.identifier == "locationSegue"{
+        
             if previousScreen == "EditView"{
-                let listingLocation : ListingLocation = segue.destinationViewController as! ListingLocation
-                listingLocation.editType = editedType
-                listingLocation.previousScreen = "EditView"
-                listingLocation.pickedImage = previewImage.image!
-                listingLocation.pickedTitle = titleField.text!
-                listingLocation.pickedLocation = editedLocation!
-                listingLocation.editProfileImg = editedProfileImg!
-                listingLocation.editPhoto = previewImage.image!
-                listingLocation.editUser = editedUser!
-                listingLocation.editDetails = editedDetails!
-                listingLocation.editKey = editKey
-                listingLocation.pickedPrice = priceField.text!
+                if segue.identifier == "editingSegue"{
+                    let listingLocation : ListingLocation = segue.destinationViewController as! ListingLocation
+                    listingLocation.editType = editedType
+                    listingLocation.previousScreen = "EditView"
+                    listingLocation.pickedImage = previewImage.image!
+                    listingLocation.pickedTitle = titleField.text!
+                    listingLocation.pickedLocation = editedLocation!
+                    listingLocation.editProfileImg = editedProfileImg!
+                    listingLocation.editPhoto = previewImage.image!
+                    listingLocation.editUser = editedUser!
+                    listingLocation.editDetails = editedDetails!
+                    listingLocation.editKey = editKey
+                    listingLocation.pickedPrice = priceField.text!
+                    listingLocation.longitude = longitude
+                    listingLocation.latitude = latitude
+                    listingLocation.city = city
+                }
             } else {
+                if segue.identifier == "locationSegue"{
                 let listingLocation : ListingLocation = segue.destinationViewController as! ListingLocation
                 listingLocation.pickedImage = previewImage.image!
                 listingLocation.pickedTitle = titleField.text!
@@ -391,6 +430,7 @@ class Camera: UIViewController, UITextFieldDelegate {
 
             }
         }
+        
         
     }
     

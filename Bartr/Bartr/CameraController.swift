@@ -10,12 +10,17 @@ import UIKit
 
 class CameraController: UIViewController {
 
+    @IBOutlet weak var signin: UIView!
     @IBOutlet weak var bgImage: UIImageView!
     @IBAction func backtoMain(sender: UIButton) {
         performSegueWithIdentifier("BacktoMain", sender: self)
     }
     @IBAction func startNewListing(sender: UIButton) {
         performSegueWithIdentifier("showNewListing", sender: self)
+    }
+    @IBAction func signInBttn(sender: UIButton) {
+        let loginViewController = self.storyboard!.instantiateViewControllerWithIdentifier("Login")
+        UIApplication.sharedApplication().keyWindow?.rootViewController = loginViewController
     }
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,11 +29,17 @@ class CameraController: UIViewController {
     }
     
     override func viewWillAppear(animated: Bool) {
-        self.tabBarController?.tabBar.hidden = true
-        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.Light)
-        let blurEffectView = UIVisualEffectView(effect: blurEffect)
-        blurEffectView.frame = self.view.bounds
-        self.bgImage.addSubview(blurEffectView)
+        if signUpSkipped {
+            signin.hidden = false
+            self.tabBarController?.tabBar.hidden = false
+        } else {
+            signin.hidden = true
+            self.tabBarController?.tabBar.hidden = true
+            let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.Light)
+            let blurEffectView = UIVisualEffectView(effect: blurEffect)
+            blurEffectView.frame = self.view.bounds
+            self.bgImage.addSubview(blurEffectView)
+        }
     }
 
     override func didReceiveMemoryWarning() {

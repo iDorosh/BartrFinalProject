@@ -24,7 +24,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var window: UIWindow?
     var offers = [Offers]()
+    var recieverOffers = [Offers]()
+    var sendOffers = [Offers]()
+    var badgeCount : Int = 0
     var getNotifications = NSTimer()
+    var tabBarController = UITabBarController()
+    
    
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
@@ -32,6 +37,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         NSThread.sleepForTimeInterval(2.0);
     
       
+        
         UIApplication.sharedApplication().setMinimumBackgroundFetchInterval(
             UIApplicationBackgroundFetchIntervalMinimum)
         
@@ -130,7 +136,51 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
     
-    
+    func observeOffers() {
+        DataService.dataService.CURRENT_USER_REF.child("offers").observeEventType(.Value, withBlock: { snapshot in
+            // 3
+            self.offers = []
+            self.sendOffers = []
+            self.recieverOffers = []
+            
+            
+            if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
+                for snap in snapshots{
+                    
+                    if let offersDictionary = snap.value as? Dictionary<String, AnyObject> {
+                        let key = snap.key
+                        let offer = Offers(key: key, dictionary: offersDictionary)
+                        self.offers.insert(offer, atIndex: 0)
+                    }
+                }
+            }
+            
+            self.badgeCount = 0
+            
+            for i in self.offers {
+                if i.offerUID == FIRAuth.auth()?.currentUser?.uid{
+                    self.sendOffers.append(i)
+                } else {
+                    if i.offerStatus == "Delivered"{
+                        self.badgeCount += 1
+                    } else {
+                        if self.badgeCount != 0 {
+                            self.badgeCount - 1
+                        }
+                    }
+                    self.recieverOffers.append(i)
+                    
+                }
+            }
+            
+            
+            if self.badgeCount != 0 {
+                self.tabBarController.tabBar.items?[4].badgeValue = String(self.badgeCount)
+            } else {
+                self.tabBarController.tabBar.items?[4].badgeValue = nil
+            }
+        })
+    }
     
     
 

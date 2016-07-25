@@ -110,8 +110,9 @@ class Feedback: UIViewController {
         if (segue.identifier == "ViewOfferSegue"){
             let offer : ViewOffers = segue.destinationViewController as! ViewOffers
             offer.offer = viewOffer
-            offer.uid = uid
-            offer.postKey = postKey
+            offer.uid = viewOffer.offerUID
+            offer.postKey = viewOffer.listingKey
+            offer.sentOffer = false
           
         }
 

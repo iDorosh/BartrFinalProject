@@ -28,11 +28,13 @@ class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, Cust
     var searchActive : Bool = false
     var filtered : Bool = false
     
+    @IBOutlet weak var mapSearchArealLavel: UIButton!
+    @IBOutlet weak var mapFilterBttn: UIButton!
     @IBOutlet weak var filterView: UIView!
     @IBOutlet weak var changeViewlabel: UIButton!
     @IBOutlet weak var mapView: MKMapView!
     @IBAction func changeView(sender: UIButton) {
-        view.endEditing(true)
+        self.view.endEditing(true)
         if mapView.hidden {
             mapView.hidden = false
             filterView.hidden = false
@@ -55,7 +57,7 @@ class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, Cust
     var action : Int = 0
     var searching = false
     var reloadPosts = false
-    var distanceMiles : Int = 20
+    var distanceMiles : Int = 500
     var locationFound : Bool = false
     var locationManager = CLLocationManager()
     var two : CLLocation!
@@ -107,7 +109,8 @@ class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, Cust
         
         setLocationManager()
         
-        distance.selectedSegmentIndex = 1
+        distance.selectedSegmentIndex = 3
+        distanceMiles = 200
         searchActive = true
         reloadPosts = false
         if searchActive {
@@ -115,10 +118,15 @@ class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, Cust
         }
         getCheckStates()
         setCheckStates()
+        
 
     }
     
     @IBAction func cancelClicked(sender: UIButton) {
+        filterBttn.hidden = true
+        searchAreaLabel.setTitle("In Your Area", forState: .Normal)
+        mapFilterBttn.hidden = true
+        mapSearchArealLavel.setTitle("In Your Area", forState: .Normal)
         cancelSearch.userInteractionEnabled = false
         cancelSearch.setTitleColor(UIColor.lightGrayColor(), forState: .Normal)
         searchBar.text = ""
@@ -126,11 +134,11 @@ class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, Cust
         searchActive = false
         filtered = false
         action = 0
-        updatePosts()
         self.view.endEditing(true)
         searchingResults = []
         filteredPosts = []
-        tabletView.reloadData()
+        updatePosts()
+       
     }
     
     @IBAction func listingType(sender: UISegmentedControl) {
@@ -152,6 +160,8 @@ class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, Cust
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        filterBttn.hidden = true
+        mapFilterBttn.hidden = true
         loadUI()
         getCheckStates()
         setLocationManager()
@@ -191,8 +201,10 @@ class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, Cust
     }
 
     func textFieldDidBeginEditing(textField: UITextField) {
+    
+        
+
         searchActive = true
-        filterBttn.hidden = false
         action = 1
         tabletView.reloadData()
         cancelSearch.userInteractionEnabled = true
@@ -210,6 +222,10 @@ class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, Cust
     }
     
     func textFieldShouldReturn(textField: UITextField) -> Bool {
+        filterBttn.hidden = false
+        searchAreaLabel.setTitle("Search Results", forState: .Normal)
+        mapSearchArealLavel.setTitle("Search Results", forState: .Normal)
+        mapFilterBttn.hidden = false
         dismissKeyboard()
         return true
     }
@@ -228,8 +244,6 @@ class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, Cust
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch action {
         case 0:
-            filterBttn.hidden = true
-            searchAreaLabel.setTitle("In Your Area", forState: .Normal)
             if posts.count > 0 {
                 tabletView.hidden = false
             } else {
@@ -237,8 +251,6 @@ class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, Cust
             }
             return posts.count
         case 1:
-            filterBttn.hidden = false
-            searchAreaLabel.setTitle("Search Results", forState: .Normal)
             return searchingResults.count
         case 2:
             return filteredPosts.count
@@ -273,37 +285,41 @@ class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, Cust
     
     //Update Firebase data and Table View
     func updatePosts(){
-        DataService.dataService.POST_REF.observeSingleEventOfType(.Value, withBlock: { snapshot in
-            self.posts = []
-            self.allPosts = []
-        
-            if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
-                for snap in snapshots {
-                    if !(snap.value!.objectForKey("postComplete") as! Bool) && !(snap.value!.objectForKey("postFeedbackLeft") as! Bool) {
-                        if let postDictionary = snap.value as? Dictionary<String, AnyObject> {
-                                let key = snap.key
-                                let post = Post(key: key, dictionary: postDictionary)
-                            
-                            self.allPosts.insert(post, atIndex: self.allPosts.endIndex
-                            )
+        if !searchActive {
+            DataService.dataService.POST_REF.observeSingleEventOfType(.Value, withBlock: { snapshot in
+                self.posts = []
+                self.allPosts = []
+            
+                if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
+                    for snap in snapshots {
+                        if !(snap.value!.objectForKey("postComplete") as! Bool) && !(snap.value!.objectForKey("postFeedbackLeft") as! Bool) {
+                            if let postDictionary = snap.value as? Dictionary<String, AnyObject> {
+                                    let key = snap.key
+                                    let post = Post(key: key, dictionary: postDictionary)
+                                
+                                self.allPosts.insert(post, atIndex: self.allPosts.endIndex
+                                )
+                            }
                         }
                     }
                 }
-            }
-            
-            for i in self.allPosts {
-                if self.loadLocation(i.lon, lat : i.lat){
-                    self.posts.insert(i, atIndex: 0)
+                
+                for i in self.allPosts {
+                    if self.loadLocation(i.lon, lat : i.lat){
+                        self.posts.insert(i, atIndex: 0)
+                    }
                 }
-            }
-            
-            self.action = 0
-            self.refreshControl.endRefreshing()
-            self.spin.stopAnimating()
-            self.spin.hidden = true
-            self.tabletView.reloadData()
-            self.setMapLocation()
-        })
+                
+                self.action = 0
+                self.refreshControl.endRefreshing()
+                self.spin.stopAnimating()
+                self.spin.hidden = true
+                self.tabletView.reloadData()
+                self.setMapLocation()
+            })
+        } else {
+            refreshControl.endRefreshing()
+        }
     }
     
     func setMapLocation(){
@@ -312,14 +328,15 @@ class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, Cust
             if filtered {
                 for i in filteredPosts {
                     let annotation = MKPointAnnotation()
-                    annotation.coordinate = CLLocationCoordinate2D(latitude: Double(i.lat)!, longitude: Double(i.lon)!)
+                    annotation.coordinate = CLLocationCoordinate2D(latitude: (Double(i.lat)! + Double.random(0.001, 0.01)), longitude: (Double(i.lon)!) + Double.random(0.001, 0.01))
                     annotation.title = i.postTitle
                     mapView.addAnnotation(annotation)
                 }
             } else {
                 for i in searchingResults {
+                
                     let annotation = MKPointAnnotation()
-                    annotation.coordinate = CLLocationCoordinate2D(latitude: Double(i.lat)!, longitude: Double(i.lon)!)
+                    annotation.coordinate = CLLocationCoordinate2D(latitude: (Double(i.lat)! + Double.random(0.001, 0.01)), longitude: (Double(i.lon)!) + Double.random(0.001, 0.01))
                     annotation.title = i.postTitle
                     mapView.addAnnotation(annotation)
                 }
@@ -327,8 +344,10 @@ class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, Cust
         } else {
             for i in posts {
                 let annotation = MKPointAnnotation()
-                annotation.coordinate = CLLocationCoordinate2D(latitude: Double(i.lat)!, longitude: Double(i.lon)!)
+                Double.random(0.000456, 0.001000)
+                annotation.coordinate = CLLocationCoordinate2D(latitude: (Double(i.lat)! + Double.random(0.001, 0.01)), longitude: (Double(i.lon)!) + Double.random(0.001, 0.01))
                 annotation.title = i.postTitle
+                
                 mapView.addAnnotation(annotation)
             }
         }
@@ -373,12 +392,16 @@ class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, Cust
     func loadLocation(lon: String, lat : String) -> Bool{
         let checkLocation = CLLocation(latitude: Double(lat)!, longitude: Double(lon)!)
         
-        if two.distanceFromLocation(checkLocation)/1609 < Double(distanceMiles) {
-            return true
+        if two != nil {
+            if two.distanceFromLocation(checkLocation)/1609 < Double(distanceMiles) {
+                return true
+            } else {
+                return false
+            }
         } else {
-            return false
+            return true
         }
-        
+    
     }
     
     func mapView(_mapView: MKMapView,
@@ -396,7 +419,7 @@ class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, Cust
             pinView!.canShowCallout = true
             pinView!.pinTintColor = UIColor.redColor()
             
-            pinView!.rightCalloutAccessoryView = UIButton(type: .DetailDisclosure) as UIButton
+            pinView!.rightCalloutAccessoryView = UIButton(type: .InfoLight) as UIButton
         }
         else {
             pinView!.annotation = annotation
@@ -426,9 +449,6 @@ class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, Cust
         let locValue:CLLocationCoordinate2D = manager.location!.coordinate
         two = CLLocation(latitude: locValue.latitude, longitude: locValue.longitude)
         
-        if two == nil {
-            two = CLLocation(latitude: 28.6000, longitude: 81.3392)
-        }
 
         
         let center = CLLocationCoordinate2D(latitude: two.coordinate.latitude, longitude: two.coordinate.longitude)
@@ -527,39 +547,78 @@ class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, Cust
             print("printfree")
         }
         
-        if reloadPosts  {
-            filterPosts()
-            action = 1
+        if distance.selectedSegmentIndex != 3 && !reloadPosts{
+            loadDistanceResults()
+            
         } else {
-            type = []
-            action = 1
-            filtered = false
-            setMapLocation()
-            tabletView.reloadData()
+            if reloadPosts  {
+                filterPosts()
+                action = 1
+            } else {
+                type = []
+                action = 1
+                filtered = false
+                setMapLocation()
+                tabletView.reloadData()
+            }
         }
+        
+        
+        
 
-        
-        if distance.selectedSegmentIndex != 20 {
-            distanceMiles = Int(distance.titleForSegmentAtIndex(distance.selectedSegmentIndex)!)!
-        } else {
-            distanceMiles = 20
-        }
-        
         getCheckStates()
     }
+    
+    func loadDistanceResults(){
+        filteredPosts = []
+        filtered = true
+        distanceMiles = Int(distance.titleForSegmentAtIndex(distance.selectedSegmentIndex)!)!
+        for i in searchingResults {
+            if loadLocation(i.lon, lat: i.lat){
+                filteredPosts.append(i)
+                print("loading")
+            }
+                        
+        }
+        
+        setMapLocation()
+        action = 2
+        tabletView.reloadData()
+        
+    }
+
+    
+    
    
     func filterPosts(){
         filteredPosts = []
         filtered = true
         mapView.removeAnnotations(mapView.annotations)
-        for i in searchingResults {
-            if !type.isEmpty {
-                for types in type {
-                    if i.postType.containsString(types) {
-                       filteredPosts.append(i)
+        if distance.selectedSegmentIndex == 1 {
+            for i in searchingResults {
+                if !type.isEmpty {
+                    for types in type {
+                        if i.postType.containsString(types) {
+                           filteredPosts.append(i)
+                        }
                     }
                 }
             }
+        } else {
+            distanceMiles = Int(distance.titleForSegmentAtIndex(distance.selectedSegmentIndex)!)!
+            for i in searchingResults {
+                if !type.isEmpty {
+                    for types in type {
+                        if i.postType.containsString(types) {
+                            if loadLocation(i.lon, lat: i.lat){
+                                filteredPosts.append(i)
+                            }
+                            
+                        }
+                    }
+                }
+            }
+
         }
         
         
@@ -574,7 +633,12 @@ class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, Cust
 
 
 
-
+public extension Double {
+    /// SwiftRandom extension
+    public static func random(lower: Double = 0, _ upper: Double = 100) -> Double {
+        return (Double(arc4random()) / 0xFFFFFFFF) * (upper - lower) + lower
+    }
+}
 
 
 

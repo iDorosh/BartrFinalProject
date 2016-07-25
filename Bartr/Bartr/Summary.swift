@@ -89,19 +89,13 @@ class Summary: UIViewController {
     //Get listing location on map preview
     func loadLocation(){
      
-            mapView.removeAnnotations(mapView.annotations)
-            let annotation = MKPointAnnotation()
-            annotation.coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-            annotation.title = pickedLocation
-        
-            annotation.subtitle = "\(pickedLocation)"
-        
-            mapView.addAnnotation(annotation)
-            let span = MKCoordinateSpanMake(0.05, 0.05)
-            let region = MKCoordinateRegionMake(CLLocationCoordinate2D(latitude: latitude, longitude: longitude), span)
-            mapView.setRegion(region, animated: true)
-
-        
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = CLLocationCoordinate2D(latitude: Double(latitude), longitude: Double(longitude))
+        annotation.title = "Test"
+        let span = MKCoordinateSpanMake(0.05, 0.05)
+        let region = MKCoordinateRegionMake(CLLocationCoordinate2DMake(Double(latitude), Double(longitude)), span)
+        mapView.setRegion(region, animated: true)
+        mapView.addAnnotation(annotation)
     }
     
     //Load UI
@@ -141,6 +135,8 @@ class Summary: UIViewController {
                 "postLocation": self.pickedLocation,
                 "userProfileImg": self.currentProfileImg,
                 "postPrice": self.pickedPrice,
+                "lon" : String(self.longitude) as String,
+                "lat" : String(self.latitude) as String
                 ])
                 self.performSegueWithIdentifier("GoBackToProfileSegue", sender: self)
             })
@@ -235,7 +231,6 @@ class Summary: UIViewController {
         let alertView = SCLAlertView()
         alertView.addButton("Twitter") {self.postToTwitter()}
         alertView.addButton("Facebook", target: self, selector: #selector (postToFacebook))
-        alertView.addButton("Instagram", target: self, selector: #selector (postToInstagram))
         alertView.addButton("Done") { self.performSegueWithIdentifier("MainFeedUnwind", sender: self) }
         alertView.showCloseButton = false
         alertView.showSuccess("Listed", subTitle: "Would you like to share your new post on social media?")

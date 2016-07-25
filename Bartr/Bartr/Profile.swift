@@ -18,6 +18,11 @@ class Profile: UIViewController, UITableViewDataSource, CustomIOS8AlertViewDeleg
     
      var customRatingView : CustomIOS8AlertView! = nil
 
+    @IBOutlet weak var signin: UIView!
+    @IBAction func signinButton(sender: UIButton) {
+        let loginViewController = self.storyboard!.instantiateViewControllerWithIdentifier("Login")
+        UIApplication.sharedApplication().keyWindow?.rootViewController = loginViewController
+    }
     
     //Back to Profile View Controller
     @IBAction func backToProfile(segue: UIStoryboardSegue){}
@@ -111,10 +116,16 @@ class Profile: UIViewController, UITableViewDataSource, CustomIOS8AlertViewDeleg
     }
     
     override func viewWillAppear(animated: Bool) {
+        if signUpSkipped {
+            signin.hidden = false
+            self.tabBarController?.tabBar.hidden = false
+        } else {
+            signin.hidden = true
         self.tabBarController?.tabBar.hidden = false
         //Fill in user info
         getCurrentUserData()
         observeOffers()
+        }
     }
     
     override func didReceiveMemoryWarning() {
@@ -157,7 +168,8 @@ class Profile: UIViewController, UITableViewDataSource, CustomIOS8AlertViewDeleg
         let cell : CustomTableCell = tableView.dequeueReusableCellWithIdentifier("ProfileCell")! as! CustomTableCell
         cell.configureCell(post)
         self.tableView.rowHeight = 352.0
-          self.tableView.hidden = false
+        self.tableView.hidden = false
+        spin.hidden = true
         return cell
         } else if segment == 1{
             let offer = recieverOffers[indexPath.row]
@@ -165,6 +177,7 @@ class Profile: UIViewController, UITableViewDataSource, CustomIOS8AlertViewDeleg
             cell.tableConfig(offer)
             self.tableView.rowHeight = 96.0
             self.tableView.hidden = false
+            spin.hidden = true
             return cell
         } else {
             let offer = sendOffers[indexPath.row]
@@ -172,14 +185,19 @@ class Profile: UIViewController, UITableViewDataSource, CustomIOS8AlertViewDeleg
             cell.tableConfig(offer)
             self.tableView.rowHeight = 96.0
             self.tableView.hidden = false
+            spin.hidden = true
             return cell
         }
+        
     }
+    
+
     
     
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath){
         if segment == 0 {
+            selectedPost = indexPath.row
             performSegueWithIdentifier("detailSegue2", sender: self)
         } else if segment == 1 {
             viewOffer = recieverOffers[indexPath.row]
@@ -236,11 +254,13 @@ class Profile: UIViewController, UITableViewDataSource, CustomIOS8AlertViewDeleg
     func deleteOffer(offer : Offers){
         if segment == 1 {
             if (offer.offerDeclined == "false") {
-                let updateRef = DataService.dataService.USER_REF.child("\(selectedOffer.offerUID)").child("offers").child("\(selectedOffer.offerKey)")
-                updateRef.updateChildValues([
-                    "offerStatus" : "Declined",
-                    "offerDeclined" : "true"
-                ])
+                if (offer.feedbackLeft == "false"){
+                    let updateRef = DataService.dataService.USER_REF.child("\(selectedOffer.offerUID)").child("offers").child("\(selectedOffer.offerKey)")
+                    updateRef.updateChildValues([
+                        "offerStatus" : "Declined",
+                        "offerDeclined" : "true"
+                    ])
+                }
             }
             
             let deleteRef = DataService.dataService.CURRENT_USER_REF.child("offers").child("\(selectedOffer.offerKey)")
@@ -248,11 +268,14 @@ class Profile: UIViewController, UITableViewDataSource, CustomIOS8AlertViewDeleg
             deleteRef.removeValue()
         } else if segment == 2 {
             if (offer.offerDeclined == "false") {
-                let updateRef = DataService.dataService.USER_REF.child("\(selectedOffer.recieverUID)").child("offers").child("\(selectedOffer.offerKey)")
-                updateRef.updateChildValues([
-                    "offerStatus" : "Canceled",
-                    "offerDeclined" : "true"
-                    ])
+                if offer.offerAccepted == "false" {
+                    let updateRef = DataService.dataService.USER_REF.child("\(selectedOffer.recieverUID)").child("offers").child("\(selectedOffer.offerKey)")
+                    
+                    updateRef.updateChildValues([
+                        "offerStatus" : "Canceled",
+                        "offerDeclined" : "true"
+                        ])
+                }
             }
             
             let deleteRef = DataService.dataService.CURRENT_USER_REF.child("offers").child("\(selectedOffer.offerKey)")
@@ -373,6 +396,7 @@ class Profile: UIViewController, UITableViewDataSource, CustomIOS8AlertViewDeleg
             
             
             self.updatePosts()
+            
         })
     }
     
@@ -429,6 +453,7 @@ class Profile: UIViewController, UITableViewDataSource, CustomIOS8AlertViewDeleg
         if (segue.identifier == "detailSegue2"){
             let details : PostDetails = segue.destinationViewController as! PostDetails
             details.key = userPosts[selectedPost].postKey
+            print(userPosts[selectedPost].postTitle)
             details.previousVC = "Profile"
         }
         
@@ -455,6 +480,7 @@ class Profile: UIViewController, UITableViewDataSource, CustomIOS8AlertViewDeleg
             userFeedback.previousSegue = "Profile"
             userFeedback.username = currentUser
             userFeedback.profileImage = profileImage.image!
+            userFeedback.otherUser = false
         }
         
     }

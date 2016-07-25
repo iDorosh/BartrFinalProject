@@ -14,6 +14,9 @@
 		DD10DFA51D3FF4E80082982D /* FeedbackObject.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD10DFA31D3FF1660082982D /* FeedbackObject.swift */; };
 		DD10DFA71D428BBA0082982D /* LocationSearchTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD10DFA61D428BBA0082982D /* LocationSearchTable.swift */; };
 		DD10DFA81D428CB10082982D /* LocationSearchTable.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD10DFA61D428BBA0082982D /* LocationSearchTable.swift */; };
+		DD10DFAA1D447C630082982D /* EmailUsernamePassword.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD10DFA91D447C620082982D /* EmailUsernamePassword.swift */; };
+		DD10DFAB1D447C810082982D /* EmailUsernamePassword.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD10DFA91D447C620082982D /* EmailUsernamePassword.swift */; };
+		DD10DFAD1D4482B20082982D /* ChangePassword.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD10DFAC1D4482B20082982D /* ChangePassword.swift */; };
 		DD162B5B1D285A5A00D234DA /* Offers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD162B5A1D285A5A00D234DA /* Offers.swift */; };
 		DD162B5C1D285E7C00D234DA /* Offers.swift in Resources */ = {isa = PBXBuildFile; fileRef = DD162B5A1D285A5A00D234DA /* Offers.swift */; };
 		DD162B5E1D2869C900D234DA /* ViewOffers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD162B5D1D2869C900D234DA /* ViewOffers.swift */; };
@@ -125,6 +128,8 @@
 		620BCB50C8DDF013127818D0 /* Pods_Bartr.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Bartr.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD10DFA31D3FF1660082982D /* FeedbackObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FeedbackObject.swift; sourceTree = "<group>"; };
 		DD10DFA61D428BBA0082982D /* LocationSearchTable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationSearchTable.swift; sourceTree = "<group>"; };
+		DD10DFA91D447C620082982D /* EmailUsernamePassword.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailUsernamePassword.swift; sourceTree = "<group>"; };
+		DD10DFAC1D4482B20082982D /* ChangePassword.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangePassword.swift; sourceTree = "<group>"; };
 		DD162B5A1D285A5A00D234DA /* Offers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Offers.swift; sourceTree = "<group>"; };
 		DD162B5D1D2869C900D234DA /* ViewOffers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewOffers.swift; sourceTree = "<group>"; };
 		DD1762D11D0DADD200B49B97 /* Register.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Register.swift; sourceTree = "<group>"; };
@@ -340,6 +345,8 @@
 				DD3E32341D1C656300F66E0F /* Feedback.swift */,
 				DD3E32441D1C9DC100F66E0F /* RecentFeedback.swift */,
 				DD162B5D1D2869C900D234DA /* ViewOffers.swift */,
+				DD10DFA91D447C620082982D /* EmailUsernamePassword.swift */,
+				DD10DFAC1D4482B20082982D /* ChangePassword.swift */,
 			);
 			name = Profile;
 			sourceTree = "<group>";
@@ -556,6 +563,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DD10DFAB1D447C810082982D /* EmailUsernamePassword.swift in Resources */,
 				DD10DFA81D428CB10082982D /* LocationSearchTable.swift in Resources */,
 				DD10DFA51D3FF4E80082982D /* FeedbackObject.swift in Resources */,
 				DDCB56D71D3B287400E85765 /* CustomIOS8AlertView.swift in Resources */,
@@ -746,6 +754,7 @@
 			files = (
 				DDF679E41D0D21870006DF37 /* Camera.swift in Sources */,
 				DD6B46151D2F4E750011DF5D /* TabBarController.swift in Sources */,
+				DD10DFAA1D447C630082982D /* EmailUsernamePassword.swift in Sources */,
 				DDF679E61D0D21A70006DF37 /* Profile.swift in Sources */,
 				DD62BB7D1D0CAFAB006DBD64 /* AppDelegate.swift in Sources */,
 				DD10DFA41D3FF1660082982D /* FeedbackObject.swift in Sources */,
@@ -775,6 +784,7 @@
 				DD8739621D0CEECA00A37FF5 /* LoginViewController.swift in Sources */,
 				DD4F0AB01D1108250040AC23 /* Details.swift in Sources */,
 				DDF679E21D0D216D0006DF37 /* Search.swift in Sources */,
+				DD10DFAD1D4482B20082982D /* ChangePassword.swift in Sources */,
 				DD3E32451D1C9DC100F66E0F /* RecentFeedback.swift in Sources */,
 				DD8739661D0CF7E300A37FF5 /* MainFeed.swift in Sources */,
 				DD3315E41D1B4C4A00048548 /* BlockedUsersTableCell.swift in Sources */,

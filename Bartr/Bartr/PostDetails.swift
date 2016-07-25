@@ -56,6 +56,7 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate, MKMapViewDeleg
     var acceptedUID : String = String()
     var postComplete : Bool = false
     var didLeaveFeedback : Bool = false
+    var acceptedOfferKey : String = String()
     
     
     @IBOutlet weak var stars: FloatRatingView!
@@ -538,26 +539,42 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate, MKMapViewDeleg
         postUserProfileImg.image = decodedimage2 as UIImage
     }
     
+    
+    
+   
+    
+    
+    
     //Sets map to the location listed under the post.
     func setMapLocation(){
             mapView.removeAnnotations(mapView.annotations)
             let annotation = MKPointAnnotation()
-            annotation.coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+            annotation.coordinate = CLLocationCoordinate2D(latitude: latitude + Double.random(0.001, 0.01),  longitude: longitude + Double.random(0.001, 0.01))
             annotation.title = selectedLocation
-            
-            mapView.addAnnotation(annotation)
-            let span = MKCoordinateSpanMake(0.05, 0.05)
         
-            let region = MKCoordinateRegionMake(CLLocationCoordinate2D(latitude: latitude, longitude: longitude), span)
+            loadOverlayForRegionWithLatitude(latitude + Double.random(0.001, 0.01), andLongitude: longitude + Double.random(0.001, 0.01))
+    }
+    
+    var circle:MKCircle!
+    
+    func loadOverlayForRegionWithLatitude(latitude: Double, andLongitude longitude: Double) {
         
-            mapView.setRegion(region, animated: true)
+        //1
+        let coordinates = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        //2
+        circle = MKCircle(centerCoordinate: coordinates, radius: 2000)
+        //3
+        self.mapView.setRegion(MKCoordinateRegion(center: coordinates, span: MKCoordinateSpan(latitudeDelta: 0.08, longitudeDelta: 0.08)), animated: true)
+        //4
+        self.mapView.addOverlay(circle)
     }
     
     func mapView(mapView: MKMapView, rendererForOverlay overlay: MKOverlay) -> MKOverlayRenderer {
-        let pr = MKPolylineRenderer(overlay: overlay)
-        pr.strokeColor = UIColor.redColor()
-        pr.lineWidth = 14
-        return pr
+        let circleRenderer = MKCircleRenderer(overlay: overlay)
+        circleRenderer.fillColor = hexStringToUIColor("#f27163").colorWithAlphaComponent(0.4)
+        circleRenderer.strokeColor = hexStringToUIColor("#f27163")
+        circleRenderer.lineWidth = 1
+        return circleRenderer
     }
     
     
@@ -734,6 +751,7 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate, MKMapViewDeleg
         }
         
         if (segue.identifier == "EditCurrentListing"){
+    
             let camera : Camera = segue.destinationViewController as! Camera
             camera.editKey = postKey
             camera.previousScreen = "EditView"
@@ -744,6 +762,7 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate, MKMapViewDeleg
             let usersProfile : UsersProfile = segue.destinationViewController as! UsersProfile
             usersProfile.usersName = selectedUser!
             usersProfile.profileUIImage = decodedimage2
+            usersProfile.uid = key
         }
         
         
@@ -863,13 +882,15 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate, MKMapViewDeleg
                     for offers in self.allOffers{
                         if (offers.listingKey == self.postKey){
                             self.hasOffers = true
-                            if offers.offerAccepted == "true" {
+                            if offers.offerAccepted == "true" && offers.feedbackLeft == "false"{
                                 self.postComplete = true
                                 self.acceptedUID = offers.offerUID
+                                self.acceptedOfferKey = offers.offerKey
                             }
                             if offers.feedbackLeft == "true" {
                                 self.didLeaveFeedback = true
                                 self.acceptedUID = offers.offerUID
+                                
                             }
                             
                             
@@ -912,6 +933,14 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate, MKMapViewDeleg
                     self.delete.hidden = false
                     self.offerAcceptedView.hidden = false
                 }
+                
+                if self.offerAcceptedView.text == "Bartr Complete" &&  !self.offerAcceptedView.hidden {
+                    self.sold.hidden = true
+                    self.offerAcceptedView.text = "Bartr Complete"
+                    self.delete.hidden = false
+                    self.offerAcceptedView.hidden = false
+                }
+
                 
                 
             })
@@ -965,10 +994,11 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate, MKMapViewDeleg
     
     func customIOS8AlertViewButtonTouchUpInside(alertView: CustomIOS8AlertView, buttonIndex: Int) {
         
+        feedbackLeft()
+        
         sendFeedback(stars.rating, currentUsername: currentUserNameString, title: postTitle.text!, img: currentProfileImg, id: acceptedUID, postUID: postKey )
         
         customRatingView.close()
-        feedbackLeft()
         userRated = true
         
         delete.hidden = false
@@ -984,16 +1014,17 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate, MKMapViewDeleg
         alertView.showSuccess(title, subTitle: subTitle)
     }
     
-    func feedbackLeft(){
+    
         func feedbackLeft(){
-            let selectedPostRef2 = DataService.dataService.CURRENT_USER_REF.child("offers").child(acceptedUID)
+            let selectedPostRef2 = DataService.dataService.USER_REF.child((FIRAuth.auth()?.currentUser?.uid)!).child("offers").child(acceptedOfferKey)
             selectedPostRef2.updateChildValues([
                 "offerStatus" : "Feedback Left",
                 "feedbackLeft" : "true"
                 ])
+            
         }
 
-    }
+
     
     
 }

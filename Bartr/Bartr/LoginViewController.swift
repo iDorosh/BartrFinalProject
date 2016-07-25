@@ -96,8 +96,17 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         
         FIRAuth.auth()?.sendPasswordResetWithEmail(loginEmail.text!) { error in
             if error != nil {
-                self.errorResetingPassword("Error", subTitle: "\(error)")
+                print(error?.code)
+                if error!.code == 17999 {
+                    self.errorResetingPassword("Error", subTitle: "Please enter a valid email")
+                } else if error!.code == 17800{
+                    self.errorResetingPassword("Error", subTitle: "There is no account associated with this email")
+                } else {
+                    self.errorResetingPassword("Error", subTitle: "Something went wrong")
+
+                }
             } else {
+                
                 self.success("Email Sent", subTitle: "Follow the instructions in your email to reset your password")
             }
         }

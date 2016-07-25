@@ -38,12 +38,8 @@ class MainFeed: UIViewController, UITableViewDataSource {
     //Outlets
     @IBOutlet weak var tableView: UITableView!
     
-    @IBOutlet weak var LogInLogOut: UIButton!
     
-    //Actions
-    @IBAction func logOutUser(sender: UIButton) {
-        logOutUser()
-    }
+    
     
     override func viewWillAppear(animated: Bool) {
         self.tabBarController?.tabBar.hidden = false
@@ -60,6 +56,12 @@ class MainFeed: UIViewController, UITableViewDataSource {
         
         setUserDefaults()
         setUpRefreshControl()
+        
+        if !signUpSkipped{
+            let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+            appDelegate.tabBarController = self.tabBarController!
+            appDelegate.observeOffers()
+        }
        
         
         
@@ -110,10 +112,8 @@ class MainFeed: UIViewController, UITableViewDataSource {
     func setUserDefaults(){
         print(NSUserDefaults.standardUserDefaults().valueForKey("uid"))
         if NSUserDefaults.standardUserDefaults().valueForKey("uid") != nil && FIRAuth.auth()?.currentUser?.uid != nil {
-            LogInLogOut.setTitle("Sign Out", forState: UIControlState.Normal)
             signUpSkipped = false
         } else {
-            LogInLogOut.setTitle("Sign In", forState: UIControlState.Normal)
             signUpSkipped = true
         }
     }
@@ -126,36 +126,6 @@ class MainFeed: UIViewController, UITableViewDataSource {
          
     }
     
-    //Sign user out when the alert view confirm button is clicked
-    func signOutCallBack() {
-        try! FIRAuth.auth()!.signOut()
-        
-        NSUserDefaults.standardUserDefaults().setValue(nil, forKey: "uid")
-        
-        let loginViewController = self.storyboard!.instantiateViewControllerWithIdentifier("Login")
-        UIApplication.sharedApplication().keyWindow?.rootViewController = loginViewController
-    }
-    
-    
-    //Logout User alert view shows
-    func logOutUser(){
-        if (LogInLogOut.currentTitle == "Sign Out"){
-            
-            
-                let alertView = SCLAlertView()
-                alertView.addButton("Sign Out", target:self, selector:#selector(MainFeed.signOutCallBack))
-            alertView.addButton("Cancel"){alertView.dismissViewControllerAnimated(true, completion: nil)}
-                alertView.showCloseButton = false
-                
-                alertView.showWarning("Sign out", subTitle: "Sign out current user?")
-        
-            
-        } else {
-            let loginViewController = self.storyboard!.instantiateViewControllerWithIdentifier("Login")
-            UIApplication.sharedApplication().keyWindow?.rootViewController = loginViewController
-        }
-        
-    }
     
     //Update Firebase and Table View
     func updatePosts(){
@@ -203,6 +173,7 @@ class MainFeed: UIViewController, UITableViewDataSource {
             details.previousVC = "MainFeed"
         }
     }
+    
 }
 
 

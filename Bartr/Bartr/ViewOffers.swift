@@ -61,14 +61,14 @@ class ViewOffers: UIViewController {
     
     
     func offerViewed(){
-        let selectedPostRef = DataService.dataService.USER_REF.child(uid).child("offers").child(offerKey)
-        selectedPostRef.updateChildValues([
+        let selectedPostRef2 = DataService.dataService.CURRENT_USER_REF.child("offers").child(offerKey)
+        selectedPostRef2.updateChildValues([
             "offerChecked": "true",
             "offerStatus" : "Read",
             ])
         
-        let selectedPostRef2 = DataService.dataService.CURRENT_USER_REF.child("offers").child(offerKey)
-        selectedPostRef2.updateChildValues([
+        let selectedPostRef = DataService.dataService.USER_REF.child(uid).child("offers").child(offerKey)
+        selectedPostRef.updateChildValues([
             "offerChecked": "true",
             "offerStatus" : "Read",
             ])
@@ -85,6 +85,7 @@ class ViewOffers: UIViewController {
             declineBttn.hidden = true
             messageBttn.hidden = true
             cancelBttn.hidden = false
+            deleteOffer.hidden = true
         }
         
         if offerComplete {
@@ -149,7 +150,7 @@ class ViewOffers: UIViewController {
     }
     
     @IBAction func cancelOffer(sender: UIButton) {
-        
+        cancelOffer()
     }
 
     
@@ -206,6 +207,24 @@ class ViewOffers: UIViewController {
         alertView.showSuccess("Offer Accepted", subTitle: "You can send a user more information on a meeting location")
     }
     
+    func cancelOffer(){
+        
+        let selectedPostRef = DataService.dataService.CURRENT_USER_REF.child("offers").child(offerKey)
+        selectedPostRef.updateChildValues([
+            "offerStatus" : "Canceled",
+            ])
+        
+        let selectedPostRef2 = DataService.dataService.USER_REF.child(uid).child("offers").child(offerKey)
+        selectedPostRef2.updateChildValues([
+            "offerStatus" : "Canceled",
+            ])
+        
+        let alertView = SCLAlertView()
+        alertView.addButton("Done", target: self, selector: #selector(backToListing))
+        alertView.showCloseButton = false
+        alertView.showSuccess("Offer Accepted", subTitle: "You can send a user more information on a meeting location")
+    }
+    
     //OfferAccepted
     func sendAccepted(){
         let alertView = SCLAlertView()
@@ -224,10 +243,10 @@ class ViewOffers: UIViewController {
     //OfferAccepted
     func backToOffer(){
         let alertView = SCLAlertView()
-        alertView.addButton("Delete", target: self, selector: #selector(removeOffer))
+        alertView.addButton("Decline", target: self, selector: #selector(removeOffer))
         alertView.addButton("Cancel", target: self, selector: #selector(back))
         alertView.showCloseButton = false
-        alertView.showSuccess("Decline Offer", subTitle: "This will also delete the offer. Continue?")
+        alertView.showSuccess("Decline Offer", subTitle: "Are you sure you want to decline this offer?")
     }
     
     func back(){
@@ -246,8 +265,11 @@ class ViewOffers: UIViewController {
             "offerDeclined" : "true"
             ])
         
-        let deleteRef = DataService.dataService.CURRENT_USER_REF.child("offers").child("\(offer.offerKey)")
-        deleteRef.removeValue()
+        let updateRef2 = DataService.dataService.CURRENT_USER_REF.child("offers").child(offerKey)
+        updateRef2.updateChildValues([
+            "offerStatus" : "Declined",
+            "offerDeclined" : "true"
+            ])
 
 
         if previousProfile {
@@ -273,9 +295,39 @@ class ViewOffers: UIViewController {
     }
     
     func deleteCompletedOffer(){
+        if !sentOffer {
+        if (offer.offerDeclined == "false") {
+            if offer.feedbackLeft == "false" {
+                let updateRef = DataService.dataService.USER_REF.child("\(offer.offerUID)").child("offers").child("\(offerKey)")
+                updateRef.updateChildValues([
+                    "offerStatus" : "Declined",
+                    "offerDeclined" : "true"
+                    ])
+            }
+            let deleteRef = DataService.dataService.CURRENT_USER_REF.child("offers").child("\(offerKey)")
+            deleteRef.removeValue()
+        }
+        
+        let deleteRef = DataService.dataService.CURRENT_USER_REF.child("offers").child("\(offer.offerKey)")
+        
+        deleteRef.removeValue()
+    } else if sentOffer {
+    if (offer.offerDeclined == "false") {
+        if offer.offerAccepted == "false" {
+            let updateRef = DataService.dataService.USER_REF.child("\(offer.offerUID)").child("offers").child("\(offerKey)")
+            updateRef.updateChildValues([
+            "offerStatus" : "Canceled",
+            "offerDeclined" : "true"
+            ])
+        }
         let deleteRef = DataService.dataService.CURRENT_USER_REF.child("offers").child("\(offer.offerKey)")
         deleteRef.removeValue()
-        performSegueWithIdentifier("BackToProfile", sender: self)
     }
     
+    
+    }
+
+        performSegueWithIdentifier("BackToProfile", sender: self)
+    }
+
 }

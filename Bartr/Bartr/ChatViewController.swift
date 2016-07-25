@@ -160,9 +160,9 @@ class ChatViewController: JSQMessagesViewController {
         
         let message = messages[indexPath.item]
         if message.senderId == senderId {
-            return JSQMessagesAvatarImageFactory.avatarImageWithImage(decodeString(currentProfileImg), diameter: UInt(kJSQMessagesCollectionViewAvatarSizeDefault));
+            return JSQMessagesAvatarImageFactory.avatarImageWithImage(UIImage(named:  "placeholderImg"), diameter: UInt(kJSQMessagesCollectionViewAvatarSizeDefault));
         } else { //
-            return JSQMessagesAvatarImageFactory.avatarImageWithImage(decodeString(avatar), diameter: UInt(kJSQMessagesCollectionViewAvatarSizeDefault));
+            return JSQMessagesAvatarImageFactory.avatarImageWithImage(UIImage(named: "placeholderImg"), diameter: UInt(kJSQMessagesCollectionViewAvatarSizeDefault));
         }
         
     }

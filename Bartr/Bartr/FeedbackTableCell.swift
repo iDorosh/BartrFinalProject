@@ -51,7 +51,7 @@ class FeedbackTableCell: UITableViewCell {
         if offer.offerUID == FIRAuth.auth()?.currentUser?.uid {
             status.text = offer.offerStatus
         } else {
-            if offer.offerStatus == "Read" || offer.offerStatus == "Accepted" || offer.offerStatus == "Feedback Left"{
+            if offer.offerStatus == "Read" || offer.offerStatus == "Accepted" || offer.offerStatus == "Feedback Left" || offer.offerStatus == "Declined"{
                 status.text = offer.offerStatus
             } else if offer.offerStatus == "Delivered" {
                 status.text = "New Offer"

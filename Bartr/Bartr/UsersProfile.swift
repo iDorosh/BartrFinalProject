@@ -20,6 +20,7 @@ class UsersProfile: UIViewController, UITableViewDataSource {
     var profileUIImage : UIImage = UIImage()
     var ratingString : String = String()
     var previousScreen : String = String()
+    var uid : String = String()
     
     @IBOutlet weak var floatRating: FloatRatingView!
     
@@ -102,7 +103,7 @@ class UsersProfile: UIViewController, UITableViewDataSource {
             //Get current users posts
             for i in self.allPosts
             {
-                if i.username == self.usersName && !i.postComplete && !i.postFL{
+                if i.postUID == self.uid && !i.postComplete && !i.postFL{
                     self.userPosts.append(i)
                 }
             }
@@ -147,6 +148,9 @@ class UsersProfile: UIViewController, UITableViewDataSource {
             let userFeedback : RecentFeedback = segue.destinationViewController as! RecentFeedback
             userFeedback.previousSegue = "UsersProfile"
             userFeedback.username = usersName
+            userFeedback.otherUser = true
+            userFeedback.uid = uid
+            userFeedback.profileImage = profileImage.image!
         }
     }
     

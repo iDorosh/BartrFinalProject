@@ -15,6 +15,12 @@ class Chat: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
     var recents : [NSDictionary] = []
     
+    @IBOutlet weak var signinView: UIView!
+    @IBAction func signinButton(sender: UIButton) {
+        let loginViewController = self.storyboard!.instantiateViewControllerWithIdentifier("Login")
+        UIApplication.sharedApplication().keyWindow?.rootViewController = loginViewController
+    }
+    
     var currentUser : String = ""
     var senderUID : String = ""
     var chatRoomID : String = ""
@@ -32,6 +38,9 @@ class Chat: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        if !signUpSkipped {
+        self.navigationController?.navigationBarHidden = true
+        self.tabBarController?.tabBar.hidden = false
         senderUID = NSUserDefaults.standardUserDefaults().valueForKey("uid") as! String
         
             DataService.dataService.CURRENT_USER_REF.observeEventType(FIRDataEventType.Value, withBlock: { snapshot in
@@ -44,11 +53,15 @@ class Chat: UIViewController, UITableViewDataSource, UITableViewDelegate {
         UIApplication.sharedApplication().statusBarStyle = .Default
         
         getUserInfo()
+        } else {
+            signinView.hidden = false
+            self.navigationController?.navigationBarHidden = true
+            self.tabBarController?.tabBar.hidden = false
+        }
     }
     
     override func viewWillAppear(animated: Bool) {
-        self.navigationController?.navigationBarHidden = true
-        self.tabBarController?.tabBar.hidden = false
+       
     }
 
     override func didReceiveMemoryWarning() {

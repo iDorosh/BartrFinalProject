@@ -19,12 +19,16 @@ protocol HandleMapSearch {
 class ListingLocation: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate, UISearchControllerDelegate {
     @IBAction func backToLocation(segue: UIStoryboardSegue){}
     
+    @IBOutlet weak var modalNavigation: UINavigationBar!
+
+    @IBOutlet weak var listingNavigation: UINavigationBar!
     let locationManager = CLLocationManager()
     var selectedLocation : CLLocationCoordinate2D!
     var city : String = String()
-    var longitude : Double = Double()
-    var latitude : Double = Double()
-    
+    var longitude : Double = 0.0
+    var latitude : Double = 0.0
+    var didSelect : Bool = false
+    var currentLocation : CLLocation?
     var resultSearchController:UISearchController? = nil
     var selectedPin:MKPlacemark? = nil
     
@@ -53,8 +57,25 @@ class ListingLocation: UIViewController, UITextFieldDelegate, CLLocationManagerD
     
     
     @IBAction func detailViewNext(sender: UIButton) {
-
-        performSegueWithIdentifier("NextInfoSegue", sender: self)
+        if longitude != 0.0 && latitude != 0.0{
+            if previousScreen != "EditView"{
+                let geocoder = CLGeocoder()
+                geocoder.reverseGeocodeLocation(CLLocation(latitude: latitude, longitude: longitude), completionHandler: {
+                    placemarks, error in
+                    
+                    if error == nil && placemarks!.count > 0 {
+                        self.city = (placemarks?.first?.locality)!
+                    }
+                     self.performSegueWithIdentifier("NextInfoSegue", sender: self)
+                })
+            } else {
+                self.performSegueWithIdentifier("NextInfoSegue", sender: self)
+            }
+       
+        } else {
+            noLocation()
+        }
+   
     }
 
     
@@ -70,10 +91,15 @@ class ListingLocation: UIViewController, UITextFieldDelegate, CLLocationManagerD
         super.viewDidLoad()
         navigationController?.navigationBarHidden = false
 
-        loadLocation()
+        print(pickedTitle)
      
         if previousScreen != "EditView"{
-            setLocationManager()
+            loadLocation()
+        } else {
+            zoom = true
+            loadLocation()
+            dropAnnotation()
+            mapView.showsUserLocation = true
         }
         
         // Do any additional setup after loading the view.
@@ -94,6 +120,7 @@ class ListingLocation: UIViewController, UITextFieldDelegate, CLLocationManagerD
         }
     }
     
+    @IBOutlet weak var navigationTitle: UINavigationItem!
     func loadLocation(){
         let locationSearchTable = storyboard!.instantiateViewControllerWithIdentifier("LocationSearchTable") as! LocationSearchTable
         resultSearchController = UISearchController(searchResultsController: locationSearchTable)
@@ -102,27 +129,30 @@ class ListingLocation: UIViewController, UITextFieldDelegate, CLLocationManagerD
         let searchBar = resultSearchController!.searchBar
         searchBar.sizeToFit()
         searchBar.placeholder = "Search for places"
-        navigationItem.titleView = resultSearchController?.searchBar
+        
+            navigationTitle.titleView = resultSearchController?.searchBar
+        
+    
+        
         
         resultSearchController?.hidesNavigationBarDuringPresentation = false
-        resultSearchController?.dimsBackgroundDuringPresentation = true
+        resultSearchController?.dimsBackgroundDuringPresentation = false
         definesPresentationContext = true
         
         locationSearchTable.mapView = mapView
         
         locationSearchTable.handleMapSearchDelegate = self
         
-        // Ask for Authorisation from the User.
-        self.locationManager.requestAlwaysAuthorization()
-        
         // For use in foreground
         self.locationManager.requestWhenInUseAuthorization()
         
-        if CLLocationManager.locationServicesEnabled() {
-            locationManager.delegate = self
-            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-            locationManager.startUpdatingLocation()
-        }
+        
+            if CLLocationManager.locationServicesEnabled() {
+                locationManager.delegate = self
+                locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+                locationManager.startUpdatingLocation()
+            }
+    
 
     }
     
@@ -136,6 +166,8 @@ class ListingLocation: UIViewController, UITextFieldDelegate, CLLocationManagerD
             zoom = true
             movePosition()
         }
+        locationManager.stopUpdatingHeading()
+        locationManager.stopUpdatingLocation()
     }
     
     func getDirections(){
@@ -161,7 +193,13 @@ class ListingLocation: UIViewController, UITextFieldDelegate, CLLocationManagerD
         
         let region:MKCoordinateRegion = MKCoordinateRegionMake(location, span)
         
-        mapView.showsUserLocation = true
+        
+        if previousScreen != "EditView"{
+            self.latitude = latitude
+            self.longitude = longitude
+            mapView.showsUserLocation = true
+        }
+        
         
         mapView.setRegion(region, animated: false)
     }
@@ -193,6 +231,8 @@ class ListingLocation: UIViewController, UITextFieldDelegate, CLLocationManagerD
                 details.editDetails = editDetails
                 details.editKey = editKey
                 details.pickedPrice = pickedPrice
+                details.longitude = longitude
+                details.latitude = latitude
             } else {
                 let details : Details = segue.destinationViewController as! Details
                 details.pickedImage = pickedImage
@@ -227,13 +267,36 @@ class ListingLocation: UIViewController, UITextFieldDelegate, CLLocationManagerD
         alertView.showWarning(title, subTitle: subTitle)
     }
     
+    func dropAnnotation(){
+        print(city)
+        print ("lat: \(latitude) lon: \(longitude)")
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        annotation.title = city
+        let span:MKCoordinateSpan = MKCoordinateSpanMake(0.05, 0.05)
+        let location:CLLocationCoordinate2D = CLLocationCoordinate2DMake(latitude, longitude)
+        let region:MKCoordinateRegion = MKCoordinateRegionMake(location, span)
+        mapView.setRegion(region, animated: true)
+        mapView.addAnnotation(annotation)
+    }
+    
     
 
 }
 
 
+func noLocation(){
+    let alertView = SCLAlertView()
+    alertView.addButton("Ok"){ alertView.dismissViewControllerAnimated(true, completion: nil) }
+    alertView.showCloseButton = false
+    alertView.showWarning("No Location", subTitle: "Please select a location from the search, or turn on location services")
+}
+
+
+
 extension ListingLocation: HandleMapSearch {
     func dropPinZoomIn(placemark:MKPlacemark){
+        didSelect = true
         // cache the pin
         selectedPin = placemark
         // clear existing pins

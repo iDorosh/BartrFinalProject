@@ -362,7 +362,7 @@ func pushNewFeedback(newFloat : Float, updatedFloat : Float, currentUsername : S
     ratingRef2.updateChildValues([
         "rating" : String(updatedFloat)
         ], withCompletionBlock: {_,_ in
-            if id != FIRAuth.auth()?.currentUser?.uid {
+            if id == FIRAuth.auth()?.currentUser?.uid {
                 let feedbackleftRef = DataService.dataService.POST_REF.child(postUID)
                 feedbackleftRef.updateChildValues([
                     "postFeedbackLeft" : true
