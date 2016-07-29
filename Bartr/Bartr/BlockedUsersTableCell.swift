@@ -10,16 +10,33 @@ import UIKit
 
 class BlockedUsersTableCell: UITableViewCell {
 
-    //Place holder information for chat threads
-    var userNames : [String] = ["Mac>Windows", "Sell24/7", "Mac4Lyfe"]
-    var listing : [String] = ["MacBook Pro 15in (Late 2013)", "Physics 101 TextBook", "Dinning Table with 6 Chairs"]
-    var images : [String] = ["Image1", "Image2", "Image3"]
+//Variables
+     var blocked: BloackedUsersObject!
     
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+
+//Outlets
     @IBOutlet weak var profileImage: UIImageView!
-    
     @IBOutlet weak var userName: UILabel!
-    
     @IBOutlet weak var post: UILabel!
+    @IBOutlet weak var timeStamp: UILabel!
+    
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+    //Creating table view cells
+    func tableConfig(blocked : BloackedUsersObject){
+        //Setting blocked object
+        self.blocked = blocked
+        
+        //Setting image to blocked users image and username to blocked users name
+        profileImage.image = decodeString(blocked.blockedUserImage)
+        userName.text = blocked.blockedUser
+        
+        //Seting time stamp from when the user has been blocked
+        let date = dateFormatter().dateFromString(blocked.date)
+        let seconds = NSDate().timeIntervalSinceDate(date!)
+        timeStamp.text = elapsedTime(seconds)
+    }
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -29,11 +46,6 @@ class BlockedUsersTableCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
     }
     
-    //Creating table view cells
-    func tableConfig(index : Int){
-        profileImage.image = UIImage(named: images[index])
-        userName.text = userNames[index]
-        post.text = listing[index]
-    }
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
 
 }

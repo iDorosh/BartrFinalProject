@@ -15,12 +15,14 @@ import FirebaseAuth
 class DataService {
     static let dataService = DataService()
     
-    //References for Databases, Users and Posts
+//References for Databases, Users and Posts
     private var _BASE_REF = FIRDatabase.database().reference()
     private var _USER_REF = FIRDatabase.database().reference().child("users")
     private var _POST_REF = FIRDatabase.database().reference().child("posts")
+    
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
    
-    //Reference Getters
+//Reference Getters
     var BASE_REF: FIRDatabaseReference {
         return _BASE_REF
     }
@@ -33,7 +35,9 @@ class DataService {
         return _POST_REF
     }
     
-    //Gets current user
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+//Gets current user
     var CURRENT_USER_REF: FIRDatabaseReference {
         let userID = FIRAuth.auth()?.currentUser?.uid
         let currentUser = _USER_REF.child(userID!)
@@ -51,14 +55,24 @@ class DataService {
         firebaseNewPost.setValue(post)
     }
     
+    //Creating a new offer
     func createNewOffer(offer: Dictionary<String, AnyObject>) {
         let firebaseNewPost = sendOfferRef
         firebaseNewPost.setValue(offer)
     }
     
+    //Block user
+    func newBlocked(blocked: Dictionary<String, AnyObject>) {
+        let firebaseNewPost = blockedUserRef
+        firebaseNewPost.setValue(blocked)
+    }
+    
+    //Create new feedback
     func createNewFeedback(feedback: Dictionary<String, AnyObject>, id : String) {
         let firebaseNewPost = sendFeedbackRef
         firebaseNewPost.setValue(feedback)
     }
+    
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
 }

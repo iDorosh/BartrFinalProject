@@ -13,7 +13,10 @@ import FirebaseDatabase
 class Offers {
     private var _offerRef: FIRDatabaseReference
     
-    //Post Information
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+
+    //Offer Information
+    
     private var _offerKey: String!
     private var _offerUser: String!
     private var _offerTitle: String!
@@ -27,14 +30,17 @@ class Offers {
     private var _offerDate: String!
     private var _offerStatus: String!
     private var _listingKey: String!
+    private var _archieved: String!
     
     private var _recieverUsername: String!
     private var _recieverUID: String!
     private var _feedbackLeft: String!
     private var _recieverImage: String!
   
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
-    //Information Getters
+//Offer Getters
+    
     var offerKey: String {
         return _offerKey
     }
@@ -101,7 +107,13 @@ class Offers {
         return _feedbackLeft
     }
     
-    // Initialize the new offer
+    var archieved: String {
+        return _archieved
+    }
+    
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+// Initialize the new offer
     init(key: String, dictionary: Dictionary<String, AnyObject>) {
         self._offerKey = key
         
@@ -171,7 +183,16 @@ class Offers {
             self._feedbackLeft = feedbackL
         }
         
-        // The above properties are assigned to their key.
+        if let archievedO = dictionary["archieved"] as? String {
+            self._archieved = archievedO
+        }
+        
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+        
+    // The above properties are assigned to their key.
         self._offerRef = sendOfferRef
     }
+    
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
 }

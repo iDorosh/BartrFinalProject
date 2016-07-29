@@ -13,22 +13,27 @@ import SCLAlertView
 class LoginViewController: UIViewController, UITextFieldDelegate {
     //Will bring the user back to the login screen
     @IBAction func backToLogin(segue: UIStoryboardSegue){}
-    
-    //----Data----//
-    
-    //Email string from text field
+
+//Variables
+    //Strings
     var emailTextFieldText : String = String()
-    //password string from text field
     var passwordTextFieldText : String = String()
-    
-    var alertController = UIAlertController()
-    
     var errorMessage : String = ""
     
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+    //Alert view controllers
+    var alertController = UIAlertController()
+    
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+    //UIColors
     var defaultColor = UIColor()
     var defaultBorderColor = UIColor()
     
-    //----Outlets----//
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+//Outlets
     
     //User Email
     @IBOutlet weak var loginEmail: UITextField!
@@ -45,7 +50,9 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     //Background Img
     @IBOutlet weak var BG: UIImageView!
     
-    //----Actions----//
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+//Actions
     
     //Log In Button Action
     @IBAction func logInAction(sender: UIButton) {
@@ -57,15 +64,21 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         registerClicked()
     }
     
+    //Forgot password action
     @IBAction func forgotPassword(sender: UIButton) {
+        self.view.endEditing(true)
+        scrollView.setContentOffset(CGPointMake(0,0), animated: true)
         enterEmail()
     }
-    
     
     //Skip Button Action
     @IBAction func skipAction(sender: UIButton) {
         skipClicked()
     }
+    
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+//UI
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -77,7 +90,6 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         setUpTapRecognizer()
     }
     
-    
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         alertController = showLoading("Signing In...")
@@ -87,101 +99,127 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
+//Functions
+    //UI
+        //Blurr effect for the background image
+        func setUpBackground(){
+            let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.Light)
+            let blurEffectView = UIVisualEffectView(effect: blurEffect)
+            blurEffectView.frame = self.view.bounds
+            self.BG.addSubview(blurEffectView)
+        }
     
-    //----Functions----//
-    
-    //Sends current email a temporary password
-    func forgotPasswordSend(email : String){
+        //Tap recognizer to minimize keyboard
+        func setUpTapRecognizer(){
+            let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(LoginViewController.dismissKeyboard))
+            view.addGestureRecognizer(tap)
+        }
         
-        FIRAuth.auth()?.sendPasswordResetWithEmail(loginEmail.text!) { error in
+        //Text Field Set Up
+        func setUpTextFields(){
+            loginEmail.delegate = self
+            loginPassword.delegate = self
+            loginEmail.addTarget(self, action: #selector(self.textViewDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
+            loginPassword.addTarget(self, action: #selector(self.textViewDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
+        }
+    
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+    //Keyboard
+        //Next text field
+        func textFieldShouldReturn(textField: UITextField) -> Bool {
+            if (textField === loginEmail) {
+                loginPassword.becomeFirstResponder()
+            } else if (textField === loginPassword) {
+                loginPassword.resignFirstResponder()
+                scrollView.setContentOffset(CGPointMake(0,0), animated: true)
+                //self.presentViewController(alertController, animated: true, completion: nil)
+                logInClicked()
+            } else {
+            }
+            return true
+        }
+        
+        //Resets view
+        func textFieldDidEndEditing(textField: UITextField) {
+            if (textField == loginPassword){
+                scrollView.setContentOffset(CGPointMake(0,0), animated: true)
+            }
+        }
+        
+        //Sets proper view postition when keyboard pops up
+        func textFieldDidBeginEditing(textField: UITextField) {
+            if (textField == loginEmail){
+                scrollView.setContentOffset(CGPointMake(0,150), animated: true)
+            } else if (textField == loginPassword){
+                scrollView.setContentOffset(CGPointMake(0,150), animated: true)
+            }
+        }
+    
+        //Changing back to default color
+        func textViewDidChange(textView: UITextView) {
+            if textView === loginEmail{
+                loginEmail.layer.borderColor = defaultBorderColor.CGColor
+            } else {
+                loginPassword.layer.borderColor = defaultBorderColor.CGColor
+            }
+            textView.textColor = defaultColor
+        }
+        
+        //Calls this function when the tap is recognized.
+        func dismissKeyboard() {
+            //Resets view offset
+            scrollView.setContentOffset(CGPointMake(0,0), animated: true)
+            view.endEditing(true)
+        }
+    
+        //Setting first responder to proper text fields
+        func setFirstResponder(){
+            if errorMessage == "Email"{
+                loginEmail.becomeFirstResponder()
+                setError(loginEmail)
+            } else if errorMessage == "Invalid"{
+                loginEmail.becomeFirstResponder()
+                setError(loginEmail)
+            }else {
+                loginPassword.becomeFirstResponder()
+                setError(loginPassword)
+            }
+        }
+    
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+
+    //Sends current email a with steps to reset the password
+    func forgotPasswordSend(email : String){
+        FIRAuth.auth()?.sendPasswordResetWithEmail(email) { error in
             if error != nil {
                 print(error?.code)
-                if error!.code == 17999 {
-                    self.errorResetingPassword("Error", subTitle: "Please enter a valid email")
-                } else if error!.code == 17800{
-                    self.errorResetingPassword("Error", subTitle: "There is no account associated with this email")
-                } else {
-                    self.errorResetingPassword("Error", subTitle: "Something went wrong")
-
+                //Checking for errors
+                if let errorCode = FIRAuthErrorCode(rawValue: error!.code) {
+                    switch (errorCode) {
+                    case .ErrorCodeInvalidEmail:
+                        self.errorMessage = "Invalid"
+                        self.alertController.dismissViewControllerAnimated(true, completion: nil)
+                        self.errorResetingPassword("Error", subTitle: "Please enter a valid email")
+                    case .ErrorCodeUserNotFound:
+                        self.errorMessage = "Invalid"
+                        self.alertController.dismissViewControllerAnimated(true, completion: nil)
+                        self.errorResetingPassword("Error", subTitle: "There is no account associated with this email")
+                    default:
+                        print(errorCode.rawValue)
+                    }
                 }
             } else {
-                
+                //Successfully sent email
                 self.success("Email Sent", subTitle: "Follow the instructions in your email to reset your password")
             }
         }
     }
     
-    //Blurr effect for the background image
-    func setUpBackground(){
-        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.Light)
-        let blurEffectView = UIVisualEffectView(effect: blurEffect)
-        blurEffectView.frame = self.view.bounds
-        self.BG.addSubview(blurEffectView)
-    }
-    
-    //Tap recognizer to minimize keyboard
-    func setUpTapRecognizer(){
-        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(LoginViewController.dismissKeyboard))
-        view.addGestureRecognizer(tap)
-    }
-    
-    //Text Field Set Up
-    func setUpTextFields(){
-        loginEmail.delegate = self
-        loginPassword.delegate = self
-        loginEmail.addTarget(self, action: #selector(self.textViewDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
-        loginPassword.addTarget(self, action: #selector(self.textViewDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
-    }
-    
-    
-    
-    //Next text field
-    func textFieldShouldReturn(textField: UITextField) -> Bool {
-        if (textField === loginEmail) {
-            loginPassword.becomeFirstResponder()
-        } else if (textField === loginPassword) {
-            loginPassword.resignFirstResponder()
-            scrollView.setContentOffset(CGPointMake(0,0), animated: true)
-            //self.presentViewController(alertController, animated: true, completion: nil)
-            logInClicked()
-        } else {
-        }
-        return true
-    }
-    
-    //Resets view
-    func textFieldDidEndEditing(textField: UITextField) {
-        if (textField == loginPassword){
-        scrollView.setContentOffset(CGPointMake(0,0), animated: true)
-        }
-    }
-    
-    //Sets proper view postition when keyboard pops up
-    func textFieldDidBeginEditing(textField: UITextField) {
-        if (textField == loginEmail){
-        scrollView.setContentOffset(CGPointMake(0,150), animated: true)
-        } else if (textField == loginPassword){
-            scrollView.setContentOffset(CGPointMake(0,150), animated: true)
-        }
-    }
-    
-    func textViewDidChange(textView: UITextView) {
-        if textView === loginEmail{
-            loginEmail.layer.borderColor = defaultBorderColor.CGColor
-        } else {
-            loginPassword.layer.borderColor = defaultBorderColor.CGColor
-        }
-        textView.textColor = defaultColor
-    }
-    
-    //Calls this function when the tap is recognized.
-    func dismissKeyboard() {
-        //Resets view offset
-        scrollView.setContentOffset(CGPointMake(0,0), animated: true)
-        view.endEditing(true)
-    }
-    
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
     //Log In Button has been clicked
     func logInClicked(){
         errorMessage = ""
@@ -221,7 +259,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                         self.alertController.dismissViewControllerAnimated(true, completion: nil)
                         // Enter Main Feed
                         self.success("Signed In!", subTitle: "Welcome to Bartr")
-                        self.performSegueWithIdentifier("skipLoginSegue", sender: nil)
+                        
                     }
                 }
                 
@@ -232,6 +270,9 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                 errorSigningIn("Oops!", subTitle: "Don't forget to enter your email and password.")
             }
     }
+    
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    //Send email and password to registration screen
     
     //Sending email and password to the register screen if they were filled out.
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
@@ -246,11 +287,20 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         }
     }
     
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    //Alert views
+    
+    //Successfully signed in
     func success(title : String, subTitle : String){
         let alertView = SCLAlertView()
+        alertView.addButton("Continue") {
+            alertView.dismissViewControllerAnimated(true, completion: nil)
+            self.performSegueWithIdentifier("skipLoginSegue", sender: nil)}
+        alertView.showCloseButton = false
         alertView.showSuccess(title, subTitle: subTitle)
     }
     
+    //Error reseting password
     func errorResetingPassword(title : String, subTitle : String){
         let alertView = SCLAlertView()
         alertView.showCloseButton = false
@@ -263,6 +313,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         alertView.showSuccess(title, subTitle: subTitle) 
     }
     
+    //Error signing in
     func errorSigningIn(title : String, subTitle : String){
         let alertView = SCLAlertView()
         alertView.addButton("Done", target:self, selector:#selector(setFirstResponder))
@@ -271,6 +322,23 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         alertView.showWarning(title, subTitle: subTitle)
     }
     
+    //Enter email to reset password
+    func enterEmail(){
+        let alert = SCLAlertView()
+        alert.showCloseButton = false
+        let txt = alert.addTextField("Enter Email")
+        alert.addButton("Reset Password") {
+            self.forgotPasswordSend((txt.text!).lowercaseString)
+        }
+        alert.addButton("Cancel"){ alert.dismissViewControllerAnimated(true, completion: nil)}
+        alert.showEdit("Forgot Password", subTitle: "Please enter an email address so we can send you a password reset link")
+    }
+
+    
+    
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+
+    // Segues
     //Register Button has been clicked
     func registerClicked(){
             performSegueWithIdentifier("registerNew", sender: nil)
@@ -282,31 +350,9 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     }
     
     
-    func setFirstResponder(){
-        if errorMessage == "Email"{
-        loginEmail.becomeFirstResponder()
-            setError(loginEmail)
-        } else if errorMessage == "Invalid"{
-            loginEmail.becomeFirstResponder()
-            setError(loginEmail)
-        }else {
-           loginPassword.becomeFirstResponder()
-           setError(loginPassword)
-        }
-    }
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
-    func enterEmail(){
-        let alert = SCLAlertView()
-        alert.showCloseButton = false
-        let txt = alert.addTextField("Enter Email")
-        alert.addButton("Reset Password") {
-            self.forgotPasswordSend(txt.text!)
-        }
-        alert.addButton("Cancel"){ alert.dismissViewControllerAnimated(true, completion: nil)}
-        alert.showEdit("Forgot Password", subTitle: "Please enter an email address so we can send you a password reset link")
-    }
-
-    
+    //Setting errors to text fields
     func setError(textField : UITextField){
         textField.layer.borderColor = hexStringToUIColor("#f27163").CGColor
         textField.layer.cornerRadius = 10.0
@@ -314,6 +360,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         textField.layer.borderWidth = 1
     }
     
+    //Setting good to go to text fields
     func setGoodToGo(textField : UITextField){
         textField.layer.borderColor = hexStringToUIColor("#91c769").CGColor
         textField.layer.cornerRadius = 10.0
@@ -321,6 +368,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         textField.layer.borderWidth = 1
     }
 
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
 
 }

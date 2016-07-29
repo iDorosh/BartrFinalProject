@@ -9,19 +9,47 @@
 import UIKit
 class UsersRecentFeedBackCell: UITableViewCell {
     
+    
+//Variables
+    //Data
     var feedback : FeedbackObject!
     
-    @IBOutlet weak var profileImage: UIImageView!
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
-    @IBOutlet weak var userName: UILabel!
-    
-    @IBOutlet weak var post: UILabel!
-    
-    @IBOutlet weak var timeStamp: UILabel!
-    
+//Outlets
     @IBOutlet weak var rating: FloatRatingView!
-    
+    @IBOutlet weak var profileImage: UIImageView!
+    @IBOutlet weak var userName: UILabel!
+    @IBOutlet weak var post: UILabel!
+    @IBOutlet weak var timeStamp: UILabel!
     @IBOutlet weak var ratinglabel: UILabel!
+    
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+//Creating table view cells
+    func tableConfig(selectedFeedback : FeedbackObject){
+        //Setting feedback object
+        feedback = selectedFeedback
+        
+        //Setting images
+        profileImage.image = decodeString(feedback.feedbackImage)
+        userName.text = feedback.feedbackUser
+        post.text = feedback.feedbackTitle
+        
+        //Setting timeStamp for recent Feedback
+        let dateString : String = feedback.feedbackDate
+        let date = dateFormatter().dateFromString(dateString)
+        let seconds = NSDate().timeIntervalSinceDate(date!)
+        timeStamp.text = elapsedTime(seconds)
+        
+        //Set label for rating and set stars according to rating
+        if Float(feedback.feedbackRating) > 1 {
+            ratinglabel.text = "\(feedback.feedbackRating) stars"
+        } else {
+            ratinglabel.text = "\(feedback.feedbackRating) star"
+        }
+        rating.rating = Float(feedback.feedbackRating)!
+    }
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -31,28 +59,6 @@ class UsersRecentFeedBackCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
     }
     
-    //Creating table view cells
-    func tableConfig(selectedFeedback : FeedbackObject){
-        feedback = selectedFeedback
-        
-        profileImage.image = decodeString(feedback.feedbackImage)
-        userName.text = feedback.feedbackUser
-        post.text = feedback.feedbackTitle
-        
-        let dateString : String = feedback.feedbackDate
-        
-        let date = dateFormatter().dateFromString(dateString)
-        let seconds = NSDate().timeIntervalSinceDate(date!)
-        
-        timeStamp.text = elapsedTime(seconds)
-        
-        if Float(feedback.feedbackRating) > 1 {
-            ratinglabel.text = "\(feedback.feedbackRating) stars"
-        } else {
-            ratinglabel.text = "\(feedback.feedbackRating) star"
-        }
-        
-        rating.rating = Float(feedback.feedbackRating)!
-    }
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
 }

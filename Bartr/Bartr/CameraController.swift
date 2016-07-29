@@ -10,8 +10,16 @@ import UIKit
 
 class CameraController: UIViewController {
 
+//Outlers
+    //Sign in view when the user isnt logged in
     @IBOutlet weak var signin: UIView!
+    //Background Image
     @IBOutlet weak var bgImage: UIImageView!
+    
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+   
+//Actions
+
     @IBAction func backtoMain(sender: UIButton) {
         performSegueWithIdentifier("BacktoMain", sender: self)
     }
@@ -22,13 +30,17 @@ class CameraController: UIViewController {
         let loginViewController = self.storyboard!.instantiateViewControllerWithIdentifier("Login")
         UIApplication.sharedApplication().keyWindow?.rootViewController = loginViewController
     }
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+    
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+//UI
+    override func viewDidLoad() {super.viewDidLoad()}
+    override func didReceiveMemoryWarning() {super.didReceiveMemoryWarning()}
+    override func viewWillAppear(animated: Bool) {
+        loadUI()
     }
     
-    override func viewWillAppear(animated: Bool) {
+    func loadUI(){
         if signUpSkipped {
             signin.hidden = false
             self.tabBarController?.tabBar.hidden = false
@@ -41,21 +53,5 @@ class CameraController: UIViewController {
             self.bgImage.addSubview(blurEffectView)
         }
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-    
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
 }

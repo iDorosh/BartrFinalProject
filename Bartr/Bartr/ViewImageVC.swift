@@ -7,32 +7,56 @@
 //
 
 import UIKit
+import SCLAlertView
 
 class ViewImageVC: UIViewController {
     
-    //Variables
+//Variables
+    //Current image that is being displayed on the screen
     var showImage : UIImage = UIImage()
     
-    //Outlets
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+//Outlets
+    //Selected Image View
     @IBOutlet weak var largerImage: UIImageView!
     
-    //Actions
-    @IBAction func saveImage(sender: UIButton) {
-    }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-    }
-    
-    override func viewWillAppear(animated: Bool) {
-        loadUI()
-    }
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
     override func didReceiveMemoryWarning() {super.didReceiveMemoryWarning()}
+    override func viewDidLoad() {super.viewDidLoad()}
+    
+    override func viewWillAppear(animated: Bool) {
+        //Setup Image
+        loadUI()
+    }
     
     func loadUI(){
         //Set UIImage View to the proper image
         largerImage.image = showImage
         self.tabBarController?.tabBar.hidden = true
     }
+
+    
+//Actions
+    //Saving the current image to photos
+    @IBAction func saveImage(sender: UIButton) {
+        UIImageWriteToSavedPhotosAlbum(showImage, self, #selector(ViewImageVC.image(_:didFinishSavingWithError:contextInfo:)), nil)
+    }
+    
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+//Functions
+    //Call back that alerts the user of a successful save or error
+    func image(image: UIImage, didFinishSavingWithError error: NSError?, contextInfo:UnsafePointer<Void>) {
+        if error == nil {
+                let alertView = SCLAlertView()
+                alertView.showSuccess("Image Saved", subTitle: "Image has been saved to photos")
+        } else {
+            let alertView = SCLAlertView()
+            alertView.showWarning("Error", subTitle: "There has been an error saving this image")
+        }
+    }
+    
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
 }

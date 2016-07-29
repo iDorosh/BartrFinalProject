@@ -12,65 +12,77 @@ import SCLAlertView
 import M13Checkbox
 import MapKit
 
-
-
-
 class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, CustomIOS8AlertViewDelegate, CLLocationManagerDelegate, MKMapViewDelegate {
+    
     @IBAction func backToSearch(segue: UIStoryboardSegue){}
     
-    //Data
+    override func viewDidAppear(animated: Bool) {updatePosts()}
+    override func didReceiveMemoryWarning() {super.didReceiveMemoryWarning()}
+    
+    //Filter View
+    var customFilterView : CustomIOS8AlertView! = nil
+    
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+//Data
+    //Posts will hold all posts pulled from firebase
     var posts = [Post]()
+    var post : Post!
+    //All post will filter the ones in a 200 mile radius
     var allPosts = [Post]()
+    
+    //Filtered posts and search results will further filter the posts based on the users entry
     var filteredPosts = [Post]()
     var searchingResults = [Post]()
-    var customFilterView : CustomIOS8AlertView! = nil
-    var selectedAnnotationTitle : String = String()
-    var searchActive : Bool = false
-    var filtered : Bool = false
     
+    //Array of filter types
+    var type : [String] = []
+    
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+//Variables
+    //Strings
+        //Will determing what type the user is filtering by, sold, looking, trade or free
+        var filterType : String = String()
+        var selectedAnnotationTitle : String = String()
+        
+    //Boolean
+        var foundLocation : Bool = false
+        var searchActive : Bool = false
+        var filtered : Bool = false
+        var searching = false
+        var reloadPosts = false
+        var locationFound : Bool = false
+        
+    //Integers
+        var selectedPost: Int = Int()
+        var distanceMiles : Int = 500
+        var action : Int = 0
+        
+    //Checkboxes
+        var forSaleState : M13Checkbox.CheckState?
+        var lookingState : M13Checkbox.CheckState?
+        var freeState : M13Checkbox.CheckState?
+        var tradeState : M13Checkbox.CheckState?
+        
+    //Current Location
+        var locationManager = CLLocationManager()
+        var currentLocation : CLLocation!
+        
+    //Pull to refresh search
+        var refreshControl: UIRefreshControl!
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+//Outlets
     @IBOutlet weak var mapSearchArealLavel: UIButton!
     @IBOutlet weak var mapFilterBttn: UIButton!
     @IBOutlet weak var filterView: UIView!
     @IBOutlet weak var changeViewlabel: UIButton!
     @IBOutlet weak var mapView: MKMapView!
-    @IBAction func changeView(sender: UIButton) {
-        self.view.endEditing(true)
-        if mapView.hidden {
-            mapView.hidden = false
-            filterView.hidden = false
-            changeViewlabel.setTitle("List", forState: .Normal)
-        } else {
-            mapView.hidden = true
-            filterView.hidden = true
-            changeViewlabel.setTitle("Map", forState: .Normal)
-        }
-    }
-    
     @IBOutlet weak var filterBttn: UIButton!
-    
     @IBOutlet weak var searchAreaLabel: UIButton!
-    //Variables
-    var post : Post!
-    var foundLocation : Bool = false
-    var filterType : String = String()
-    var selectedPost: Int = Int()
-    var action : Int = 0
-    var searching = false
-    var reloadPosts = false
-    var distanceMiles : Int = 500
-    var locationFound : Bool = false
-    var locationManager = CLLocationManager()
-    var two : CLLocation!
-    var refreshControl: UIRefreshControl!
     
-    var forSaleState : M13Checkbox.CheckState?
-    var lookingState : M13Checkbox.CheckState?
-    var freeState : M13Checkbox.CheckState?
-    var tradeState : M13Checkbox.CheckState?
-    
-    var type : [String] = []
-    
-    //Outlets
     @IBOutlet weak var tabletView: UITableView!
     @IBOutlet var cancelSearch: UIButton!
     @IBOutlet weak var viewType: UIButton!
@@ -78,396 +90,524 @@ class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, Cust
     @IBOutlet weak var spin: UIActivityIndicatorView!
     @IBOutlet weak var distance: UISegmentedControl!
     
-    
+    //Checkboxes
     @IBOutlet weak var forSale: M13Checkbox!
     @IBOutlet weak var looking: M13Checkbox!
     @IBOutlet weak var trade: M13Checkbox!
     @IBOutlet weak var free: M13Checkbox!
     
-  
+    //Filter view
     @IBOutlet var filters: UIView!
-
-    //Actions
-    @IBAction func listingDistance(sender: UISegmentedControl) {}
     
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+//Actions
+    //Switching between map and list view
+    @IBAction func changeView(sender: UIButton) {
+        switchViews()
+    }
+   
+    //Cancels the search
+    @IBAction func cancelClicked(sender: UIButton) { cancelSearching() }
+    //Sets the array with the selected listings
+    @IBAction func listingType(sender: UISegmentedControl) { setlistingType(sender.selectedSegmentIndex) }
+    
+    //Open filter allert
     @IBAction func showFilter(sender: UIButton) {
         self.view.endEditing(true)
         ShowFilters()
     }
     
-    
-    @IBAction func applyFilter(sender: UIButton) {
+    //Reset all filters
+    @IBAction func resetFilters(sender: UIButton) {
         filtered = false
         resetFilter()
     }
-    
-    func resetFilter(){
-        forSale.checkState = .Unchecked
-        trade.checkState = .Unchecked
-        free.checkState = .Unchecked
-        looking.checkState = .Unchecked
-        
-        setLocationManager()
-        
-        distance.selectedSegmentIndex = 3
-        distanceMiles = 200
-        searchActive = true
-        reloadPosts = false
-        if searchActive {
-            searchFirebase()
-        }
-        getCheckStates()
-        setCheckStates()
-        
-
-    }
-    
-    @IBAction func cancelClicked(sender: UIButton) {
-        filterBttn.hidden = true
-        searchAreaLabel.setTitle("In Your Area", forState: .Normal)
-        mapFilterBttn.hidden = true
-        mapSearchArealLavel.setTitle("In Your Area", forState: .Normal)
-        cancelSearch.userInteractionEnabled = false
-        cancelSearch.setTitleColor(UIColor.lightGrayColor(), forState: .Normal)
-        searchBar.text = ""
-        resetFilter()
-        searchActive = false
-        filtered = false
-        action = 0
-        self.view.endEditing(true)
-        searchingResults = []
-        filteredPosts = []
-        updatePosts()
-       
-    }
-    
-    @IBAction func listingType(sender: UISegmentedControl) {
-        let selectedIndex : Int = sender.selectedSegmentIndex
-        switch selectedIndex {
-        case 0:
-            filterType = "Sale"
-        case 1:
-            filterType = "Trade"
-        case 2:
-            filterType = "Looking"
-        case 3:
-            filterType = "Free"
-        default:
-            break
-        }
-    }
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        filterBttn.hidden = true
-        mapFilterBttn.hidden = true
-        loadUI()
-        getCheckStates()
-        setLocationManager()
-        setUpRefreshControl()
-        mapView.delegate = self
+        setUpView()
     }
 
-    override func viewDidAppear(animated: Bool) {
-        updatePosts()
-    }
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-    }
-    
-    func loadUI(){
-        spin.startAnimating()
-        spin.hidden = false
-        
-        UIApplication.sharedApplication().statusBarStyle = .Default
-        self.navigationController?.setNavigationBarHidden(true, animated: true)
-        
-        //Update firebase data and Table View
-        updatePosts()
-        searchBar.delegate = self
-        cancelSearch.userInteractionEnabled = false
-        cancelSearch.setTitleColor(UIColor.lightGrayColor(), forState: .Normal)
-        
-        searchBar.addTarget(self, action: #selector(self.searchDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
-    }
-    
-    func setUpRefreshControl(){
-        refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(Search.updatePosts), forControlEvents: UIControlEvents.ValueChanged)
-        tabletView.addSubview(refreshControl)
-        
-    }
+//Functions
+    //Create View
+        //Set up buttons location managers and refresh controller
+        func setUpView(){
+            filterBttn.hidden = true
+            mapFilterBttn.hidden = true
+            loadUI()
+            getCheckStates()
+            setLocationManager()
+            setUpRefreshControl()
+            mapView.delegate = self
+        }
 
-    func textFieldDidBeginEditing(textField: UITextField) {
-    
+        //Set up UI and gets data
+        func loadUI(){
+            //Set statusbar and navigation bar
+            UIApplication.sharedApplication().statusBarStyle = .Default
+            self.navigationController?.setNavigationBarHidden(true, animated: true)
+            
+            //Start loading animation
+            spin.startAnimating()
+            spin.hidden = false
+            
+            //Update firebase data and Table View
+            updatePosts()
+            searchBar.delegate = self
+            cancelSearch.userInteractionEnabled = false
+            cancelSearch.setTitleColor(UIColor.lightGrayColor(), forState: .Normal)
+            searchBar.addTarget(self, action: #selector(self.searchDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
+        }
         
-
-        searchActive = true
-        action = 1
-        tabletView.reloadData()
-        cancelSearch.userInteractionEnabled = true
-        cancelSearch.setTitleColor(hexStringToUIColor("#2b3146"), forState: .Normal)
-        if textField.text == "" {
-            mapView.removeAnnotations(mapView.annotations)
+        //Refresh search
+        func setUpRefreshControl(){
+            //Creates a refresh controller and adds it to the table view
+            refreshControl = UIRefreshControl()
+            refreshControl.addTarget(self, action: #selector(Search.updatePosts), forControlEvents: UIControlEvents.ValueChanged)
+            tabletView.addSubview(refreshControl)
         }
-    }
     
-    func searchDidChange(textView: UITextView) {
-        if mapView.hidden == true {
-            searchFirebase()
-        }
-        
-    }
-    
-    func textFieldShouldReturn(textField: UITextField) -> Bool {
-        filterBttn.hidden = false
-        searchAreaLabel.setTitle("Search Results", forState: .Normal)
-        mapSearchArealLavel.setTitle("Search Results", forState: .Normal)
-        mapFilterBttn.hidden = false
-        dismissKeyboard()
-        return true
-    }
-    
-    func textFieldDidEndEditing(textField: UITextField) {
-        if mapView.hidden == false {
-            searchFirebase()
-        }
-    }
-    
-    func dismissKeyboard(){
-        self.view.endEditing(true)
-    }
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
     //Set Up Table View
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        switch action {
-        case 0:
-            if posts.count > 0 {
-                tabletView.hidden = false
-            } else {
-                tabletView.hidden  = true
-            }
-            return posts.count
-        case 1:
-            return searchingResults.count
-        case 2:
-            return filteredPosts.count
-        default:
-            return posts.count
-        }
-    }
-    
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell{
-        switch action {
-        case 0:
-            post = posts[indexPath.row]
-        case 1:
-            post = searchingResults[indexPath.row]
-        case 2:
-            post = filteredPosts[indexPath.row]
-        default:
-            break
+        //Get number of rows in the table
+        func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+            return getIndexCount()
         }
     
-        let cell : CustomTableCell = tableView.dequeueReusableCellWithIdentifier("MyCell")! as! CustomTableCell
-        cell.configureCell(post)
-        return cell
-    }
-    
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath){
-        selectedPost = indexPath.row
-        dismissKeyboard()
-        performSegueWithIdentifier("detailSegue", sender: self)
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
-    }
-    
-    //Update Firebase data and Table View
-    func updatePosts(){
-        if !searchActive {
-            DataService.dataService.POST_REF.observeSingleEventOfType(.Value, withBlock: { snapshot in
-                self.posts = []
-                self.allPosts = []
-            
-                if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
-                    for snap in snapshots {
-                        if !(snap.value!.objectForKey("postComplete") as! Bool) && !(snap.value!.objectForKey("postFeedbackLeft") as! Bool) {
-                            if let postDictionary = snap.value as? Dictionary<String, AnyObject> {
-                                    let key = snap.key
-                                    let post = Post(key: key, dictionary: postDictionary)
-                                
-                                self.allPosts.insert(post, atIndex: self.allPosts.endIndex
-                                )
-                            }
-                        }
-                    }
-                }
-                
-                for i in self.allPosts {
-                    if self.loadLocation(i.lon, lat : i.lat){
-                        self.posts.insert(i, atIndex: 0)
-                    }
-                }
-                
-                self.action = 0
-                self.refreshControl.endRefreshing()
-                self.spin.stopAnimating()
-                self.spin.hidden = true
-                self.tabletView.reloadData()
-                self.setMapLocation()
-            })
-        } else {
-            refreshControl.endRefreshing()
+        //Get post and return a cell with the data
+        func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell{
+            post = getPost(indexPath.row)
+            let cell : CustomTableCell = tableView.dequeueReusableCellWithIdentifier("MyCell")! as! CustomTableCell
+            cell.configureCell(post)
+            return cell
         }
-    }
     
-    func setMapLocation(){
-        mapView.removeAnnotations(mapView.annotations)
-        if searchActive {
-            if filtered {
-                for i in filteredPosts {
-                    let annotation = MKPointAnnotation()
-                    annotation.coordinate = CLLocationCoordinate2D(latitude: (Double(i.lat)! + Double.random(0.001, 0.01)), longitude: (Double(i.lon)!) + Double.random(0.001, 0.01))
-                    annotation.title = i.postTitle
-                    mapView.addAnnotation(annotation)
-                }
-            } else {
-                for i in searchingResults {
-                
-                    let annotation = MKPointAnnotation()
-                    annotation.coordinate = CLLocationCoordinate2D(latitude: (Double(i.lat)! + Double.random(0.001, 0.01)), longitude: (Double(i.lon)!) + Double.random(0.001, 0.01))
-                    annotation.title = i.postTitle
-                    mapView.addAnnotation(annotation)
-                }
-            }
-        } else {
-            for i in posts {
-                let annotation = MKPointAnnotation()
-                Double.random(0.000456, 0.001000)
-                annotation.coordinate = CLLocationCoordinate2D(latitude: (Double(i.lat)! + Double.random(0.001, 0.01)), longitude: (Double(i.lon)!) + Double.random(0.001, 0.01))
-                annotation.title = i.postTitle
-                
-                mapView.addAnnotation(annotation)
+        //Did select listing will open up listing details
+        func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath){
+            selectedPost = indexPath.row
+            dismissKeyboard()
+            performSegueWithIdentifier("detailSegue", sender: self)
+            tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        }
+    
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+    //Keyboard
+        //Dismiss keyboard from view
+        func dismissKeyboard(){
+            self.view.endEditing(true)
+        }
+        
+        //Will update table view when the search is being entered in
+        func searchDidChange(textView: UITextView) {
+            if mapView.hidden == true {
+                searchingResults = []
+                searchFirebase()
+                filterBttn.hidden = false
+                searchAreaLabel.setTitle("Search Results", forState: .Normal)
+                mapSearchArealLavel.setTitle("Search Results", forState: .Normal)
+                mapFilterBttn.hidden = false
+
             }
         }
         
-    }
-    
-    
-    func searchFirebase(){
-        searchingResults = []
-        DataService.dataService.POST_REF.queryOrderedByChild("postTitle").observeSingleEventOfType(.Value, withBlock: {
-            snapshot in
-            if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
-                
-                for snap in snapshots {
-                    let postTitle: String = (snap.value?.objectForKey("postTitle"))! as! String
-                    let searchText: String = self.searchBar.text!
-                    
-                    if postTitle.lowercaseString.containsString(searchText.lowercaseString) && !(snap.value!.objectForKey("postComplete") as! Bool) && !(snap.value!.objectForKey("postFeedbackLeft") as! Bool){
-                        if let postDictionary = snap.value as? Dictionary<String, AnyObject> {
-                            let key = snap.key
-                            let post = Post(key: key, dictionary: postDictionary)
-                            if self.loadLocation(post.lon, lat: post.lat) {
-                                self.searchingResults.insert(post, atIndex: 0)
-                            }
-                        }
-                    }
-                }
-                
+        //Did end editing will complete the search
+        func textFieldDidEndEditing(textField: UITextField) {
+            if mapView.hidden == false {
+                searchFirebase()
             }
-            
-                    self.action = 1
-                    self.tabletView.reloadData()
-                    self.refreshControl.endRefreshing()
-                    self.setMapLocation()
-        })
-        
-    }
-    
-    
-    
-    //Get listing location on map preview
-    func loadLocation(lon: String, lat : String) -> Bool{
-        let checkLocation = CLLocation(latitude: Double(lat)!, longitude: Double(lon)!)
-        
-        if two != nil {
-            if two.distanceFromLocation(checkLocation)/1609 < Double(distanceMiles) {
-                return true
-            } else {
-                return false
+        }
+
+        //Will set search to active and will clear the map
+        func textFieldDidBeginEditing(textField: UITextField) {
+            searchActive = true
+            action = 1
+            tabletView.reloadData()
+            cancelSearch.userInteractionEnabled = true
+            cancelSearch.setTitleColor(hexStringToUIColor("#2b3146"), forState: .Normal)
+            if textField.text == "" {
+                mapView.removeAnnotations(mapView.annotations)
             }
-        } else {
+        }
+    
+        //Will allow user to filter results
+        func textFieldShouldReturn(textField: UITextField) -> Bool {
+            filterBttn.hidden = false
+            searchAreaLabel.setTitle("Search Results", forState: .Normal)
+            mapSearchArealLavel.setTitle("Search Results", forState: .Normal)
+            mapFilterBttn.hidden = false
+            dismissKeyboard()
             return true
         }
     
-    }
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
-    func mapView(_mapView: MKMapView,
-                 viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
-        
-        if annotation is MKUserLocation {
-            return nil
+    //Update Firebase data and Table View
+        /*
+        Gets all listings from firebase
+        Filters out the listing to a 200 mile radius
+        Adds the anotatios to the mapview
+        */
+        func updatePosts(){
+            if !searchActive {
+                DataService.dataService.POST_REF.observeSingleEventOfType(.Value, withBlock: { snapshot in
+                    //Clears posts and all posts
+                    self.posts = []
+                    self.allPosts = []
+                
+                    if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
+                        for snap in snapshots {
+                            //Will check if the post is not complete or accepted and will add it to all posts
+                            if !(snap.value!.objectForKey("postComplete") as! Bool) && !(snap.value!.objectForKey("postFeedbackLeft") as! Bool) {
+                                if let postDictionary = snap.value as? Dictionary<String, AnyObject> {
+                                        let key = snap.key
+                                        let post = Post(key: key, dictionary: postDictionary)
+                                        self.allPosts.insert(post, atIndex: self.allPosts.endIndex
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    //Will filter items to a 200 mile radius, stop animation adn reload table view and map
+                    self.updatePostsComplete()
+                })
+            } else {
+                //ends refresh controller if empty
+                refreshControl.endRefreshing()
+            }
         }
-        
-        let reuseId = "pin"
-        
-        var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView
-        if pinView == nil {
-            pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
-            pinView!.canShowCallout = true
-            pinView!.pinTintColor = UIColor.redColor()
+    
+        func updatePostsComplete(){
+            //Will filter out locations based on a 200 mile radius
+            for i in self.allPosts {
+                if self.loadLocation(i.lon, lat : i.lat){
+                    self.posts.insert(i, atIndex: 0)
+                }
+            }
             
-            pinView!.rightCalloutAccessoryView = UIButton(type: .InfoLight) as UIButton
+            //End animations
+            self.refreshControl.endRefreshing()
+            self.spin.stopAnimating()
+            self.spin.hidden = true
+            
+            //Set proper object for table view
+            self.action = 0
+            
+            //Reload tableview and drop pins
+            self.tabletView.reloadData()
+            self.setMapLocation()
         }
-        else {
-            pinView!.annotation = annotation
+    
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+    //Query firebase
+        /*
+         Queries firebase based on post title
+         */
+        func searchFirebase(){
+            //Sets search results to empty
+            
+            DataService.dataService.POST_REF.queryOrderedByChild("postTitle").observeSingleEventOfType(.Value, withBlock: {
+                snapshot in
+                self.searchingResults = []
+                if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
+                    //Will get post title and compares it to search bar
+                    for snap in snapshots {
+                        let postTitle: String = (snap.value?.objectForKey("postTitle"))! as! String
+                        let searchText: String = self.searchBar.text!
+                        
+                        //If the listing offer is not accepeted or feedback has not been left will append and will filter based on radius
+                        if postTitle.lowercaseString.containsString(searchText.lowercaseString) && !(snap.value!.objectForKey("postComplete") as! Bool) && !(snap.value!.objectForKey("postFeedbackLeft") as! Bool){
+                            if let postDictionary = snap.value as? Dictionary<String, AnyObject> {
+                                let key = snap.key
+                                let post = Post(key: key, dictionary: postDictionary)
+                                if self.loadLocation(post.lon, lat: post.lat) {
+                                    self.searchingResults.insert(post, atIndex: 0)
+                                    print("adding")
+                                }
+                            }
+                        }
+                    }
+                    
+                }
+                //Sets proper object for table view
+                self.action = 1
+                
+                //Reload table view and end refresh animation
+                self.tabletView.reloadData()
+                self.refreshControl.endRefreshing()
+                //Drop pins
+                self.setMapLocation()
+            })
+        }
+    
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+    //Map View
+        //Checks if the given location is within the selected radius
+        func loadLocation(lon: String, lat : String) -> Bool{
+            let checkLocation = CLLocation(latitude: Double(lat)!, longitude: Double(lon)!)
+            if currentLocation != nil {
+                if currentLocation.distanceFromLocation(checkLocation)/1609 < Double(distanceMiles) {
+                    return true
+                } else {
+                    return false
+                }
+            } else {
+                return true
+            }
+        
+        }
+        
+        //Will allow users to select an anotation to take them to the selected listing details
+        func mapView(_mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+            // Will return nil for the annotation if it is the current loaction
+            if annotation is MKUserLocation {
+                return nil
+            }
+            
+            //Reuse id for the Pin annotation in the map view
+            let reuseId = "pin"
+            
+            //Creates a pin with an annotation that includes a button for the user to click on
+            var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView
+            if pinView == nil {
+                pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
+                pinView!.canShowCallout = true
+                pinView!.pinTintColor = UIColor.redColor()
+                pinView!.rightCalloutAccessoryView = UIButton(type: .InfoLight) as UIButton
+            }
+            else {
+                pinView!.annotation = annotation
+            }
+            return pinView
+        }
+        
+        //Will run when the user clicks a pin annotation
+        func mapView(MapView: MKMapView, annotationView: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+            //Will open the detail view
+            if control == annotationView.rightCalloutAccessoryView {
+                selectedAnnotationTitle = ((annotationView.annotation?.title)!)!
+                performSegueWithIdentifier("detailSegue", sender: self)
+            }
+        }
+        
+        //Set up location manager
+        func setLocationManager(){
+            //Ask for permission
+            self.locationManager.requestWhenInUseAuthorization()
+            //Set up location manager if permission granted
+            if CLLocationManager.locationServicesEnabled() {
+                locationManager.delegate = self
+                locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+                locationManager.startUpdatingLocation()
+            }
             
         }
-        return pinView
-    }
-    
-    func mapView(MapView: MKMapView, annotationView: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
         
-        if control == annotationView.rightCalloutAccessoryView {
-            selectedAnnotationTitle = ((annotationView.annotation?.title)!)!
-            performSegueWithIdentifier("detailSegue", sender: self)
+        //Get current user location
+        func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+            
+            //Sets current location to coordinates provided by the location manager
+            let locValue:CLLocationCoordinate2D = manager.location!.coordinate
+            currentLocation = CLLocation(latitude: locValue.latitude, longitude: locValue.longitude)
+            
+            //Centers the current location on the map
+            let center = CLLocationCoordinate2D(latitude: currentLocation.coordinate.latitude, longitude: currentLocation.coordinate.longitude)
+            let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.30, longitudeDelta: 0.30))
+            self.mapView.setRegion(region, animated: true)
+            
+            //Shows users location
+            self.mapView.showsUserLocation = true
+            
+            //Stops updating location
+            locationManager.stopUpdatingHeading()
+            locationManager.stopUpdatingLocation()
         }
-    }
-    func setLocationManager(){
-        self.locationManager.requestWhenInUseAuthorization()
-        if CLLocationManager.locationServicesEnabled() {
-            locationManager.delegate = self
-            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-            locationManager.startUpdatingLocation()
+        
+        //Will drop pins for all results in the appropriate objects
+        func setMapLocation(){
+            //Remove current annotations from map
+            mapView.removeAnnotations(mapView.annotations)
+            if searchActive {
+                if filtered {
+                    //Map pins for filtered posts
+                    for i in filteredPosts {
+                        let annotation = MKPointAnnotation()
+                        annotation.coordinate = CLLocationCoordinate2D(latitude: (Double(i.lat)! + Double.random(0.001, 0.01)), longitude: (Double(i.lon)!) + Double.random(0.001, 0.01))
+                        annotation.title = i.postTitle
+                        mapView.addAnnotation(annotation)
+                    }
+                } else {
+                    //Map pins for search results
+                    for i in searchingResults {
+                        let annotation = MKPointAnnotation()
+                        annotation.coordinate = CLLocationCoordinate2D(latitude: (Double(i.lat)! + Double.random(0.001, 0.01)), longitude: (Double(i.lon)!) + Double.random(0.001, 0.01))
+                        annotation.title = i.postTitle
+                        mapView.addAnnotation(annotation)
+                    }
+                }
+            } else {
+                //Map pins for all results
+                for i in posts {
+                    let annotation = MKPointAnnotation()
+                    annotation.coordinate = CLLocationCoordinate2D(latitude: (Double(i.lat)! + Double.random(0.001, 0.01)), longitude: (Double(i.lon)!) + Double.random(0.001, 0.01))
+                    annotation.title = i.postTitle
+                    mapView.addAnnotation(annotation)
+                }
+            }
+        }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+
+    //Filtering
+        //Custom Filter View to display filter options during search
+        func ShowFilters(){
+            filters.hidden = false
+            customFilterView = CustomIOS8AlertView()
+            customFilterView.delegate = self
+            customFilterView.containerView = filters
+            customFilterView.buttonColor = hexStringToUIColor("#2b3146")
+            customFilterView.buttonColorHighlighted = hexStringToUIColor("#a6a6a6")
+            customFilterView.tintColor = hexStringToUIColor("#f27163")
+            customFilterView.buttonTitles = ["Done"]
+            customFilterView.show()
         }
         
-    }
+        //Done call back for the filter view
+        func customIOS8AlertViewButtonTouchUpInside(alertView: CustomIOS8AlertView, buttonIndex: Int) {
+            checkForFilters()
+            filters.hidden = true
+            customFilterView.close()
+        }
     
-    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        let locValue:CLLocationCoordinate2D = manager.location!.coordinate
-        two = CLLocation(latitude: locValue.latitude, longitude: locValue.longitude)
-        
-
-        
-        let center = CLLocationCoordinate2D(latitude: two.coordinate.latitude, longitude: two.coordinate.longitude)
-        let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.30, longitudeDelta: 0.30))
-        
-        self.mapView.setRegion(region, animated: true)
-        self.mapView.showsUserLocation = true
-        locationManager.stopUpdatingHeading()
-        locationManager.stopUpdatingLocation()
-    }
-
-
+        //Gets current checked boxes
+        func getCheckStates(){
+            forSaleState = forSale.checkState
+            tradeState = trade.checkState
+            lookingState = looking.checkState
+            freeState = free.checkState
+        }
     
+        //Sets variable to checked or unchecked states when custom filter view apears
+        func setCheckStates(){
+            forSale.checkState = forSaleState!
+            trade.checkState = tradeState!
+            looking.checkState = lookingState!
+            free.checkState = freeState!
+        }
+    
+        //Will check to see which types have been selected and if distance has been selected
+        func checkForFilters(){
+            type.removeAll()
+            reloadPosts = false
+            
+            if forSale.checkState == .Checked {
+                type.append("Sale")
+                reloadPosts = true
+            }
+            if trade.checkState == .Checked {
+                type.append("Trade")
+                reloadPosts = true
+            }
+            if looking.checkState == .Checked {
+                type.append("Looking")
+                reloadPosts = true
+            }
+            if free.checkState == .Checked {
+                type.append("Free")
+                reloadPosts = true
+            }
+            
+            //Will load only distance results if type wasnt selected
+            if distance.selectedSegmentIndex != 3 && !reloadPosts{
+                loadDistanceResults()
+            } else {
+                //Will reload the post to apply filters
+                if reloadPosts  {
+                    filterPosts()
+                    action = 1
+                } else {
+                    //Will clear fitler
+                    type = []
+                    action = 1
+                    filtered = false
+                    setMapLocation()
+                    tabletView.reloadData()
+                }
+            }
+            getCheckStates()
+        }
+    
+        //Will load results based on the distance parameter
+        func loadDistanceResults(){
+            filteredPosts = []
+            filtered = true
+            distanceMiles = Int(distance.titleForSegmentAtIndex(distance.selectedSegmentIndex)!)!
+            
+            //Check if distance is within the radius
+            for i in searchingResults {
+                if loadLocation(i.lon, lat: i.lat){
+                    filteredPosts.insert(i, atIndex: 0)
+                }
+                            
+            }
+            //Sets map pins and reloads tableview
+            action = 2
+            setMapLocation()
+            tabletView.reloadData()
+        }
+    
+        //Will filter the listings and will reload the data
+        func filterPosts(){
+            filteredPosts = []
+            filtered = true
+            mapView.removeAnnotations(mapView.annotations)
+            //Checks if distance has been selected
+            if distance.selectedSegmentIndex == 1 {
+                for i in searchingResults {
+                    if !type.isEmpty {
+                        //Appends listing containing the selected type
+                        for types in type {
+                            if i.postType.containsString(types) {
+                               filteredPosts.insert(i, atIndex: 0)
+                            }
+                        }
+                    }
+                }
+            } else {
+                //Will also filter by distance if that has been selected
+                distanceMiles = Int(distance.titleForSegmentAtIndex(distance.selectedSegmentIndex)!)!
+                for i in searchingResults {
+                    if !type.isEmpty {
+                        for types in type {
+                            if i.postType.containsString(types) {
+                                if loadLocation(i.lon, lat: i.lat){
+                                    filteredPosts.insert(i, atIndex: 0)
+                                }
+                                
+                            }
+                        }
+                    }
+                }
+
+            }
+            setMapLocation()
+            action = 2
+            tabletView.reloadData()
+        }
+    
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
     //Send data to next screen
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if (segue.identifier == "detailSegue"){
             let details : PostDetails = segue.destinationViewController as! PostDetails
-
+            //Sending the proper post key to the next screen
             if (mapView.hidden){
                 switch action {
                 case 0:
@@ -486,179 +626,167 @@ class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, Cust
                     }
                 }
             }
+            //Sets previous screen to search to allow proper exit segue
             details.previousVC = "Search"
         }
     }
     
-    func ShowFilters(){
-        filters.hidden = false
-        customFilterView = CustomIOS8AlertView()
-        customFilterView.delegate = self
-        customFilterView.containerView = filters
-        customFilterView.buttonColor = hexStringToUIColor("#2b3146")
-        customFilterView.buttonColorHighlighted = hexStringToUIColor("#a6a6a6")
-        customFilterView.buttonTitles = ["Done"]
-        customFilterView.tintColor = hexStringToUIColor("#f27163")
-        customFilterView.show()
-    }
-    
-    func getCheckStates(){
-        forSaleState = forSale.checkState
-        tradeState = trade.checkState
-        lookingState = looking.checkState
-        freeState = free.checkState
-    }
-    
-    func setCheckStates(){
-        forSale.checkState = forSaleState!
-        trade.checkState = tradeState!
-        looking.checkState = lookingState!
-        free.checkState = freeState!
-    }
-    
-    func customIOS8AlertViewButtonTouchUpInside(alertView: CustomIOS8AlertView, buttonIndex: Int) {
-        checkForFilters()
-        filters.hidden = true
-        customFilterView.close()
-    }
-    
-    func checkForFilters(){
-        type.removeAll()
-        reloadPosts = false
-        
-        if forSale.checkState == .Checked {
-            type.append("Sale")
-            print("sale")
-            reloadPosts = true
-        }
-        if trade.checkState == .Checked {
-            type.append("Trade")
-            reloadPosts = true
-            print("trade")
-        }
-        if looking.checkState == .Checked {
-            type.append("Looking")
-            reloadPosts = true
-            print("looking")
-        }
-        if free.checkState == .Checked {
-            type.append("Free")
-            reloadPosts = true
-            print("printfree")
-        }
-        
-        if distance.selectedSegmentIndex != 3 && !reloadPosts{
-            loadDistanceResults()
-            
-        } else {
-            if reloadPosts  {
-                filterPosts()
-                action = 1
-            } else {
-                type = []
-                action = 1
-                filtered = false
-                setMapLocation()
-                tabletView.reloadData()
-            }
-        }
-        
-        
-        
-
-        getCheckStates()
-    }
-    
-    func loadDistanceResults(){
-        filteredPosts = []
-        filtered = true
-        distanceMiles = Int(distance.titleForSegmentAtIndex(distance.selectedSegmentIndex)!)!
-        for i in searchingResults {
-            if loadLocation(i.lon, lat: i.lat){
-                filteredPosts.append(i)
-                print("loading")
-            }
-                        
-        }
-        
-        setMapLocation()
-        action = 2
-        tabletView.reloadData()
-        
-    }
-
-    
-    
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
    
-    func filterPosts(){
-        filteredPosts = []
-        filtered = true
-        mapView.removeAnnotations(mapView.annotations)
-        if distance.selectedSegmentIndex == 1 {
-            for i in searchingResults {
-                if !type.isEmpty {
-                    for types in type {
-                        if i.postType.containsString(types) {
-                           filteredPosts.append(i)
-                        }
-                    }
-                }
-            }
-        } else {
-            distanceMiles = Int(distance.titleForSegmentAtIndex(distance.selectedSegmentIndex)!)!
-            for i in searchingResults {
-                if !type.isEmpty {
-                    for types in type {
-                        if i.postType.containsString(types) {
-                            if loadLocation(i.lon, lat: i.lat){
-                                filteredPosts.append(i)
-                            }
-                            
-                        }
-                    }
-                }
-            }
-
-        }
-        
-        
-            setMapLocation()
-            action = 2
-            tabletView.reloadData()
-    }
+    //Helper Functions
     
-    
-    
-}
-
-
-
-public extension Double {
-    /// SwiftRandom extension
-    public static func random(lower: Double = 0, _ upper: Double = 100) -> Double {
-        return (Double(arc4random()) / 0xFFFFFFFF) * (upper - lower) + lower
-    }
-}
-
-
-
-
-extension MKMapView {
-    func fitMapViewToAnnotaionList() -> Void {
-        let mapEdgePadding = UIEdgeInsets(top: 100, left: 60, bottom: 100, right: 60)
-        var zoomRect:MKMapRect = MKMapRectNull
-        
-        for index in 0..<self.annotations.count {
-            let annotation = self.annotations[index]
-            let aPoint:MKMapPoint = MKMapPointForCoordinate(annotation.coordinate)
-            let rect:MKMapRect = MKMapRectMake(aPoint.x, aPoint.y, 0.1, 0.1)
+        //Clear filters
+        func resetFilter(){
+            //Resting distance
+            distance.selectedSegmentIndex = 3
+            distanceMiles = 200
             
-            if MKMapRectIsNull(zoomRect) {
-                zoomRect = rect
+            //Uncheck check boxes
+            forSale.checkState = .Unchecked
+            trade.checkState = .Unchecked
+            free.checkState = .Unchecked
+            looking.checkState = .Unchecked
+            
+            //updating location
+            setLocationManager()
+            
+            //Refresh search results
+            searchActive = true
+            reloadPosts = false
+            if searchActive {
+                searchFirebase()
+            }
+            //Save checkbox states
+            getCheckStates()
+            setCheckStates()
+        }
+    
+        //Switches between list and map view
+        func switchViews(){
+            self.view.endEditing(true)
+            if mapView.hidden {
+                mapView.hidden = false
+                filterView.hidden = false
+                changeViewlabel.setTitle("List", forState: .Normal)
             } else {
-                zoomRect = MKMapRectUnion(zoomRect, rect)
+                mapView.hidden = true
+                filterView.hidden = true
+                changeViewlabel.setTitle("Map", forState: .Normal)
             }
         }
-        self.setVisibleMapRect(zoomRect, edgePadding: mapEdgePadding, animated: true)
-    }
+    
+        //Cancels the search
+        func cancelSearching(){
+            self.view.endEditing(true)
+            //Selects proper object for tableview
+            action = 0
+            
+            //Turns of cancel button
+            cancelSearch.userInteractionEnabled = false
+            cancelSearch.setTitleColor(UIColor.lightGrayColor(), forState: .Normal)
+            
+            //Hides filter buttons
+            filterBttn.hidden = true
+            mapFilterBttn.hidden = true
+            
+            //Sets label text
+            searchAreaLabel.setTitle("In Your Area", forState: .Normal)
+            mapSearchArealLavel.setTitle("In Your Area", forState: .Normal)
+            
+            //Resets searchbar and filter
+            searchBar.text = ""
+            resetFilter()
+            
+            //Not searching or filtering
+            searchActive = false
+            filtered = false
+            
+            //Clears search and filters objects
+            searchingResults = []
+            filteredPosts = []
+            //Updates list
+            updatePosts()
+        }
+    
+        //Sets the listing type
+        func setlistingType(selectedIndex : Int){
+            switch selectedIndex {
+            case 0:
+                filterType = "Sale"
+            case 1:
+                filterType = "Trade"
+            case 2:
+                filterType = "Looking"
+            case 3:
+                filterType = "Free"
+            default:
+                break
+            }
+        }
+    
+        //Gets index count based on selected filters and returns them to tableview
+        func getIndexCount() -> Int{
+            switch action {
+            case 0:
+                if posts.count > 0 {
+                    tabletView.hidden = false
+                } else {
+                    tabletView.hidden  = true
+                }
+                return posts.count
+            case 1:
+                print(searchingResults.count)
+                return searchingResults.count
+            case 2:
+                return filteredPosts.count
+            default:
+                return posts.count
+            }
+        }
+    
+        //Gets post for row and creates a cell for it
+        func getPost(indexPath : Int) -> Post{
+            switch action {
+            case 0:
+                return posts[indexPath]
+            case 1:
+                return searchingResults[indexPath]
+            case 2:
+                return filteredPosts[indexPath]
+            default:
+                return posts[indexPath]
+            }
+        }
 }
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+
+//Extentions
+    //Double extention to randomly offset pin location
+    public extension Double {
+        /// SwiftRandom extension
+        public static func random(lower: Double = 0, _ upper: Double = 100) -> Double {
+            return (Double(arc4random()) / 0xFFFFFFFF) * (upper - lower) + lower
+        }
+    }
+
+    //Zooms map to include pins on map
+    extension MKMapView {
+        func fitMapViewToAnnotaionList() -> Void {
+            let mapEdgePadding = UIEdgeInsets(top: 100, left: 60, bottom: 100, right: 60)
+            var zoomRect:MKMapRect = MKMapRectNull
+            
+            for index in 0..<self.annotations.count {
+                let annotation = self.annotations[index]
+                let aPoint:MKMapPoint = MKMapPointForCoordinate(annotation.coordinate)
+                let rect:MKMapRect = MKMapRectMake(aPoint.x, aPoint.y, 0.1, 0.1)
+                
+                if MKMapRectIsNull(zoomRect) {
+                    zoomRect = rect
+                } else {
+                    zoomRect = MKMapRectUnion(zoomRect, rect)
+                }
+            }
+            self.setVisibleMapRect(zoomRect, edgePadding: mapEdgePadding, animated: true)
+        }
+    }

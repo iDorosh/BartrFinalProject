@@ -13,7 +13,7 @@ import FirebaseDatabase
 class Post {
     private var _postRef: FIRDatabaseReference!
     
-    //Post Information
+//Post Information
     private var _postKey: String!
     private var _postText: String!
     private var _postviews: Int!
@@ -34,7 +34,9 @@ class Post {
     private var _lon: String!
     private var _lat : String!
     
-    //Information Getters
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+//Information Getters
     var postKey: String {
         return _postKey
     }
@@ -107,7 +109,9 @@ class Post {
         return _postExpired
     }
     
-    // Initialize the new post
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+// Initialize the new post
     init(key: String, dictionary: Dictionary<String, AnyObject>) {
         self._postKey = key
         
@@ -183,7 +187,13 @@ class Post {
             self._username = ""
         }
         
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
         // The above properties are assigned to their key.
         self._postRef = DataService.dataService.POST_REF.child(self._postKey)
     }
+    
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+    
 }

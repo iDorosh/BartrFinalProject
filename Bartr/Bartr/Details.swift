@@ -7,18 +7,23 @@
 //
 
 import UIKit
+import SCLAlertView
 
 class Details: UIViewController, UITextViewDelegate {
     
     @IBAction func backToDetails(segue: UIStoryboardSegue){}
     
-    //Variables
-    var pickedImage: UIImage = UIImage()
+
+//Data
+    //Holds selcted Types
+    var type : [String] = []
+    
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+
+//Variables
+    //Strings
     var pickedTitle : String = String()
     var pickedLocation : String = String()
-    var type : [String] = []
-    var Unchecked : UIImage = UIImage(named: "NotChecked")!
-    var Checked : UIImage = UIImage(named: "Checked")!
     var typesString : String = String()
     var pickedPrice : String = String()
     
@@ -33,11 +38,22 @@ class Details: UIViewController, UITextViewDelegate {
     var editDetails : String = String()
     var editKey : String = String()
     
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+    //UIImages
+    var pickedImage: UIImage = UIImage()
+    var Unchecked : UIImage = UIImage(named: "NotChecked")!
+    var Checked : UIImage = UIImage(named: "Checked")!
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+    //Doubles
     var longitude : Double = Double()
     var latitude : Double = Double()
     
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
-    //Outlets
+//Outlets
     @IBOutlet weak var Image1: UIImageView!
     @IBOutlet weak var Image2: UIImageView!
     @IBOutlet weak var Image3: UIImageView!
@@ -47,8 +63,10 @@ class Details: UIViewController, UITextViewDelegate {
     @IBOutlet weak var backBttn: UIButton!
     @IBOutlet weak var detailsScrollView: UIScrollView!
     
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
-    //Actions
+    
+//Actions
     @IBAction func forSale(sender: UIButton) {
         checkedChecker(Image1, listingType: "Sale")
     }
@@ -73,137 +91,197 @@ class Details: UIViewController, UITextViewDelegate {
         performSegueWithIdentifier("backToLocation", sender: self)
     }
     
+    @IBAction func goToSummary(sender: UIButton) {
+        checkInput()
+    }
+   
     
     @IBAction func discardListing(sender: UIButton) {
-        showAlertView("Discard Listing", text: "Listing will be discarded", confirmButton: "Discard", cancelButton: "Cancel")
+        discardListingAlert("Discard Listing", subTitle: "Listing will be discarded")
     }
     
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+//UI
+    override func didReceiveMemoryWarning() { super.didReceiveMemoryWarning()}
     
     override func viewDidLoad() {
         navigationController?.navigationBarHidden = true
+        loadUI()
         super.viewDidLoad()
-        applyBlurrEffect()
-        addTapRecognizer()
-        pickedDescription.delegate = self
-        if previousScreen == "EditView"{
-            if ((editType.containsString("Sale"))){
-                Image1.image = Checked
-                type.append("Sale")
-            }
-            if ((editType.containsString("Trade"))){
-                Image2.image = Checked
-                type.append("Trade")
-            }
-            if ((editType.containsString("Looking"))){
-                Image3.image = Checked
-                type.append("Looking")
-            }
-            if ((editType.containsString("Free"))){
-                Image4.image = Checked
-                type.append("Free")
-            }
-            pickedDescription.text = editDetails
-
-        }
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-    
-    //Tap Recognizer to minimize the keyboard
-    func addTapRecognizer(){
-        //Looks for single or multiple taps.
-        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(Camera.dismissKeyboard))
-        view.addGestureRecognizer(tap)
-    }
-    
-    //Checks and Unchecks type boxes
-    func checkedChecker(image: UIImageView, listingType: String) {
-        if image.image == Unchecked{
-            image.image = Checked
-            type.append(listingType)
-        } else {
-            image.image = Unchecked
-            type.removeAtIndex(type.indexOf(listingType)!)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+
+//Functions
+    //UI Setup
+        //Sets up ui with existing data
+        func loadUI(){
+            applyBlurrEffect()
+            addTapRecognizer()
+            pickedDescription.delegate = self
+            if previousScreen == "EditView"{
+                if ((editType.containsString("Sale"))){
+                    Image1.image = Checked
+                    type.append("Sale")
+                }
+                if ((editType.containsString("Trade"))){
+                    Image2.image = Checked
+                    type.append("Trade")
+                }
+                if ((editType.containsString("Looking"))){
+                    Image3.image = Checked
+                    type.append("Looking")
+                }
+                if ((editType.containsString("Free"))){
+                    Image4.image = Checked
+                    type.append("Free")
+                }
+                pickedDescription.text = editDetails
+            }
         }
-    }
-    
-    //Alert to delete, mark as completed or rate
-    func showAlertView(title: String?, text: String?, confirmButton: String?, cancelButton: String?){
-        let alertview = JSSAlertView().show(
-            self,
-            title: title!,
-            text: text!,
-            buttonText: confirmButton!,
-            cancelButtonText: cancelButton!
-        )
-        alertview.addAction(removeListing)
-    }
-    
-    func removeListing(){
-        performSegueWithIdentifier("MainSegue", sender: self)
-    }
-    
-    func textViewDidBeginEditing(textView: UITextView) {
-        textView.text = ""
-        UIApplication.sharedApplication().statusBarHidden = true
-        detailsScrollView.setContentOffset(CGPointMake(0,210), animated: true)
-    }
-    
-    //Calls this function when the tap is recognized.
-    func dismissKeyboard() {
-        //Resets view offset
-        detailsScrollView.setContentOffset(CGPointMake(0,0), animated: true)
-        view.endEditing(true)
-        UIApplication.sharedApplication().statusBarHidden = false
-    }
-    
-    func textViewDidEndEditing(textView: UITextView) {
-        detailsScrollView.setContentOffset(CGPointMake(0,0), animated: true)
-    }
-    
-    //Applies Blurr effect to the background image
-    func applyBlurrEffect(){
-        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.Light)
-        let blurEffectView = UIVisualEffectView(effect: blurEffect)
-        blurEffectView.frame = self.view.bounds
-        self.previewImage.addSubview(blurEffectView)
-    }
-    
-    //Creates the type string to be passed into the next view
-    func createTypeString(){
-        typesString = ""
-        for types in type {
-            if type.indexOf(types) == 0 {
-                typesString = typesString + types
+        
+        //Tap Recognizer to minimize the keyboard
+        func addTapRecognizer(){
+            //Looks for single or multiple taps.
+            let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(Camera.dismissKeyboard))
+            view.addGestureRecognizer(tap)
+        }
+        
+        //Checks and Unchecks type boxes
+        func checkedChecker(image: UIImageView, listingType: String) {
+            if image.image == Unchecked{
+                image.image = Checked
+                type.append(listingType)
             } else {
-                typesString = typesString + ", \(types)"
+                image.image = Unchecked
+                type.removeAtIndex(type.indexOf(listingType)!)
             }
         }
+    
+        //Applies Blurr effect to the background image
+        func applyBlurrEffect(){
+            let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.Light)
+            let blurEffectView = UIVisualEffectView(effect: blurEffect)
+            blurEffectView.frame = self.view.bounds
+            self.previewImage.addSubview(blurEffectView)
+        }
+    
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+    //Keyboard
+        //Will offset the scroll view to fit the text view
+        func textViewDidBeginEditing(textView: UITextView) {
+            textView.text = ""
+            UIApplication.sharedApplication().statusBarHidden = true
+            detailsScrollView.setContentOffset(CGPointMake(0,190), animated: true)
+        }
+        
+        //Calls this function when the tap is recognized.
+        func dismissKeyboard() {
+            //Resets view offset
+            detailsScrollView.setContentOffset(CGPointMake(0,0), animated: true)
+            view.endEditing(true)
+            UIApplication.sharedApplication().statusBarHidden = false
+        }
+        
+        //Resets the scroll view
+        func textViewDidEndEditing(textView: UITextView) {
+            detailsScrollView.setContentOffset(CGPointMake(0,0), animated: true)
+        }
+    
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+    //Discard New
+        //Show alert view to verify that the users wants to discard the listing
+        func discardListingAlert(title : String, subTitle : String){
+            let alertView = SCLAlertView()
+            alertView.showCloseButton = false
+            alertView.addButton("Discard") {
+                self.removeListing()
+            }
+            alertView.addButton("Don't Discard") {
+                alertView.dismissViewControllerAnimated(true, completion: nil)
+            }
+            alertView.showWarning(title, subTitle: subTitle)
+        }
+    
+        //Back to Main Feed
+        func removeListing(){
+            performSegueWithIdentifier("MainSegue", sender: self)
+        }
+    
+        func noType(title : String, subtitle : String){
+            let alertView = SCLAlertView()
+            alertView.addButton("Ok"){
+                alertView.dismissViewControllerAnimated(true, completion: nil)
+            }
+            alertView.showCloseButton = false
+            alertView.showWarning(title, subTitle: subtitle)
+        }
+    
+        func withoutDescription(){
+            let alertView = SCLAlertView()
+            alertView.addButton("Continue"){
+                self.pickedDescription.text = "No description provided"
+                self.performSegueWithIdentifier("GotoSummarySegue", sender: self)
+            }
+            alertView.addButton("Add Discription") {
+                alertView.dismissViewControllerAnimated(true, completion: nil)
+            }
+            alertView.showCloseButton = false
+            alertView.showWarning("No Discription", subTitle: "Continue without discription?")
+        }
+    
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+    //Check for type and discription
+    func checkInput(){
+          let trimmedString = pickedDescription.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+        if type.count == 0 {
+            noType("Type", subtitle: "Please select a type of listing")
+        } else if trimmedString == ""{
+            withoutDescription()
+        } else {
+            self.performSegueWithIdentifier("GotoSummarySegue", sender: self)
+        }
     }
+    
+    //Segue
+        //Creates the type string to be passed into the next view
+        func createTypeString(){
+            typesString = ""
+            for types in type {
+                if type.indexOf(types) == 0 {
+                    typesString = typesString + types
+                } else {
+                    typesString = typesString + ", \(types)"
+                }
+            }
+        }
 
-    //Sends data to the Summary Page
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        createTypeString()
-        
-        detailsScrollView.setContentOffset(CGPointMake(0,0), animated: true)
-        
-        if (segue.identifier == "summarySegue"){
-            let summary : Summary = segue.destinationViewController as! Summary
-            summary.pickedImage = pickedImage
-            summary.pickedTitle = pickedTitle
-            summary.pickedLocation = pickedLocation
-            summary.pickedTypes = typesString
-            summary.pickedDescription = pickedDescription.text
-            summary.pickedPrice = pickedPrice
-            summary.editKey = editKey
-            summary.longitude = longitude
-            summary.latitude = latitude
-            if (previousScreen == "EditView"){
-                summary.previousVC = "EditView"
+        //Sends data to the Summary Page
+        override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+            createTypeString()
+            detailsScrollView.setContentOffset(CGPointMake(0,0), animated: true)
+            
+            if (segue.identifier == "GotoSummarySegue"){
+                let summary : Summary = segue.destinationViewController as! Summary
+                summary.pickedImage = pickedImage
+                summary.pickedTitle = pickedTitle
+                summary.pickedLocation = pickedLocation
+                summary.pickedTypes = typesString
+                summary.pickedDescription = pickedDescription.text
+                summary.pickedPrice = pickedPrice
+                summary.editKey = editKey
+                summary.longitude = longitude
+                summary.latitude = latitude
+                if (previousScreen == "EditView"){
+                    summary.previousVC = "EditView"
+                }
             }
         }
-    }
+    
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
 }

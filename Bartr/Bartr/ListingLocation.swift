@@ -17,33 +17,23 @@ protocol HandleMapSearch {
 }
 
 class ListingLocation: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate, UISearchControllerDelegate {
+   
     @IBAction func backToLocation(segue: UIStoryboardSegue){}
     
-    @IBOutlet weak var modalNavigation: UINavigationBar!
-
-    @IBOutlet weak var listingNavigation: UINavigationBar!
-    let locationManager = CLLocationManager()
-    var selectedLocation : CLLocationCoordinate2D!
-    var city : String = String()
-    var longitude : Double = 0.0
-    var latitude : Double = 0.0
-    var didSelect : Bool = false
-    var currentLocation : CLLocation?
+//Variables 
+    //View Controllers 
     var resultSearchController:UISearchController? = nil
-    var selectedPin:MKPlacemark? = nil
     
-    var lat : Double = Double()
-    var lon : Double = Double()
-
-    @IBOutlet weak var scrollView: UIScrollView!
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
-    var pickedImage: UIImage = UIImage()
-    var pickedTitle : String = String()
-    var pickedLocation : String = String()
+    //Data
     var type : [String] = []
+    
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+    //Strings
     var typesString : String = String()
     var pickedPrice : String = String()
-    
     var previousScreen : String = String()
     var editTitle : String = String()
     var editPrice : String = String()
@@ -54,246 +44,277 @@ class ListingLocation: UIViewController, UITextFieldDelegate, CLLocationManagerD
     var editUser : String = String()
     var editDetails : String = String()
     var editKey : String = String()
+    var pickedTitle : String = String()
+    var pickedLocation : String = String()
+    var city : String = String()
     
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
-    @IBAction func detailViewNext(sender: UIButton) {
-        if longitude != 0.0 && latitude != 0.0{
-            if previousScreen != "EditView"{
-                let geocoder = CLGeocoder()
-                geocoder.reverseGeocodeLocation(CLLocation(latitude: latitude, longitude: longitude), completionHandler: {
-                    placemarks, error in
-                    
-                    if error == nil && placemarks!.count > 0 {
-                        self.city = (placemarks?.first?.locality)!
-                    }
-                     self.performSegueWithIdentifier("NextInfoSegue", sender: self)
-                })
-            } else {
-                self.performSegueWithIdentifier("NextInfoSegue", sender: self)
-            }
-       
-        } else {
-            noLocation()
-        }
-   
-    }
-
+    //UIImage
+    var pickedImage: UIImage = UIImage()
     
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
+    //Doubles
+    var lat : Double = Double()
+    var lon : Double = Double()
+    var longitude : Double = 0.0
+    var latitude : Double = 0.0
     
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+    //Booleans
+    var didSelect : Bool = false
     var locationFound : Bool = false
+    var zoom : Bool = false
     
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+    //Locations
+    let locationManager = CLLocationManager()
+    var selectedLocation : CLLocationCoordinate2D!
+    var currentLocation : CLLocation?
+    var selectedPin:MKPlacemark? = nil
+    
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+ 
+//Outlets
+    @IBOutlet weak var navigationTitle: UINavigationItem!
+    @IBOutlet weak var modalNavigation: UINavigationBar!
+    @IBOutlet weak var listingNavigation: UINavigationBar!
+    @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var mapView: MKMapView!
     
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+//Actions
+    @IBAction func detailViewNext(sender: UIButton) {
+        goToNextView()
+    }
+    
+    @IBAction func discard(sender: UIBarButtonItem) {
+        discardNew("Discard Listing", subTitle: "Listing will be discarded")
+    }
 
-
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+   
+//UI
+    override func didReceiveMemoryWarning() { super.didReceiveMemoryWarning()}
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationController?.navigationBarHidden = false
+        setUpViewDidLoad()
+    }
+    
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
 
-        print(pickedTitle)
-     
-        if previousScreen != "EditView"{
-            loadLocation()
-        } else {
-            zoom = true
-            loadLocation()
-            dropAnnotation()
-            mapView.showsUserLocation = true
+//Functions
+    //Set Up View
+        //Load location or go to current location
+        func setUpViewDidLoad(){
+            navigationController?.navigationBarHidden = false
+            if previousScreen != "EditView"{
+                loadLocation()
+            } else {
+                zoom = true
+                loadLocation()
+                dropAnnotation()
+                mapView.showsUserLocation = true
+            }
         }
-        
-        // Do any additional setup after loading the view.
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
     
-    //Set up loaction manager to get the current posistion
-    func setLocationManager(){
-        self.locationManager.requestWhenInUseAuthorization()
-        if CLLocationManager.locationServicesEnabled() {
-            locationManager.delegate = self
-            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-            locationManager.startUpdatingLocation()
-        }
-    }
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
-    @IBOutlet weak var navigationTitle: UINavigationItem!
-    func loadLocation(){
-        let locationSearchTable = storyboard!.instantiateViewControllerWithIdentifier("LocationSearchTable") as! LocationSearchTable
-        resultSearchController = UISearchController(searchResultsController: locationSearchTable)
-        resultSearchController?.searchResultsUpdater = locationSearchTable
-        
-        let searchBar = resultSearchController!.searchBar
-        searchBar.sizeToFit()
-        searchBar.placeholder = "Search for places"
-        
-            navigationTitle.titleView = resultSearchController?.searchBar
-        
-    
-        
-        
-        resultSearchController?.hidesNavigationBarDuringPresentation = false
-        resultSearchController?.dimsBackgroundDuringPresentation = false
-        definesPresentationContext = true
-        
-        locationSearchTable.mapView = mapView
-        
-        locationSearchTable.handleMapSearchDelegate = self
-        
-        // For use in foreground
-        self.locationManager.requestWhenInUseAuthorization()
-        
-        
+    //Location
+        //Set up loaction manager to get the current posistion
+        func setLocationManager(){
+            self.locationManager.requestWhenInUseAuthorization()
             if CLLocationManager.locationServicesEnabled() {
                 locationManager.delegate = self
                 locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
                 locationManager.startUpdatingLocation()
             }
-    
-
-    }
-    
-    var zoom : Bool = false
-    
-    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        let locValue:CLLocationCoordinate2D = manager.location!.coordinate
-        lat = locValue.latitude
-        lon = locValue.longitude
-        if (!zoom){
-            zoom = true
-            movePosition()
-        }
-        locationManager.stopUpdatingHeading()
-        locationManager.stopUpdatingLocation()
-    }
-    
-    func getDirections(){
-        if let selectedPin = selectedPin {
-            let mapItem = MKMapItem(placemark: selectedPin)
-            let launchOptions = [MKLaunchOptionsDirectionsModeKey : MKLaunchOptionsDirectionsModeDriving]
-            mapItem.openInMapsWithLaunchOptions(launchOptions)
-        }
-    }
-    
-    func movePosition(){
-        let latitude:CLLocationDegrees = lat
-        
-        let longitude:CLLocationDegrees = lon
-        
-        let latDelta:CLLocationDegrees = 0.05
-        
-        let lonDelta:CLLocationDegrees = 0.05
-        
-        let span:MKCoordinateSpan = MKCoordinateSpanMake(latDelta, lonDelta)
-        
-        let location:CLLocationCoordinate2D = CLLocationCoordinate2DMake(latitude, longitude)
-        
-        let region:MKCoordinateRegion = MKCoordinateRegionMake(location, span)
-        
-        
-        if previousScreen != "EditView"{
-            self.latitude = latitude
-            self.longitude = longitude
-            mapView.showsUserLocation = true
         }
         
-        
-        mapView.setRegion(region, animated: false)
-    }
-
-    
-
-    @IBAction func discard(sender: UIBarButtonItem) {
-        discardNew("Discard Listing", subTitle: "Listing will be discarded")
-    }
-    
-
-    
-    
-    
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        UIApplication.sharedApplication().statusBarHidden = false
-        
-        if (segue.identifier == "NextInfoSegue"){
-            if(previousScreen == "EditView"){
-                let details : Details = segue.destinationViewController as! Details
-                details.editType = editType
-                details.previousScreen = "EditView"
-                details.pickedImage = pickedImage
-                details.pickedTitle = pickedTitle
-                details.pickedLocation = city
-                details.editProfileImg = editProfileImg
-                details.editPhoto = editPhoto
-                details.editUser = editUser
-                details.editDetails = editDetails
-                details.editKey = editKey
-                details.pickedPrice = pickedPrice
-                details.longitude = longitude
-                details.latitude = latitude
-            } else {
-                let details : Details = segue.destinationViewController as! Details
-                details.pickedImage = pickedImage
-                details.pickedTitle = pickedTitle
-                details.pickedPrice = pickedPrice
-                details.pickedLocation = city
-                details.longitude = longitude
-                details.latitude = latitude
+        //Load loadtion Set up search bar in navigation and get current position
+        func loadLocation(){
+            let locationSearchTable = storyboard!.instantiateViewControllerWithIdentifier("LocationSearchTable") as! LocationSearchTable
+            resultSearchController = UISearchController(searchResultsController: locationSearchTable)
+            resultSearchController?.searchResultsUpdater = locationSearchTable
+            
+            let searchBar = resultSearchController!.searchBar
+            searchBar.sizeToFit()
+            searchBar.placeholder = "Search for places"
+            
+            navigationTitle.titleView = resultSearchController?.searchBar
+            
+            resultSearchController?.hidesNavigationBarDuringPresentation = false
+            resultSearchController?.dimsBackgroundDuringPresentation = false
+            definesPresentationContext = true
+            
+            locationSearchTable.mapView = mapView
+            
+            locationSearchTable.handleMapSearchDelegate = self
+            
+            self.locationManager.requestWhenInUseAuthorization()
+                if CLLocationManager.locationServicesEnabled() {
+                    locationManager.delegate = self
+                    locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+                    locationManager.startUpdatingLocation()
                 }
-            }
-    }
+        }
     
-    func removeListing(){
-        if previousScreen == "EditView"{
-            performSegueWithIdentifier("MainSegue", sender: self)
-        } else {
-            performSegueWithIdentifier("MainSegue", sender: self)
+    
+        //Zoom in on current position
+        func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+            let locValue:CLLocationCoordinate2D = manager.location!.coordinate
+            lat = locValue.latitude
+            lon = locValue.longitude
+            if (!zoom){
+                zoom = true
+                movePosition()
+            }
+            locationManager.stopUpdatingHeading()
+            locationManager.stopUpdatingLocation()
+        }
+    
+        //Drop a pin
+        func getDirections(){
+            if let selectedPin = selectedPin {
+                let mapItem = MKMapItem(placemark: selectedPin)
+                let launchOptions = [MKLaunchOptionsDirectionsModeKey : MKLaunchOptionsDirectionsModeDriving]
+                mapItem.openInMapsWithLaunchOptions(launchOptions)
+            }
+        }
+    
+        //Move to loctation
+        func movePosition(){
+            let latitude:CLLocationDegrees = lat
+            let longitude:CLLocationDegrees = lon
+            let latDelta:CLLocationDegrees = 0.05
+            let lonDelta:CLLocationDegrees = 0.05
+            let span:MKCoordinateSpan = MKCoordinateSpanMake(latDelta, lonDelta)
+            let location:CLLocationCoordinate2D = CLLocationCoordinate2DMake(latitude, longitude)
+            let region:MKCoordinateRegion = MKCoordinateRegionMake(location, span)
+            if previousScreen != "EditView"{
+                self.latitude = latitude
+                self.longitude = longitude
+                mapView.showsUserLocation = true
+            }
+            mapView.setRegion(region, animated: false)
+        }
+    
+        //Drop a pin on selected location
+        func dropAnnotation(){
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+            annotation.title = city
+            let span:MKCoordinateSpan = MKCoordinateSpanMake(0.05, 0.05)
+            let location:CLLocationCoordinate2D = CLLocationCoordinate2DMake(latitude, longitude)
+            let region:MKCoordinateRegion = MKCoordinateRegionMake(location, span)
+            mapView.setRegion(region, animated: true)
+            mapView.addAnnotation(annotation)
+        }
+
+    
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+    //Go to next view
+
+        func goToNextView(){
+            if longitude != 0.0 && latitude != 0.0{
+                if previousScreen != "EditView"{
+                    let geocoder = CLGeocoder()
+                    geocoder.reverseGeocodeLocation(CLLocation(latitude: latitude, longitude: longitude), completionHandler: {
+                        placemarks, error in
+                        
+                        if error == nil && placemarks!.count > 0 {
+                            self.city = (placemarks?.first?.locality)!
+                        }
+                        self.performSegueWithIdentifier("NextInfoSegue", sender: self)
+                    })
+                } else {
+                    self.performSegueWithIdentifier("NextInfoSegue", sender: self)
+                }
+                
+            } else {
+                noLocation()
+            }
+        }
+
+        override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+            UIApplication.sharedApplication().statusBarHidden = false
+            
+            if (segue.identifier == "NextInfoSegue"){
+                if(previousScreen == "EditView"){
+                    let details : Details = segue.destinationViewController as! Details
+                    details.editType = editType
+                    details.previousScreen = "EditView"
+                    details.pickedImage = pickedImage
+                    details.pickedTitle = pickedTitle
+                    details.pickedLocation = city
+                    details.editProfileImg = editProfileImg
+                    details.editPhoto = editPhoto
+                    details.editUser = editUser
+                    details.editDetails = editDetails
+                    details.editKey = editKey
+                    details.pickedPrice = pickedPrice
+                    details.longitude = longitude
+                    details.latitude = latitude
+                } else {
+                    let details : Details = segue.destinationViewController as! Details
+                    details.pickedImage = pickedImage
+                    details.pickedTitle = pickedTitle
+                    details.pickedPrice = pickedPrice
+                    details.pickedLocation = city
+                    details.longitude = longitude
+                    details.latitude = latitude
+                    }
+                }
+        }
+    
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+    //Remove listing
+        func removeListing(){
+            if previousScreen == "EditView"{
+                performSegueWithIdentifier("MainSegue", sender: self)
+            } else {
+                performSegueWithIdentifier("MainSegue", sender: self)
+            }
+        }
+    
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+
+    //Alert Views
+        //Discard listing
+        func discardNew(title : String, subTitle : String){
+            let alertView = SCLAlertView()
+            alertView.showCloseButton = false
+            alertView.addButton("Discard") {
+                self.removeListing()
+            }
+            alertView.addButton("Don't Discard") {
+                alertView.dismissViewControllerAnimated(true, completion: nil)
+            }
+            alertView.showWarning(title, subTitle: subTitle)
         }
         
-    }
-
-    
-    func discardNew(title : String, subTitle : String){
-        let alertView = SCLAlertView()
-        alertView.showCloseButton = false
-        alertView.addButton("Discard") {
-            self.removeListing()
+        //No location selected
+        func noLocation(){
+            let alertView = SCLAlertView()
+            alertView.addButton("Ok"){ alertView.dismissViewControllerAnimated(true, completion: nil) }
+            alertView.showCloseButton = false
+            alertView.showWarning("No Location", subTitle: "Please select a location from the search, or turn on location services")
         }
-        alertView.addButton("Don't Discard") {
-            alertView.dismissViewControllerAnimated(true, completion: nil)
-        }
-        alertView.showWarning(title, subTitle: subTitle)
-    }
     
-    func dropAnnotation(){
-        print(city)
-        print ("lat: \(latitude) lon: \(longitude)")
-        let annotation = MKPointAnnotation()
-        annotation.coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-        annotation.title = city
-        let span:MKCoordinateSpan = MKCoordinateSpanMake(0.05, 0.05)
-        let location:CLLocationCoordinate2D = CLLocationCoordinate2DMake(latitude, longitude)
-        let region:MKCoordinateRegion = MKCoordinateRegionMake(location, span)
-        mapView.setRegion(region, animated: true)
-        mapView.addAnnotation(annotation)
-    }
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
-    
-
 }
 
 
-func noLocation(){
-    let alertView = SCLAlertView()
-    alertView.addButton("Ok"){ alertView.dismissViewControllerAnimated(true, completion: nil) }
-    alertView.showCloseButton = false
-    alertView.showWarning("No Location", subTitle: "Please select a location from the search, or turn on location services")
-}
+//Extentions
 
-
-
+//Set a pin to the location that the user selected in the search bar
 extension ListingLocation: HandleMapSearch {
     func dropPinZoomIn(placemark:MKPlacemark){
         didSelect = true
@@ -315,10 +336,10 @@ extension ListingLocation: HandleMapSearch {
         mapView.setRegion(region, animated: true)
         longitude = placemark.coordinate.longitude
         latitude = placemark.coordinate.latitude
-        
     }
 }
 
+//Create annotation with city and state
 extension ListingLocation : MKMapViewDelegate {
     func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView?{
         if annotation is MKUserLocation {

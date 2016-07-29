@@ -11,54 +11,48 @@ import Firebase
 
 class CustomChatTableCell: UITableViewCell {
     
-    
-    //Outlets
-    @IBOutlet weak var newIndicator: UIImageView!
-    
-    @IBOutlet weak var profileImage: UIImageView!
-    
-    @IBOutlet weak var userName: UILabel!
-    
-    @IBOutlet weak var post: UILabel!
-    
-    @IBOutlet weak var timeStamp: UILabel!
-    
+ //Variables 
     var imgString : String = ""
     
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
-    override func awakeFromNib() {
-        super.awakeFromNib()
-    }
-
-    override func setSelected(selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-    }
+//Outlets
+    @IBOutlet weak var newIndicator: UIImageView!
+    @IBOutlet weak var profileImage: UIImageView!
+    @IBOutlet weak var userName: UILabel!
+    @IBOutlet weak var post: UILabel!
+    @IBOutlet weak var timeStamp: UILabel!
     
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
     //Creating table view cells  "users\(withUserId)"
     func tableConfig(recent : NSDictionary){
 
-        //let withUserId = (recent.objectForKey("withUserUserId") as? String)!
+        //Setting thread details
         let withUsername = (recent.objectForKey("withUserUsername") as? String)!
-        let listingTitle = (recent.objectForKey("listingTitle") as? String)!
+        let listingTitle = (recent.objectForKey("lastMessage") as? String)!
         let dateString = (recent.objectForKey("date") as? String)!
         let pImg : String = (recent.objectForKey("usersProfileImage") as? String)!
+        
         userName.text = withUsername
-        
-        
-        let decodedData2 = NSData(base64EncodedString: pImg, options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters)
-        
-        let decodedimage2 = UIImage(data: decodedData2!)
-        
-        profileImage.image = decodedimage2! as UIImage
- 
-        
+        profileImage.image = decodeString(pImg)
         post.text = listingTitle
+        
+        //Setting timestamp
         let date = dateFormatter().dateFromString(dateString)
         let seconds = NSDate().timeIntervalSinceDate(date!)
-        
         timeStamp.text = elapsedTime(seconds)
         
-           }
-    
     }
+    
+        override func awakeFromNib() {
+            super.awakeFromNib()
+        }
+        
+        override func setSelected(selected: Bool, animated: Bool) {
+            super.setSelected(selected, animated: animated)
+        }
+    
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+}

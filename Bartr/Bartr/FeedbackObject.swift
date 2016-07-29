@@ -13,7 +13,7 @@ import FirebaseDatabase
 class FeedbackObject {
     private var _feedbackRef: FIRDatabaseReference
     
-    //Post Information
+//Feedback Information
     private var _feedbackKey: String!
     private var _feedbackUser: String!
     private var _feedbackTitle: String!
@@ -21,6 +21,7 @@ class FeedbackObject {
     private var _feedbackRating: String!
     private var _feedbackDate: String!
   
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
     //Information Getters
     var feedbackKey: String {
@@ -47,7 +48,9 @@ class FeedbackObject {
         return _feedbackDate
     }
     
-    // Initialize the new offer
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
+// Initialize new feedback
     init(key: String, dictionary: Dictionary<String, AnyObject>) {
         self._feedbackKey = key
         
@@ -72,8 +75,13 @@ class FeedbackObject {
         if let feedbackD = dictionary["feedbackDate"] as? String {
             self._feedbackDate = feedbackD
         }
-
-        // The above properties are assigned to their key.
+    
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------//
+        
+    // The above properties are assigned to their key.
         self._feedbackRef = sendFeedbackRef
     }
+    
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+    
 }
