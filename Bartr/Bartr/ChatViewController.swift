@@ -142,7 +142,6 @@ class ChatViewController: JSQMessagesViewController {
     
         //Check if the message has been accepted and bring them back to the details screen
         func acceptedMessageSent(){
-            print(previousProfile)
             if accepted {
                 if previousProfile {
                     performSegueWithIdentifier("BackToProfileSegue", sender: self)
@@ -471,7 +470,6 @@ class ChatViewController: JSQMessagesViewController {
                                 if key == self.recieverUID {
                                     self.otherBlocked = true
                                     self.blockOrunBlock.title = "Unblock"
-                                    print("blocked")
                                 } else {
                                     self.otherBlocked = false
                                     self.blockOrunBlock.title = "Block"

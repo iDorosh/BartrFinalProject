@@ -143,7 +143,6 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate, MKMapViewDeleg
     @IBAction func sendOffer(sender: UIButton) {}
     @IBAction func renewOrExtendAction(sender: UIButton) {renewListing()}
     @IBAction func makeOfferAction(sender: UIButton) {
-        print("Current Offers \(self.leftOffer)")
         if self.leftOffer == 3 {
             self.outOfOffers("Offers", subTitle: "You are out of offers for this listing")
         } else {
@@ -166,7 +165,7 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate, MKMapViewDeleg
     
     //Send User a message
     @IBAction func messageAction(sender: UIButton) {
-        performSegueWithIdentifier("NewMessage", sender: self)
+        checkforBlock()
     }
     
     //Delete post
@@ -780,9 +779,45 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate, MKMapViewDeleg
                 success()
             }
     
+            //Check if current user is block
+            func checkforBlock() {
+                DataService.dataService.USER_REF.child(userKey).child("blockedUsers").observeSingleEventOfType(.Value, withBlock: { snapshot in
+                    if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
+                        if snapshots.count > 0 {
+                            for snap in snapshots{
+                                if (snap.value as? Dictionary<String, AnyObject>) != nil {
+                                    let key = snap.key
+                                    if key == FIRAuth.auth()?.currentUser!.uid {
+                                        self.blocked()
+                                    } else {
+                                        //Restarts chat if needed
+                                        self.performSegueWithIdentifier("NewMessage", sender: self)
+                                        
+                                    }
+                                }
+                            }
+                        }else {
+                            //Restarts chat if needed
+                            self.performSegueWithIdentifier("NewMessage", sender: self)
+                        }
+                    }
+                })
+                
+            }
+
+    
     
         //-----------------------------------------------------------------------------------------------------------------------------------------------------//
         //Alerts
+    
+            //Blocked alert
+            func blocked(){
+                let alertView = SCLAlertView()
+                alertView.addButton("OK"){}
+                alertView.showCloseButton = false
+                alertView.showWarning("Blocked", subTitle: "You have been blocked from this thread")
+            }
+    
             //Offer has been sent
             func success(){
                 let alertView = SCLAlertView()
@@ -883,7 +918,7 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate, MKMapViewDeleg
             }
     
     //-----------------------------------------------------------------------------------------------------------------------------------------------------//
-    //Leave Feed back
+    //Leave Feedback
         func leaveFeedback(title : String, subTitle : String){
             let alertView = SCLAlertView()
             alertView.addButton("Leave Feedback"){
@@ -1068,6 +1103,7 @@ class PostDetails: UIViewController, CustomIOS8AlertViewDelegate, MKMapViewDeleg
                 noAccount()
             }
         }
+
     
 
     

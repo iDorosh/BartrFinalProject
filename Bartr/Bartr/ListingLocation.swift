@@ -111,7 +111,7 @@ class ListingLocation: UIViewController, UITextFieldDelegate, CLLocationManagerD
     //Set Up View
         //Load location or go to current location
         func setUpViewDidLoad(){
-            navigationController?.navigationBarHidden = false
+            navigationController?.navigationBarHidden = true
             if previousScreen != "EditView"{
                 loadLocation()
             } else {
@@ -149,7 +149,7 @@ class ListingLocation: UIViewController, UITextFieldDelegate, CLLocationManagerD
             
             resultSearchController?.hidesNavigationBarDuringPresentation = false
             resultSearchController?.dimsBackgroundDuringPresentation = false
-            definesPresentationContext = true
+            definesPresentationContext = false
             
             locationSearchTable.mapView = mapView
             

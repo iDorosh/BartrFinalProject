@@ -9,6 +9,7 @@
 import UIKit
 import Firebase
 import FirebaseDatabase
+import SCLAlertView
 
 class Chat: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
@@ -108,6 +109,7 @@ class Chat: UIViewController, UITableViewDataSource, UITableViewDelegate {
                 })
             }
     
+    
         //-----------------------------------------------------------------------------------------------------------------------------------------------------//
     
         //Set Up Table View
@@ -142,13 +144,42 @@ class Chat: UIViewController, UITableViewDataSource, UITableViewDelegate {
                     }
                     
                 }
-                
-                //Restarts chat if needed
-                RestartRecentChat(recent)
+                checkforBlock(selectedUID, recent: recent)
                 tableView.deselectRowAtIndexPath(indexPath, animated: true)
-                performSegueWithIdentifier("GoToThread", sender: self)
             }
-            
+    
+            //Check if current user is block
+    func checkforBlock(uid : String, recent : NSDictionary) {
+                DataService.dataService.USER_REF.child(uid).child("blockedUsers").observeSingleEventOfType(.Value, withBlock: { snapshot in
+                    if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
+                        if snapshots.count > 0 {
+                            for snap in snapshots{
+                                
+                                
+                                if (snap.value as? Dictionary<String, AnyObject>) != nil {
+                                    let key = snap.key
+                                    if key == FIRAuth.auth()?.currentUser!.uid {
+                                        self.blocked()
+                                    } else {
+                                        //Restarts chat if needed
+                                        RestartRecentChat(recent)
+                                        self.performSegueWithIdentifier("GoToThread", sender: self)
+                                        
+                                    }
+                                }
+                            }
+                        }else {
+                            
+                            //Restarts chat if needed
+                            RestartRecentChat(recent)
+                            self.performSegueWithIdentifier("GoToThread", sender: self)
+                        }
+                    }
+                })
+                
+            }
+
+    
             func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
                 return true
                 
@@ -230,7 +261,16 @@ class Chat: UIViewController, UITableViewDataSource, UITableViewDelegate {
                 self.tabletView.reloadData()
             })
         }
+    
+    
+        //Blocked alert
+        func blocked(){
+            let alertView = SCLAlertView()
+            alertView.addButton("OK"){}
+            alertView.showCloseButton = false
+            alertView.showWarning("Blocked", subTitle: "You have been blocked from this thread")
+        }
 
-//-----------------------------------------------------------------------------------------------------------------------------------------------------// 
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
 
 }

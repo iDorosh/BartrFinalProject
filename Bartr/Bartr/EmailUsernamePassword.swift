@@ -267,7 +267,6 @@ class EmailUsernamePassword: UIViewController, UITextFieldDelegate {
                                         ])
                                 
                                     if self.imagePicked {
-                                        print("updating")
                                         let selectedPostRef2 = DataService.dataService.POST_REF.child(snap.key)
                                         selectedPostRef2.updateChildValues([
                                             "userProfileImg" : encodePhoto(self.profileImage.image!),

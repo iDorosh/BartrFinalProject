@@ -98,7 +98,6 @@ class Profile: UIViewController, UITableViewDataSource, CustomIOS8AlertViewDeleg
     
     
     @IBAction func showRatings(sender: UIButton) {
-        print("clicked")
         performSegueWithIdentifier("ShowRecentUserFeedback", sender: self)
     }
     

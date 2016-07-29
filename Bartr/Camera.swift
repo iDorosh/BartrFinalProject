@@ -308,9 +308,17 @@ class Camera: UIViewController, UITextFieldDelegate {
     
         //Check Fields
         func checkFields(){
-            if titleField.text == "" || self.titleField.text?.characters.count < 6 {
-                errorInvalid("Missing Fields", subTitle: "Please fill in both fields")
-            } else {
+            if titleField.text == "" {
+                titleField.becomeFirstResponder()
+                errorInvalid("Missing Title", subTitle: "Please include a title")
+            } else if self.titleField.text?.characters.count < 6 {
+                titleField.becomeFirstResponder()
+                errorInvalid("Short Title", subTitle: "The title is to short")
+            } else if self.titleField.text?.characters.count > 24  {
+                titleField.becomeFirstResponder()
+                errorInvalid("Long Title", subTitle: "The title is to long")
+            }
+            else {
                 if previousScreen == "EditView"{
                     performSegueWithIdentifier("editingSegue", sender: self)
                 } else {
@@ -346,25 +354,17 @@ class Camera: UIViewController, UITextFieldDelegate {
             return true
         }
     
-        //Set responders when next is clicked
-        func setFirstResponder(){
-            if errorMessage == "Email"{
-                titleField.becomeFirstResponder()
-                setError(titleField)
-            } else {
-                priceField.becomeFirstResponder()
-                setError(priceField)
-            }
-        }
     
         //Create Invalid alert
         func errorInvalid(title : String, subTitle : String){
             let alertView = SCLAlertView()
             alertView.showCloseButton = false
             alertView.addButton("Ok") {
-                if Int(self.priceField.text!) == nil{
-                    self.setError(self.priceField)
-                    self.priceField.becomeFirstResponder()
+                if self.priceField.text != "" {
+                    if Int(self.priceField.text!) == nil{
+                        self.setError(self.priceField)
+                        self.priceField.becomeFirstResponder()
+                    }
                 }
                 if self.titleField.text == "" || self.titleField.text?.characters.count < 7 {
                     self.setError(self.titleField)

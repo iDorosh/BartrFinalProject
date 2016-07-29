@@ -233,7 +233,7 @@ class ViewOffers: UIViewController {
                 "offerDeclined" : "true"
                 ])
             
-            print("Hello \(offer.offerUID)")
+
             //Mark offer as canceled for other
             let updateRef = DataService.dataService.USER_REF.child(offer.recieverUID).child("offers").child(offer.offerKey)
             updateRef.updateChildValues([

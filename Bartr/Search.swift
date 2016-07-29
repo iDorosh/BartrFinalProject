@@ -327,7 +327,6 @@ class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, Cust
                                 let post = Post(key: key, dictionary: postDictionary)
                                 if self.loadLocation(post.lon, lat: post.lat) {
                                     self.searchingResults.insert(post, atIndex: 0)
-                                    print("adding")
                                 }
                             }
                         }
@@ -735,7 +734,6 @@ class Search: UIViewController, UITableViewDataSource, UITextFieldDelegate, Cust
                 }
                 return posts.count
             case 1:
-                print(searchingResults.count)
                 return searchingResults.count
             case 2:
                 return filteredPosts.count

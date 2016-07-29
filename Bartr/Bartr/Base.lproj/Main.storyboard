@@ -5172,7 +5172,7 @@
         <!--Location Search Table-->
         <scene sceneID="6ky-YD-m3g">
             <objects>
-                <tableViewController storyboardIdentifier="LocationSearchTable" id="tTC-vQ-cYE" customClass="LocationSearchTable" customModule="Bartr" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="LocationSearchTable" modalPresentationStyle="currentContext" id="tTC-vQ-cYE" customClass="LocationSearchTable" customModule="Bartr" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="39" sectionFooterHeight="28" id="Zfe-7e-7i8">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -5209,7 +5209,8 @@
                             <outlet property="delegate" destination="tTC-vQ-cYE" id="tfa-BX-6kK"/>
                         </connections>
                     </tableView>
-                    <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina55"/>
+                    <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+                    <size key="freeformSize" width="414" height="736"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Cm6-1q-bZu" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

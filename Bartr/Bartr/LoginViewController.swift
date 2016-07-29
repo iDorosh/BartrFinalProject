@@ -196,7 +196,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     func forgotPasswordSend(email : String){
         FIRAuth.auth()?.sendPasswordResetWithEmail(email) { error in
             if error != nil {
-                print(error?.code)
+              
                 //Checking for errors
                 if let errorCode = FIRAuthErrorCode(rawValue: error!.code) {
                     switch (errorCode) {
